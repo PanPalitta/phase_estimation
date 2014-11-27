@@ -1,0 +1,59 @@
+# @configure_input@
+
+# Package-related substitution variables
+package	= @PACKAGE_NAME@
+version	= @PACKAGE_VERSION@
+tarname	= @PACKAGE_TARNAME@
+distdir	= $(tarname)-$(version)
+
+# Prefix-related substitution variables
+prefix	 = @prefix@
+exec_prefix    = @exec_prefix@
+bindir	 = @bindir@
+libdir	 = @libdir@
+
+# Tool-related substitution variables
+CC		         = @CC@
+CFLAGS         = @CFLAGS@
+LIBS	         = @LIBS@
+DEFS           = @DEFS@
+INSTALL	       = @INSTALL@
+INSTALL_DATA   = @INSTALL_DATA@
+INSTALL_PROGRAM= @INSTALL_PROGRAM@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+MPI_INC        = @MPI_INC@
+MPI_LIBDIR     = @MPI_LIBDIR@
+MPI_LIBS       = @MPI_LIBS@
+
+# VPATH-related substitution variables
+srcdir	 = @srcdir@
+VPATH	  = @srcdir@
+
+OBJS=main.o phase_loss_opt.o
+
+all: phase_estimation
+	
+phase_estimation: $(OBJS)
+	$(CC) $(DEFS) $(CFLAGS) $(MPI_LIBDIR) -o $@ $^ $(LIBS) $(MPI_LIBS)
+
+%.o: %.cpp
+		$(CC) $(DEFS) $(CFLAGS) $(MPI_INC) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
+
+clean:
+	-rm -f phase_estimation $(OBJS) 1>/dev/null
+
+install:
+	$(INSTALL) -d $(DESTDIR)$(bindir)
+	$(INSTALL_PROGRAM) -m 0755 phase_estimation \
+	 $(DESTDIR)$(bindir)
+	 
+uninstall:
+	-rm $(DESTDIR)$(bindir)/phase_estimation &>/dev/null
+
+Makefile: Makefile.in ../config.status
+	cd .. && ./config.status $@
+
+../config.status: ../configure
+	cd .. && ./config.status --recheck
+
+.PHONY: all clean install uninstall
