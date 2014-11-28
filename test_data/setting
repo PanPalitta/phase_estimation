@@ -1,6 +1,6 @@
 pop_size=48
 N_begin=4
-N_cut=5
+N_cut=8
 N_end=50
 iter=300
 iter_begin=500
