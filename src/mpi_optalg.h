@@ -121,7 +121,8 @@ void OptAlg<typeT>::Init_previous(double prev_dev, double new_dev,int psize, typ
 				}
 			}
 		else{}
-		prob->normalize(input);
+		//prob->normalize(input);
+		prob->modulo(input);
 		//store it in candidate object
 		pop[p].init_can(num);
 		pop[p].update_cont(input);
