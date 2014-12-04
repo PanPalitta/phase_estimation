@@ -43,8 +43,7 @@ fi
 else
 AC_MSG_ERROR(MPI is necessary to compile)
 fi
-AC_CONFIG_FILES([Makefile
-src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile test/Makefile])
 AC_OUTPUT
 echo \
 "-------------------------------------------------
