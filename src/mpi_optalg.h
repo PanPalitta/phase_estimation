@@ -104,12 +104,9 @@ void OptAlg<typeT>::Init_previous(double prev_dev, double new_dev,int psize, typ
         //generate candidate
 
         for(i=0; i<num; i++) {
-            temp[i].real()=rand_Gaussian(dcmplx(prev_soln[i]).real(),dev[i]);
-            if(dcmplx(prev_soln[i]).imag()==0) {
-                temp[i].imag()=0;
-            }
-            else {
-                temp[i].imag()=rand_Gaussian(dcmplx(prev_soln[i]).imag(),dev[i]);
+            temp[i]=rand_Gaussian(dcmplx(prev_soln[i]).real(),dev[i]);
+            if(dcmplx(prev_soln[i]).imag()!=0) {
+                temp[i].imag(rand_Gaussian(dcmplx(prev_soln[i]).imag(),dev[i]));
             }
 
             if(temp[i].imag()==0) {}

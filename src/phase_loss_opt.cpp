@@ -78,8 +78,8 @@ double Phase::fitness(double *soln) {
                 d++;
             }
         }
-        sharp.real()+=cos(phi-PHI);
-        sharp.imag()+=sin(phi-PHI);
+        sharp.real(sharp.real()+cos(phi-PHI));
+        sharp.imag(sharp.imag()+sin(phi-PHI));
     }
     return abs(sharp)/double(K);
 }
@@ -129,8 +129,8 @@ double Phase::avg_fitness(double *soln, int K) {
                 d++;
             }
         }
-        sharp.real()+=cos(phi-PHI);
-        sharp.imag()+=sin(phi-PHI);
+        sharp.real(sharp.real()+cos(phi-PHI));
+        sharp.imag(sharp.imag()+sin(phi-PHI));
     }
     return abs(sharp)/double(K);
 }
@@ -224,16 +224,16 @@ void Phase::WK_state() {
 
     for(n=0; n<=num; n++) { //we have N+1 state b/c we include n=0 and n=N.
         temp=0;
-        input_state[n].real()=0;
-        input_state[n].imag()=0;
+        input_state[n].real(0);
+        input_state[n].imag(0);
         for(k=0; k<=num; k++) {
             s_part=cal_spart(n,k,num);
             temp=s_part*k_part[k]*sin((k+1)*M_PI/(num+2));
-            input_state[n].real()+=temp*cos(M_PI/2*(k-n));
-            input_state[n].imag()+=temp*sin(M_PI/2*(k-n));
+            input_state[n].real(input_state[n].real()+temp*cos(M_PI/2*(k-n)));
+            input_state[n].imag(input_state[n].imag()+temp*sin(M_PI/2*(k-n)));
         }//end k
-        input_state[n].real()=input_state[n].real()*n_part[n]/sqrt(num/2+1);
-        input_state[n].imag()=input_state[n].imag()*n_part[n]/sqrt(num/2+1);
+        input_state[n].real(input_state[n].real()*n_part[n]/sqrt(num/2+1));
+        input_state[n].imag(input_state[n].imag()*n_part[n]/sqrt(num/2+1));
     }//end n
     //releasing memories
     delete sqrtfac_mat;
@@ -296,14 +296,14 @@ bool Phase::noise_outcome(double phi, double PHI, int N) {
     oper_n[2]=rand_Gaussian(0,dev_n);//n_z
     oper_n[1]=sqrt(1-(oper_n[0]*oper_n[0]+oper_n[2]*oper_n[2]));
 
-    U[0][0].real()=sin_theta*oper_n[1];
-    U[0][0].imag()=-oper_n[0]*sin_theta;
-    U[0][1].real()=cos_theta;
-    U[0][1].imag()=oper_n[2]*sin_theta;
-    U[1][0].real()=cos_theta;
-    U[1][0].imag()=-oper_n[2]*sin_theta;
-    U[1][1].real()=sin_theta*oper_n[1];
-    U[1][1].imag()=sin_theta*oper_n[0];
+    U[0][0].real(sin_theta*oper_n[1]);
+    U[0][0].imag(-oper_n[0]*sin_theta);
+    U[0][1].real(cos_theta);
+    U[0][1].imag(oper_n[2]*sin_theta);
+    U[1][0].real(cos_theta);
+    U[1][0].imag(-oper_n[2]*sin_theta);
+    U[1][1].real(sin_theta*oper_n[1]);
+    U[1][1].imag(sin_theta*oper_n[0]);
 
     for (n=0; n<N; n++) {
         //if C_0 is measured
