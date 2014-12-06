@@ -5,6 +5,11 @@
  * the lossy case (loss in fitness() set to other than zero) which is called
  * through avg_Final_select() in OptAlg class.
  * */
+#include<complex>
+#include<cmath>
+#include<iostream>
+#include<cstdlib>
+#include<ctime>
 
 #include "phase_loss_opt.h"
 
@@ -27,6 +32,14 @@ Phase::Phase(const int numvar) {
     state = new dcmplx[num+1];
     update0 = new dcmplx[num+1];
     update1 = new dcmplx[num+1];
+    //Maximum number of uniform random numbers we will use in one go
+    n_urandom_numbers = num_repeat+2*num_repeat*num;
+    urandom_numbers = new double[n_urandom_numbers];
+    index_urandom_numbers = 0;
+    //Maximum number of Gaussian random numbers we will use in one go
+    n_grandom_numbers = 3*num_repeat*num;
+    grandom_numbers = new double[n_grandom_numbers];
+    index_grandom_numbers = 0;    
 }
 
 Phase::~Phase() {
@@ -34,6 +47,8 @@ Phase::~Phase() {
     delete update0;
     delete update1;
     delete input_state;
+    delete grandom_numbers; 
+    delete urandom_numbers; 
 }
 
 double Phase::fitness(double *soln) {
@@ -86,16 +101,19 @@ double Phase::fitness(double *soln) {
 }
 
 double Phase::avg_fitness(double *soln, const int K) {
-    // This loss value differs from that of in fitness. Is this correct?
+    //TODO: This loss value differs from that of in fitness. Is this correct?
     const double loss = 0.0;//loss level
     dcmplx sharp(0.0, 0.0);
     bool dect_result;
     double PHI, phi, coin, PHI_in;
     int m, k, d;
-
+    // Random numbers are generated in advance to take advantage of 
+    // vectorization
+    init_urandom_number_cache(K+2*K*num);
+    init_grandom_number_cache(3*K*num);
     WK_state();
     for(k=0; k<K; ++k) {
-        phi = double(rand())/RAND_MAX*(upper-lower)+lower;
+        phi = next_urand()*(upper-lower)+lower;
         PHI = 0;
         //TODO: memcpy
         /*copy input state*/
@@ -105,14 +123,18 @@ double Phase::avg_fitness(double *soln, const int K) {
         /*measurement*/
         d = 0;
         for (m=0; m<num; ++m) {
+            // This loop is the most critical part of the entire program. It
+            // executes K*num=10*num^3 times on each call of avg_fitness. All
+            // optimization should focus on this loop.
+
             //randomly decide whether loss occurs
-            coin = double(rand())/RAND_MAX;
+            coin = next_urand();
             if(coin<=loss) {
                 state_loss(num-m);//update only the state using loss function
             } else {
-                PHI_in = rand_Gaussian(PHI, THETA_DEV);
+                PHI_in = next_grand(PHI, THETA_DEV);
                 PHI_in = mod_2PI(PHI_in);//noisy PHI
-                dect_result = noise_outcome(phi,PHI_in,num-m);
+                dect_result = noise_outcome(phi, PHI_in, num-m);
                 //dect_result = outcome(phi,PHI_in,num-m);
                 if (dect_result==0) {
                     PHI = PHI-soln[d++];
@@ -147,7 +169,7 @@ void Phase::sqrtfac(double *fac_mat) { //calculate sqrt of factorial matrix
     }//end i
 }
 
-double Phase::cal_spart(int n, int k, int N) { 
+double Phase::cal_spart(const int n, const int k, const int N) { 
     //calculating the Wigner d-matrix element
     int s;
     int s_min;
@@ -233,13 +255,14 @@ bool Phase::outcome(const double phi, const double PHI, const int N) {
     const double cos_theta=cos(theta)/sqrt_cache[N];
     const double sin_theta=sin(theta)/sqrt_cache[N];
     int n;
-    double prob0 = 0.0;
+    double prob0 = 0.0, prob1 = 0.0;
     for (n=0; n<N; ++n) {
         //if C_0 is measured
         update0[n] = state[n+1]*sin_theta*sqrt_cache[n+1]+state[n]*cos_theta*sqrt_cache[N-n];
         prob0 += abs(update0[n]*conj(update0[n]));
         //if C_1 is measured
         update1[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
+        prob1 += abs(update1[n]*conj(update1[n]));        
     }
     state[N] = 0;
     if ((double(rand())/RAND_MAX) <= prob0) {
@@ -251,9 +274,9 @@ bool Phase::outcome(const double phi, const double PHI, const int N) {
         return 0;
     } else { 
         //measurement outcome is 1
-        prob0 = 1.0/sqrt(1-prob0);
+        prob1 = 1.0/sqrt(prob1);
         for(n=0; n<N; ++n) {
-            state[n] = update1[n] * prob0;
+            state[n] = update1[n] * prob1;
         }
         return 1;
     }
@@ -265,24 +288,27 @@ bool Phase::noise_outcome(const double phi, const double PHI, const int N) {
     const double cos_theta = cos(theta)/sqrt_cache[N];
     const double sin_theta = sin(theta)/sqrt_cache[N];
     //noise in operator: currently not in use
-    const double oper_n0 = rand_Gaussian(0.0, DEV_N);//n_x
-    const double oper_n2 = rand_Gaussian(0.0, DEV_N);//n_z
+    const double oper_n0 = next_grand(0.0, DEV_N);//n_x
+    const double oper_n2 = next_grand(0.0, DEV_N);//n_z
     const double oper_n1 = sqrt(1.0-(oper_n0*oper_n0+oper_n2*oper_n2));
     const dcmplx U00(sin_theta*oper_n1, -oper_n0*sin_theta);
     const dcmplx U01(cos_theta, oper_n2*sin_theta);
     const dcmplx U10(cos_theta, -oper_n2*sin_theta);
     const dcmplx U11(sin_theta*oper_n1, sin_theta*oper_n0);
     int n;
-    double prob0 = 0.0;
+    double prob0 = 0.0, prob1 = 0.0;
     for (n=0; n<N; ++n) {
         //if C_0 is measured
         update0[n] = state[n+1]*U00*sqrt_cache[n+1]+state[n]*U01*sqrt_cache[N-n];
         prob0 += abs(update0[n]*conj(update0[n]));
         //if C_1 is measured
+        //This is cache-optimized: we update state[n] in-place
         state[n] = state[n+1]*U10*sqrt_cache[n+1]-state[n]*U11*sqrt_cache[N-n];
-     }
+        prob1 += abs(state[n]*conj(state[n]));
+    }
     state[N] = 0;
-    if ((double(rand())/RAND_MAX) <= prob0) {
+    //TODO: Why don't prob0+prob1 sum to 1?
+    if (next_urand() <= prob0/(prob0+prob1)) {
         //measurement outcome is 0
         prob0 = 1.0/sqrt(prob0);
         for(n=0; n<N; ++n) {
@@ -291,15 +317,15 @@ bool Phase::noise_outcome(const double phi, const double PHI, const int N) {
         return 0;
     } else { 
         //measurement outcome is 1
-        prob0 = 1.0/sqrt(1-prob0);
+        prob1 = 1.0/sqrt(prob1);
         for(n=0; n<N; ++n) {
-            state[n] *= prob0;
+            state[n] *= prob1;
         }
         return 1;
     }
 }
 
-void Phase::state_loss(int N) {
+void Phase::state_loss(const int N) {
     //state update if the photon is loss
     double factor=1/sqrt(2*N);
     for(int n=0; n<N; ++n) {
@@ -308,8 +334,19 @@ void Phase::state_loss(int N) {
     state[N] = 0;
 }
 
-double Phase::rand_Gaussian(double mean, /*the average theta*/
-                            double dev /*deviation for distribution*/
+double Phase::mod_2PI(double PHI) {
+    while(PHI>=2*M_PI) {
+        PHI=PHI-2*M_PI;
+    }
+    while (PHI<0) {
+        PHI=PHI+2*M_PI;
+    }
+    return PHI;
+}
+
+/*########### RNG Functions ###########*/
+double Phase::rand_Gaussian(const double mean, /*the average theta*/
+                            const double dev /*deviation for distribution*/
                            ) {
     /*creating random number using Box-Muller Method/Transformation*/
     double U1,U2; /*uniformly distributed random number input*/
@@ -326,12 +363,53 @@ double Phase::rand_Gaussian(double mean, /*the average theta*/
     return U1*sqrt(-2*log(r)/r)*dev+mean;
 }/*end of rand_Gaussian*/
 
-double Phase::mod_2PI(double PHI) {
-    while(PHI>=2*M_PI) {
-        PHI=PHI-2*M_PI;
+void Phase::init_urandom_number_cache(const int n) {
+    if (n > n_urandom_numbers) {
+        cerr << "Problem with n" << endl;
     }
-    while (PHI<0) {
-        PHI=PHI+2*M_PI;
+    for (int i=0; i<n; ++i) {
+        // Comment out this line to revert to original non-vectorized behaviour
+        // urandom_numbers[i] = double(rand())/RAND_MAX;
     }
-    return PHI;
+    index_urandom_numbers = 0;
+}
+
+double Phase::next_urand() {
+  if (index_urandom_numbers < n_urandom_numbers) {
+      // Flip these two lines to revert to original non-vectorized behaviour
+      return double(rand())/RAND_MAX;
+      //return urandom_numbers[index_urandom_numbers++];
+  } else {
+      cerr << "Out of urandom numbers " << index_urandom_numbers << "/" 
+           << n_urandom_numbers << endl;
+      ++index_urandom_numbers;
+      return 0;
+  }
+}
+
+void Phase::init_grandom_number_cache(const int n) {
+    if (n > n_grandom_numbers) {
+        cerr << "Problem with n" << endl;
+    }
+    for (int i=0; i<n; ++i) {
+        // Comment out this line to revert to original non-vectorized behaviour
+        // grandom_numbers[i] = rand_Gaussian(0.0, 1.0);
+    }
+    index_grandom_numbers = 0;
+}
+
+double Phase::next_grand(const double mean, const double dev) {
+  if (index_grandom_numbers < n_grandom_numbers) {
+      // Flip these two lines to revert to original non-vectorized behaviour
+      return rand_Gaussian(mean, dev);
+      //return grandom_numbers[index_grandom_numbers++]*dev+mean;
+  } else {
+      cerr << "Out of grandom numbers " << index_grandom_numbers << "/" 
+           << n_grandom_numbers << endl;
+      ++index_grandom_numbers;
+      return 0;
+  }
+}
+void Phase::status_rand() {
+    cout << index_grandom_numbers << "/" << n_grandom_numbers << endl;
 }

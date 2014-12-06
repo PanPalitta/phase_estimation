@@ -1,12 +1,6 @@
 #ifndef PHASE_LOSS_H
 #define PHASE_LOSS_H
 
-#include<complex>
-#include<cmath>
-#include<iostream>
-#include<cstdlib>
-#include<ctime>
-
 /*NOTE on using fitness functions for phase estimation problem with loss*/
 /* Both avg_fitness() and fitness() contain the same code.
  * The policies are learned without loss (loss in avg_fitness() set to zero).
@@ -19,21 +13,33 @@
 #define THETA_DEV 0.0 //M_PI;//phase noise level
 
 #include "problem.h"
+
 class Phase: public Problem<double>
 {
 public:
-    Phase(int numvar);
+    Phase(const int numvar);
     ~Phase();
 
     double fitness(double *soln);
-    double avg_fitness(double *soln, int K);
+    double avg_fitness(double *soln, const int K);
 
 private:
     double lower;
     double upper;
-
     //array to avoid calculation of expensive sqrt calls for integers
-    double *sqrt_cache; //
+    double *sqrt_cache;
+    //infrastructure to store random numbers that are generated vectorized
+    double *urandom_numbers;
+    int n_urandom_numbers;
+    int index_urandom_numbers;
+    void init_urandom_number_cache(const int n);
+    double next_urand();
+    double *grandom_numbers;
+    int n_grandom_numbers;
+    int index_grandom_numbers;
+    void init_grandom_number_cache(const int n);
+    double next_grand(const double mean, const double dev);
+    void status_rand();
 
     //variables for WK state generation
     dcmplx *input_state;
@@ -49,17 +55,13 @@ private:
     //functions to generate WK_state
     void sqrtfac(double *fac_mat);
     void one_over_fac(double *over_mat);
-    double cal_spart(int n, int k, int N);//N is is the same as total number of photon 'num', but I'll leave it like this.
+    double cal_spart(const int n, const int k, const int N);//N is is the same as total number of photon 'num', but I'll leave it like this.
     void WK_state();
     //Measurement function
-    bool outcome(double phi, double PHI, int N);//N is the number of photons currently available, not equal to 'num'
-    bool noise_outcome(double phi, double PHI, int N);
-    void state_loss(int N);
-    double rand_Gaussian(double mean,double dev);
+    bool outcome(const double phi, const double PHI, const int N);//N is the number of photons currently available, not equal to 'num'
+    bool noise_outcome(const double phi, const double PHI, const int N);
+    void state_loss(const int N);
+    double rand_Gaussian(const double mean, const double dev);
     double mod_2PI(double PHI);
 };
-
-
-
-
 #endif // PHASE_H

@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
     int pop_size=48;
     int N_begin=4;
     int N_cut=8;
-    int N_end=4;
+    int N_end=5;
     int iter=300;
     int iter_begin=500;
     int T_cut_off=N_cut;
