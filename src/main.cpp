@@ -73,10 +73,10 @@ int main(int argc, char **argv) {
     y=new double[data_size];
     //calculating number of candidate per processor and stores the number in an array.
     can_per_proc=new int[nb_proc];
-    for(p=0; p<nb_proc; p++) {
+    for(p=0; p<nb_proc; ++p) {
         can_per_proc[p]=0;   //make sure the array started with zeroes.
     }
-    for(p=0; p<pop_size; p++) {
+    for(p=0; p<pop_size; ++p) {
         can_per_proc[p%nb_proc]+=1;
     }
 
@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
     }
     else {}
 
-    for(numvar=N_begin; numvar<=N_end; numvar++) {
+    for(numvar=N_begin; numvar<=N_end; ++numvar) {
         //cout<<numvar<<":";
         t=0;
         Problem<double>* prob_ptr=new Phase(numvar);
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
             else {}
 
             if(my_rank==0) {
-                for(p=1; p<nb_proc; p++) {
+                for(p=1; p<nb_proc; ++p) {
                     MPI_Send(&solution[0],numvar,MPI_TYPE,p,tag,MPI_COMM_WORLD);
                 }
             }
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
             opt->update_popfit();
             opt->combination(my_rank,pop_size,nb_proc);//this is where a lot of comm goes on between processors
             opt->selection(my_rank,pop_size,nb_proc);
-            t++;
+            ++t;
 
             //root check for success
             final_fit=opt->Final_select(my_rank,pop_size,nb_proc,soln_fit,solution);//again, communicate to find the best solution that exist so far

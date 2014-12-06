@@ -27,7 +27,7 @@ private:
 template <typename typeT>
 void DE<typeT>::put_to_best(int my_rank, int total_pop, int nb_proc) {
     int p;
-    for(p=0; p<this->pop_size; p++) { //pop_size here is the number of candidates assigned for a processor from the initialization.
+    for(p=0; p<this->pop_size; ++p) { //pop_size here is the number of candidates assigned for a processor from the initialization.
         this->pop[p].update_best();
     }
 }
@@ -51,7 +51,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
     typeT input[this->num];
     typeT can[this->num];
 
-    srand(time(NULL)+my_rank);
+    srand(0+my_rank);
 
     if(typeid(input[0])==typeid(double)) {
         MPI_TYPE=MPI_DOUBLE;
@@ -62,7 +62,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
     else {}
 
     //get the solution from all processor to root ***POTENTIAL BOTTLE NECK***
-    for(p=0; p<total_pop; p++) {
+    for(p=0; p<total_pop; ++p) {
         if(p%nb_proc!=0) { //if candidate is not in root, send the solution to root.
             if(my_rank==p%nb_proc) {
                 this->pop[int(p/nb_proc)].read_best(input);
@@ -70,7 +70,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
             }
             else if(my_rank==0) {
                 MPI_Recv(&input,this->num,MPI_TYPE,p%nb_proc,tag,MPI_COMM_WORLD,&status);
-                for(i=0; i<this->num; i++) {
+                for(i=0; i<this->num; ++p) {
                     all_soln[p][i]=input[i];
                 }
             }
@@ -78,7 +78,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
         else if(p%nb_proc==0) { //if candidate is in root, read the solution into the memory
             if(my_rank==0) {
                 this->pop[int(p/nb_proc)].read_best(input);
-                for(i=0; i<this->num; i++) {
+                for(i=0; i<this->num; ++i) {
                     all_soln[p][i]=input[i];
                 }
             }
@@ -90,14 +90,14 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
 
 
     //select family members for the candidate on the processor other that root
-    for(p=0; p<total_pop; p++) {
+    for(p=0; p<total_pop; ++p) {
 
         if(my_rank==0) {
             //srand(time(NULL)+p);
             //temp=rand();//flush out the first sampling which is not random
 
             if(total_pop<=fam_size+1) {
-                for(f=0; f<fam_size; f++) {
+                for(f=0; f<fam_size; ++f) {
                     fam[f]=rand()%total_pop;
                 }
             }
@@ -112,7 +112,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
             //create donor
 
             //if(fam_size==3){//check that we have the combination rule
-            for(i=0; i<this->num; i++) {
+            for(i=0; i<this->num; ++i) {
                 //create donor
                 input[i]=all_soln[fam[0]][i]+F*(all_soln[fam[1]][i]-all_soln[fam[2]][i]);
                 //cross-over
@@ -144,7 +144,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    for(p=0; p<this->pop_size; p++) {
+    for(p=0; p<this->pop_size; ++p) {
         this->Cont_fitness(p);   //compute the fitness
     }
 
@@ -154,7 +154,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
 template <typename typeT>
 void DE<typeT>::selection(int my_rank, int total_pop, int nb_proc) {
     int p;
-    for(p=0; p<this->pop_size; p++) {
+    for(p=0; p<this->pop_size; ++p) {
         if(this->pop[p].read_bestfit()<this->pop[p].read_contfit()) {
             this->pop[p].update_best();
             //cout<<"can select:"<<this->pop[p].read_bestfit()<<endl;
@@ -168,7 +168,7 @@ void DE<typeT>::selection(int my_rank, int total_pop, int nb_proc) {
 template <typename typeT>
 void DE<typeT>::fit_to_global() {
     int p;
-    for(p=0; p<this->pop_size; p++) {
+    for(p=0; p<this->pop_size; ++p) {
         this->pop[p].put_to_global();
         //cout<<p<<":"<<this->pop[p].read_globalfit()<<endl;
     }

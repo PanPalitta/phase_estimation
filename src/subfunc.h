@@ -21,7 +21,7 @@ void output_result(int num, double final_fit, typeT *solution, time_t start_time
 
     output_file.open("output.dat",ios::app);
     output_file<<num<<"\t"<<final_fit<<"\t";
-    for(i=0; i<num; i++) {
+    for(i=0; i<num; ++i) {
         output_file<<solution[i]<<"\t";
     }
     output_file<<endl;

@@ -15,6 +15,8 @@
  * through avg_Final_select() in OptAlg class.
  * */
 
+#define DEV_N 0.0 //level of noise in operator
+#define THETA_DEV 0.0 //M_PI;//phase noise level
 
 #include "problem.h"
 class Phase: public Problem<double>
@@ -30,16 +32,20 @@ private:
     double lower;
     double upper;
 
+    //array to avoid calculation of expensive sqrt calls for integers
+    double *sqrt_cache; //
+
     //variables for WK state generation
     dcmplx *input_state;
     double *sqrtfac_mat; //matrix to keep values of square roots of factorials
     double *overfac_mat; //matrix to keep values of one over factorials
-    double cosN;
     double tan_beta;
     //state for use with measurement
     dcmplx *state;
+    //variables for noise_output function
     dcmplx *update0;
     dcmplx *update1;
+
     //functions to generate WK_state
     void sqrtfac(double *fac_mat);
     void one_over_fac(double *over_mat);

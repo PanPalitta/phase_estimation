@@ -37,10 +37,10 @@ void PSO<typeT>::put_to_best(int my_rank, int total_pop, int nb_proc) {
     int i,p;
     typeT array[this->num];
 
-    for(p=0; p<this->pop_size; p++) {
+    for(p=0; p<this->pop_size; ++p) {
         this->pop[p].update_best();
         this->pop[p].init_velocity();
-        for(i=0; i<this->num; i++) {
+        for(i=0; i<this->num; ++i) {
             array[i]=double(rand())/RAND_MAX*v_max;
         }
         this->pop[p].update_vel(array);
@@ -67,7 +67,7 @@ void PSO<typeT>::find_global(int my_rank, int total_pop, int nb_proc) {
     }
     else {}
 
-    for(p=0; p<total_pop; p++) {
+    for(p=0; p<total_pop; ++p) {
 
         //find index of the candidate in the neighborhood
         if(p==0) {
@@ -192,14 +192,14 @@ void PSO<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
     typeT vel[this->num];
     typeT new_pos[this->num];
 
-    for(p=0; p<this->pop_size; p++) {
+    for(p=0; p<this->pop_size; ++p) {
         srand(time(NULL)+p);
         i=rand();//flushing out the deterministic results
         this->pop[p].read_global(global_pos);
         this->pop[p].read_best(personal_pos);
         this->pop[p].read_cont(pos);
         this->pop[p].read_vel(vel);
-        for(i=0; i<this->num; i++) {
+        for(i=0; i<this->num; ++i) {
             new_pos[i]=pos[i]+vel[i];
             vel[i]=vel[i]+phi1*double(rand())/RAND_MAX*(personal_pos[i]-pos[i])+phi2*double(rand())/RAND_MAX*(global_pos[i]-pos[i]);
             if(vel[i]>v_max) {
@@ -223,7 +223,7 @@ void PSO<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
 template <typename typeT>
 void PSO<typeT>::selection(int my_rank, int total_pop, int nb_proc) {
     int p;
-    for(p=0; p<this->pop_size; p++) {
+    for(p=0; p<this->pop_size; ++p) {
         if(this->pop[p].read_bestfit()<this->pop[p].read_contfit()) {
             this->pop[p].update_best();
         }

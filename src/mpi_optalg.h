@@ -68,11 +68,11 @@ void OptAlg<typeT>::Init_population(int psize) {
     pop_size=psize;
     pop=new Candidate<typeT>[pop_size];
 
-    srand(time(NULL));
+    srand(0);
 
-    for(p=0; p<pop_size; p++) {
+    for(p=0; p<pop_size; ++p) {
         //generate candidate
-        for(i=0; i<num; i++) {
+        for(i=0; i<num; ++i) {
             input[i]=double(rand())/RAND_MAX*(prob->upper_bound[i]-prob->lower_bound[i])+prob->lower_bound[i];
         }
         //store it in candidate object
@@ -98,18 +98,15 @@ void OptAlg<typeT>::Init_previous(double prev_dev, double new_dev,int psize, typ
     prev_soln[num-1]=prev_soln[num-2];
     dev_gen(dev,prev_dev,new_dev,dev_cut_off);
 
-    srand(time(NULL));
+    srand(0);
 
-    for(p=0; p<pop_size; p++) {
+    for(p=0; p<pop_size; ++p) {
         //generate candidate
 
-        for(i=0; i<num; i++) {
-            temp[i].real()=rand_Gaussian(dcmplx(prev_soln[i]).real(),dev[i]);
-            if(dcmplx(prev_soln[i]).imag()==0) {
-                temp[i].imag()=0;
-            }
-            else {
-                temp[i].imag()=rand_Gaussian(dcmplx(prev_soln[i]).imag(),dev[i]);
+        for(i=0; i<num; ++i) {
+            temp[i]=rand_Gaussian(dcmplx(prev_soln[i]).real(),dev[i]);
+            if(dcmplx(prev_soln[i]).imag()!=0) {
+                temp[i].imag(rand_Gaussian(dcmplx(prev_soln[i]).imag(),dev[i]));
             }
 
             if(temp[i].imag()==0) {}
@@ -120,12 +117,12 @@ void OptAlg<typeT>::Init_previous(double prev_dev, double new_dev,int psize, typ
 
 
         if(sum_im==0) {
-            for(i=0; i<num; i++) {
+            for(i=0; i<num; ++i) {
                 input[i]=abs(temp[i]);
             }
         }
         else if(sum_im!=0) { //TEST THIS FOR COMPLEX VAR LATER!!!!!!
-            for(i=0; i<num; i++) {
+            for(i=0; i<num; ++i) {
                 //           input[i]=temp[i];
                 static_cast<dcmplx>(input[i])=temp[i];//need this line if the typeT is not complex
                 //cout<<i<<"="<<input[i]<<endl;
@@ -167,7 +164,7 @@ void OptAlg<typeT>::Best_fitness(int p) {
 template<typename typeT>
 void OptAlg<typeT>::update_popfit() {
     int p;
-    for(p=0; p<pop_size; p++) {
+    for(p=0; p<pop_size; ++p) {
         Best_fitness(p);
     }
 }
@@ -221,7 +218,7 @@ void OptAlg<typeT>::linear_fit(int data_size,double *x, double *y, double *slope
     double res_y,res_x;
     double fit_del;
 
-    for(v=0; v<data_size; v++) {
+    for(v=0; v<data_size; ++v) {
         sum_x=sum_x+x[v];
         sum_xx=sum_xx+x[v]*x[v];
         sum_y=sum_y+y[v];
@@ -275,7 +272,7 @@ double OptAlg<typeT>::Final_select(int my_rank, int total_pop,int nb_proc, doubl
     fit_to_global();//ensuring that global_best contains the solutions
 
     //roots needed all the global fitness
-    for(p=1; p<total_pop; p++) {
+    for(p=1; p<total_pop; ++p) {
         if(my_rank==p%nb_proc) {
             global_fit=pop[int(p/nb_proc)].read_globalfit();
             MPI_Send(&global_fit,1,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
@@ -292,14 +289,14 @@ double OptAlg<typeT>::Final_select(int my_rank, int total_pop,int nb_proc, doubl
     if(my_rank==0) {
         soln=&fit[0];
         indx=0;
-        for(p=1; p<total_pop; p++) {
+        for(p=1; p<total_pop; ++p) {
             if(*soln<fit[p]) {
                 soln=&fit[p];
                 indx=p;
             }
             else {}
         }
-        for(p=1; p<nb_proc; p++) {
+        for(p=1; p<nb_proc; ++p) {
             MPI_Send(&indx,1,MPI_INT,p%nb_proc,tag,MPI_COMM_WORLD);
         }
     }
@@ -313,7 +310,7 @@ double OptAlg<typeT>::Final_select(int my_rank, int total_pop,int nb_proc, doubl
     //send the best fitness function to all processor
     if(my_rank==0) {
         global_fit=*soln;
-        for(p=1; p<nb_proc; p++) {
+        for(p=1; p<nb_proc; ++p) {
             MPI_Send(&global_fit,1,MPI_DOUBLE,p,tag,MPI_COMM_WORLD);
         }
     }
@@ -361,11 +358,11 @@ double OptAlg<typeT>::avg_Final_select(typeT* solution,int repeat, int my_rank, 
     fit_to_global();//move solution to global_best array in case we're using DE.
 
     //Need to calculate fitness again for 'repeat' times, independently on each
-    for(p=0; p<pop_size; p++) {
+    for(p=0; p<pop_size; ++p) {
         pop[p].read_global(array);
         //cout<<"previous global_fit ="<<pop[p].read_globalfit()<<",";
         fit[p]=0;
-        for(i=0; i<repeat; i++) {
+        for(i=0; i<repeat; ++i) {
             fit[p]+=prob->avg_fitness(array,prob->num_repeat);
         }
         fit[p]=fit[p]/repeat;
@@ -374,7 +371,7 @@ double OptAlg<typeT>::avg_Final_select(typeT* solution,int repeat, int my_rank, 
     }
 
     //filling the fitness table in root
-    for(p=0; p<total_pop; p++) {
+    for(p=0; p<total_pop; ++p) {
         if(p%nb_proc==0) {
             soln_fit[p]=fit[p/nb_proc];//no need for transmitting data
         }
@@ -398,7 +395,7 @@ double OptAlg<typeT>::avg_Final_select(typeT* solution,int repeat, int my_rank, 
         soln=&soln_fit[0];
         indx=0;
         //cout<<"0:"<<soln_fit[0]<<endl;
-        for(p=1; p<total_pop; p++) {
+        for(p=1; p<total_pop; ++p) {
             //cout<<p<<":"<<soln_fit[p]<<endl;
             if(*soln<soln_fit[p]) {
                 soln=&soln_fit[p];
@@ -407,7 +404,7 @@ double OptAlg<typeT>::avg_Final_select(typeT* solution,int repeat, int my_rank, 
             else {}
         }
         final_fit=*soln;
-        for(p=1; p<nb_proc; p++) {
+        for(p=1; p<nb_proc; ++p) {
             MPI_Send(&final_fit,1,MPI_DOUBLE,p,tag,MPI_COMM_WORLD);
         }
     }
@@ -418,7 +415,7 @@ double OptAlg<typeT>::avg_Final_select(typeT* solution,int repeat, int my_rank, 
     MPI_Barrier(MPI_COMM_WORLD);
 
     if(my_rank==0) {
-        for(p=1; p<nb_proc; p++) {
+        for(p=1; p<nb_proc; ++p) {
             MPI_Send(&indx,1,MPI_INT,p,tag,MPI_COMM_WORLD);
         }
     }
@@ -441,7 +438,7 @@ double OptAlg<typeT>::avg_Final_select(typeT* solution,int repeat, int my_rank, 
     MPI_Barrier(MPI_COMM_WORLD);
 
     if(my_rank==0) {
-        for(i=0; i<num; i++) {
+        for(i=0; i<num; ++i) {
             solution[i]=array[i];
         }
     }
@@ -475,7 +472,7 @@ double OptAlg<typeT>::rand_Gaussian(double mean, /*the average theta*/
 template<typename typeT>
 void OptAlg<typeT>::dev_gen(double *dev_array,double prev_dev, double new_dev, int cut_off) {
     int i;
-    for(i=0; i<num; i++) {
+    for(i=0; i<num; ++i) {
         if(i<cut_off) {
             dev_array[i]=prev_dev;
         }
