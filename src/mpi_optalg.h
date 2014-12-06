@@ -1,16 +1,9 @@
 #ifndef MPIOPTALG_H
 #define MPIOPTALG_H
 
-#include<complex>
-#include<ctime>
-#include<cstdlib>
-#include<typeinfo>
-#include "mpi.h"
 #include "problem.h"
 #include "candidate.h"
 
-using namespace std;
-using namespace MPI;
 typedef complex<double> dcmplx;
 
 template<typename typeT>

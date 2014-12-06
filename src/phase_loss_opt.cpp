@@ -5,11 +5,8 @@
  * the lossy case (loss in fitness() set to other than zero) which is called
  * through avg_Final_select() in OptAlg class.
  * */
-#include<complex>
-#include<cmath>
-#include<iostream>
-#include<cstdlib>
-#include<ctime>
+#include <iostream>
+#include <cstdlib>
 
 #include "phase_loss_opt.h"
 
@@ -240,7 +237,7 @@ void Phase::WK_state() {
             input_state[n].real(input_state[n].real()+temp*cos(M_PI/2*(k-n)));
             input_state[n].imag(input_state[n].imag()+temp*sin(M_PI/2*(k-n)));
         }//end k
-        // TODO: Verify if sqrt(num/2+1) returns the correct value
+        // FIXME: This is most likely incorrect!!! Should be sqrt(num/2.0+1)?
         input_state[n].real(input_state[n].real()*n_part[n]/sqrt(num/2+1));
         input_state[n].imag(input_state[n].imag()*n_part[n]/sqrt(num/2+1));
     }//end n
@@ -307,7 +304,7 @@ bool Phase::noise_outcome(const double phi, const double PHI, const int N) {
         prob1 += abs(state[n]*conj(state[n]));
     }
     state[N] = 0;
-    //TODO: Why don't prob0+prob1 sum to 1?
+    //FIXME: Why don't prob0+prob1 always sum to 1?
     if (next_urand() <= prob0/(prob0+prob1)) {
         //measurement outcome is 0
         prob0 = 1.0/sqrt(prob0);

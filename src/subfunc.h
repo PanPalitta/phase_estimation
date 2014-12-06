@@ -1,5 +1,5 @@
 /*supporting functions for main function*/
-#include<fstream>
+#include <fstream>
 
 void output_header() {
     ofstream output_file;
@@ -32,4 +32,3 @@ void output_result(int num, double final_fit, typeT *solution, time_t start_time
     time_file.close();
 
 }
-

@@ -1,9 +1,8 @@
 #ifndef PROBLEM_H
 #define PROBLEM_H
 
-#include<iostream>
-#include<complex>
-#include<typeinfo>
+#include <complex>
+
 using namespace std;
 typedef complex<double> dcmplx;
 

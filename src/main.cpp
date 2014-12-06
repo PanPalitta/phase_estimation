@@ -1,12 +1,8 @@
-#include<stdio.h>
-#include<cstdlib>
-#include<ctime>
-#include<iostream>
-#include<complex>
-#include<fstream>
-#include<typeinfo>
+#include <cstdlib>
+#include <iostream>
+#include <typeinfo>
+#include <mpi.h>
 
-#include "mpi.h"
 #include "phase_loss_opt.h"
 #include "mpi_de.h"
 #include "subfunc.h"
