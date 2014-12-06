@@ -15,8 +15,9 @@ bindir	 = @bindir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@
 
-all clean install uninstall lib somoclu:
+all clean install uninstall lib test phase_estimation:
 	$(MAKE) -C src $@
+	$(MAKE) -C test $@
 
 dist: $(distdir).tar.gz
 
