@@ -60,7 +60,6 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
         MPI_TYPE=MPI_DOUBLE_COMPLEX;
     }
     else {}
-
     //get the solution from all processor to root ***POTENTIAL BOTTLE NECK***
     for(p=0; p<total_pop; ++p) {
         if(p%nb_proc!=0) { //if candidate is not in root, send the solution to root.
@@ -70,7 +69,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
             }
             else if(my_rank==0) {
                 MPI_Recv(&input,this->num,MPI_TYPE,p%nb_proc,tag,MPI_COMM_WORLD,&status);
-                for(i=0; i<this->num; ++p) {
+                for(i=0; i<this->num; ++i) {
                     all_soln[p][i]=input[i];
                 }
             }
@@ -83,9 +82,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
                 }
             }
         }
-        else {}
     }// p loop
-
     MPI_Barrier(MPI_COMM_WORLD);
 
 
