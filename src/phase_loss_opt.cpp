@@ -54,15 +54,10 @@ double Phase::fitness(double *soln) {
     const int K = 10*num*num;
     dcmplx sharp(0.0, 0.0);
     bool dect_result;
-    double PHI;
-    double phi;
-    int m,k,d;
-
-    double coin;
-    double PHI_in;
+    double PHI, phi, coin, PHI_in;
+    int m, k, d;
 
     WK_state();
-
     for(k=0; k<K; ++k) {
         phi = double(rand())/RAND_MAX*(upper-lower)+lower;
         PHI = 0;
@@ -82,12 +77,11 @@ double Phase::fitness(double *soln) {
                 dect_result = noise_outcome(phi, PHI_in, num-m);
                 //dect_result=outcome(phi,PHI_in,num-m);
                 if(dect_result == 0) {
-                    PHI = PHI-soln[d];
+                    PHI = PHI-soln[d++];
                 } else {
-                    PHI = PHI+soln[d];
+                    PHI = PHI+soln[d++];
                 }
                 PHI = mod_2PI(PHI);
-                ++d;
             }
         }
         sharp.real(sharp.real()+cos(phi-PHI));
@@ -255,11 +249,13 @@ inline bool Phase::outcome(const double phi, const double PHI, const int N) {
         update0[n] = state[n+1]*sin_theta*sqrt_cache[n+1]+state[n]*cos_theta*sqrt_cache[N-n];
         prob0 += abs(update0[n]*conj(update0[n]));
         //if C_1 is measured
-        update1[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
-        prob1 += abs(update1[n]*conj(update1[n]));        
+        //This is cache-optimized: we update state[n] in-place        
+        state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
+        prob1 += abs(state[n]*conj(state[n]));        
     }
     state[N] = 0;
-    if ((double(rand())/RAND_MAX) <= prob0) {
+    //FIXME: Why don't prob0+prob1 always sum to 1?
+    if ((double(rand())/RAND_MAX) <= prob0/(prob0+prob1)) {
         //measurement outcome is 0
         prob0 = 1.0/sqrt(prob0);
         for(n=0; n<N; ++n) {
@@ -270,7 +266,7 @@ inline bool Phase::outcome(const double phi, const double PHI, const int N) {
         //measurement outcome is 1
         prob1 = 1.0/sqrt(prob1);
         for(n=0; n<N; ++n) {
-            state[n] = update1[n] * prob1;
+            state[n] *= prob1;
         }
         return 1;
     }
