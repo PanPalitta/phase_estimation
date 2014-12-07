@@ -54,8 +54,6 @@ protected:
 template<typename typeT>
 void OptAlg<typeT>::Init_population(int psize) {
     int i,p;
-    int sum_im=0;
-    dcmplx temp[num];
     typeT input[num];
     //store the variables
     pop_size=psize;
@@ -208,9 +206,6 @@ void OptAlg<typeT>::linear_fit(int data_size,double *x, double *y, double *slope
     double sum_xy=0;
     double mean_x=0;
 
-    double res_y,res_x;
-    double fit_del;
-
     for(v=0; v<data_size; ++v) {
         sum_x=sum_x+x[v];
         sum_xx=sum_xx+x[v]*x[v];
@@ -225,7 +220,10 @@ void OptAlg<typeT>::linear_fit(int data_size,double *x, double *y, double *slope
     *intercept=sum_y/double(data_size)-*slope*sum_x/double(data_size);
 
     /*error in slope*/
-    /*res_y=0;
+    /*
+    double res_y,res_x;
+    double fit_del;
+    res_y=0;
     res_x=0;
     for(v=0;v<data_size;v++){
     res_y=res_y+pow(y[v]-intercept-slope*x[v],2);
@@ -234,8 +232,8 @@ void OptAlg<typeT>::linear_fit(int data_size,double *x, double *y, double *slope
     fit_del=sqrt(res_y/res_x/double(data_size-2));
 
     //cout<<"linear fit: m="<<slope<<",b="<<intercept<<endl;
-    /*extrapolation from two data points*/
-    /*m=(y[numvar-1]-y[numvar])/(x[numvar-1]-x[numvar]);
+    //extrapolation from two data points
+    m=(y[numvar-1]-y[numvar])/(x[numvar-1]-x[numvar]);
     b=y[numvar]-m*x[numvar];*/
     //printf("m=%lf, fit_del=%lf, b=%lf\n",m,fit_del,b);
 

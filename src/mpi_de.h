@@ -43,7 +43,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
     MPI_Status status;
     MPI_Datatype MPI_TYPE;
     int tag=1;
-    int i,f,p,temp,p_pop;
+    int i,f,p;
     double coin;
     int fam_size=3;
     typeT all_soln[total_pop][this->num];

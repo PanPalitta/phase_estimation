@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     int data_start=N_begin;
     int data_end=155;
     int data_size=data_end-data_start;
-    double slope,intercept;
+    double slope=0.0, intercept=0.0;
 
     if(N_cut<N_begin) {
         cout<<"please select new N_cut>"<<N_begin<<":";
@@ -143,7 +143,8 @@ int main(int argc, char **argv) {
             //root check for success
             final_fit=opt->Final_select(my_rank,pop_size,nb_proc,soln_fit,solution);//again, communicate to find the best solution that exist so far
 
-            opt->success=opt->check_success(t,numvar,final_fit,slope,intercept);
+            opt->success = opt->check_success(t, numvar, final_fit, slope,
+                                              intercept);
 
             //cout<<t<<":"<<final_fit<<endl;
 
