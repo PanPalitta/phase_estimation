@@ -33,12 +33,12 @@ private:
     int n_urandom_numbers;
     int index_urandom_numbers;
     void init_urandom_number_cache(const int n);
-    double next_urand();
+    inline double next_urand();
     double *grandom_numbers;
     int n_grandom_numbers;
     int index_grandom_numbers;
     void init_grandom_number_cache(const int n);
-    double next_grand(const double mean, const double dev);
+    inline double next_grand(const double mean, const double dev);
     void status_rand();
 
     //variables for WK state generation
@@ -53,15 +53,15 @@ private:
     dcmplx *update1;
 
     //functions to generate WK_state
-    void sqrtfac(double *fac_mat);
-    void one_over_fac(double *over_mat);
-    double cal_spart(const int n, const int k, const int N);//N is is the same as total number of photon 'num', but I'll leave it like this.
+    inline void sqrtfac(double *fac_mat);
+    inline void one_over_fac(double *over_mat);
+    inline double cal_spart(const int n, const int k, const int N);//N is is the same as total number of photon 'num', but I'll leave it like this.
     void WK_state();
     //Measurement function
-    bool outcome(const double phi, const double PHI, const int N);//N is the number of photons currently available, not equal to 'num'
-    bool noise_outcome(const double phi, const double PHI, const int N);
-    void state_loss(const int N);
-    double rand_Gaussian(const double mean, const double dev);
-    double mod_2PI(double PHI);
+    inline bool outcome(const double phi, const double PHI, const int N);//N is the number of photons currently available, not equal to 'num'
+    inline bool noise_outcome(const double phi, const double PHI, const int N);
+    inline void state_loss(const int N);
+    inline double rand_Gaussian(const double mean, const double dev);
+    inline double mod_2PI(double PHI);
 };
 #endif // PHASE_H

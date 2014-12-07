@@ -147,7 +147,7 @@ double Phase::avg_fitness(double *soln, const int K) {
 /*private functions*/
 /*########### Generating Input State ###########*/
 /*Aux functions*/
-void Phase::one_over_fac(double *over_mat) { //calculate one over factorial matrix
+inline void Phase::one_over_fac(double *over_mat) { //calculate one over factorial matrix
     int i;
     over_mat[0] = 1;
     for (i=1; i<=num; ++i) {
@@ -155,7 +155,7 @@ void Phase::one_over_fac(double *over_mat) { //calculate one over factorial matr
     }//end i
 }
 
-void Phase::sqrtfac(double *fac_mat) { //calculate sqrt of factorial matrix
+inline void Phase::sqrtfac(double *fac_mat) { //calculate sqrt of factorial matrix
     int i;
     fac_mat[0] = 1;
     for (i=1; i<=num; ++i) {
@@ -163,7 +163,7 @@ void Phase::sqrtfac(double *fac_mat) { //calculate sqrt of factorial matrix
     }//end i
 }
 
-double Phase::cal_spart(const int n, const int k, const int N) { 
+inline double Phase::cal_spart(const int n, const int k, const int N) { 
     //calculating the Wigner d-matrix element
     int s;
     int s_min;
@@ -243,7 +243,7 @@ void Phase::WK_state() {
     delete overfac_mat;
 }
 /*########### Measurement Functions ###########*///Measurement function
-bool Phase::outcome(const double phi, const double PHI, const int N) {
+inline bool Phase::outcome(const double phi, const double PHI, const int N) {
     //N is the number of photons currently available, not equal to 'num'
     const double theta = (phi-PHI)/2;
     const double cos_theta=cos(theta)/sqrt_cache[N];
@@ -276,7 +276,7 @@ bool Phase::outcome(const double phi, const double PHI, const int N) {
     }
 }
 
-bool Phase::noise_outcome(const double phi, const double PHI, const int N) {
+inline bool Phase::noise_outcome(const double phi, const double PHI, const int N) {
     //N is the number of photons currently available, not equal to 'num'
     const double theta = (phi-PHI)/2.0;
     const double cos_theta = cos(theta)/sqrt_cache[N];
@@ -319,7 +319,7 @@ bool Phase::noise_outcome(const double phi, const double PHI, const int N) {
     }
 }
 
-void Phase::state_loss(const int N) {
+inline void Phase::state_loss(const int N) {
     //state update if the photon is loss
     double factor=1/sqrt(2*N);
     for(int n=0; n<N; ++n) {
@@ -328,7 +328,7 @@ void Phase::state_loss(const int N) {
     state[N] = 0;
 }
 
-double Phase::mod_2PI(double PHI) {
+inline double Phase::mod_2PI(double PHI) {
     while(PHI>=2*M_PI) {
         PHI=PHI-2*M_PI;
     }
@@ -339,7 +339,7 @@ double Phase::mod_2PI(double PHI) {
 }
 
 /*########### RNG Functions ###########*/
-double Phase::rand_Gaussian(const double mean, /*the average theta*/
+inline double Phase::rand_Gaussian(const double mean, /*the average theta*/
                             const double dev /*deviation for distribution*/
                            ) {
     /*creating random number using Box-Muller Method/Transformation*/
@@ -368,7 +368,7 @@ void Phase::init_urandom_number_cache(const int n) {
     index_urandom_numbers = 0;
 }
 
-double Phase::next_urand() {
+inline double Phase::next_urand() {
   if (index_urandom_numbers < n_urandom_numbers) {
       // Flip these two lines to revert to original non-vectorized behaviour
       return double(rand())/RAND_MAX;
@@ -392,7 +392,7 @@ void Phase::init_grandom_number_cache(const int n) {
     index_grandom_numbers = 0;
 }
 
-double Phase::next_grand(const double mean, const double dev) {
+inline double Phase::next_grand(const double mean, const double dev) {
   if (index_grandom_numbers < n_grandom_numbers) {
       // Flip these two lines to revert to original non-vectorized behaviour
       return rand_Gaussian(mean, dev);
