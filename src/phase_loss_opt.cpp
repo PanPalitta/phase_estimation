@@ -358,51 +358,39 @@ inline double Phase::rand_Gaussian(const double mean, /*the average theta*/
 }/*end of rand_Gaussian*/
 
 void Phase::init_urandom_number_cache(const int n) {
-    if (n > n_urandom_numbers) {
-        cerr << "Problem with n" << endl;
-    }
     for (int i=0; i<n; ++i) {
-        // Comment out this line to revert to original non-vectorized behaviour
+        // Comment out this line if not using vectorized version
         // urandom_numbers[i] = double(rand())/RAND_MAX;
     }
     index_urandom_numbers = 0;
 }
 
 inline double Phase::next_urand() {
-  if (index_urandom_numbers < n_urandom_numbers) {
-      // Flip these two lines to revert to original non-vectorized behaviour
-      return double(rand())/RAND_MAX;
-      //return urandom_numbers[index_urandom_numbers++];
-  } else {
-      cerr << "Out of urandom numbers " << index_urandom_numbers << "/" 
-           << n_urandom_numbers << endl;
-      ++index_urandom_numbers;
-      return 0;
-  }
+    // Warning: for speed, there is no bound checking! See
+    // nadeausoftware.com/articles/2013/12/
+    // c_tip_considering_use_exceptions_asserts_and_bounds_checking
+
+    // Flip these lines to change between vectorized and non-vectorized variants
+    return double(rand())/RAND_MAX;
+    //return urandom_numbers[index_urandom_numbers++];
 }
 
 void Phase::init_grandom_number_cache(const int n) {
-    if (n > n_grandom_numbers) {
-        cerr << "Problem with n" << endl;
-    }
     for (int i=0; i<n; ++i) {
-        // Comment out this line to revert to original non-vectorized behaviour
+        // Comment out this line if not using vectorized version
         // grandom_numbers[i] = rand_Gaussian(0.0, 1.0);
     }
     index_grandom_numbers = 0;
 }
 
 inline double Phase::next_grand(const double mean, const double dev) {
-  if (index_grandom_numbers < n_grandom_numbers) {
-      // Flip these two lines to revert to original non-vectorized behaviour
-      return rand_Gaussian(mean, dev);
-      //return grandom_numbers[index_grandom_numbers++]*dev+mean;
-  } else {
-      cerr << "Out of grandom numbers " << index_grandom_numbers << "/" 
-           << n_grandom_numbers << endl;
-      ++index_grandom_numbers;
-      return 0;
-  }
+    // Warning: for speed, there is no bound checking! See
+    // nadeausoftware.com/articles/2013/12/
+    // c_tip_considering_use_exceptions_asserts_and_bounds_checking
+
+    // Flip these lines to change between vectorized and non-vectorized variants
+    return rand_Gaussian(mean, dev);
+    //return grandom_numbers[index_grandom_numbers++]*dev+mean;
 }
 void Phase::status_rand() {
     cout << index_grandom_numbers << "/" << n_grandom_numbers << endl;
