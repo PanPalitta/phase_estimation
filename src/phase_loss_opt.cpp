@@ -7,6 +7,7 @@
  * */
 #include <iostream>
 #include <cstdlib>
+#include <cstring>
 
 #include "phase_loss_opt.h"
 
@@ -65,12 +66,10 @@ double Phase::fitness(double *soln) {
     for(k=0; k<K; ++k) {
         phi = double(rand())/RAND_MAX*(upper-lower)+lower;
         PHI = 0;
-        /*copy input state*/
-        for (m=0; m<=num; ++m) {
-            //TODO memcpy
-            state[m] = input_state[m];
-        }
-        /*measurement*/
+        //copy input state: the optimal solution across all compilers is memcpy:
+        //nadeausoftware.com/articles/2012/05/c_c_tip_how_copy_memory_quickly
+        memcpy(state, input_state, (num+1)*sizeof(dcmplx));
+        //measurement
         d = 0;
         for (m=0; m<num; ++m) {
             //randomly decide whether loss occurs
@@ -112,12 +111,10 @@ double Phase::avg_fitness(double *soln, const int K) {
     for(k=0; k<K; ++k) {
         phi = next_urand()*(upper-lower)+lower;
         PHI = 0;
-        //TODO: memcpy
-        /*copy input state*/
-        for (m=0; m<=num; ++m) {
-            state[m]=input_state[m];
-        }
-        /*measurement*/
+        //copy input state: the optimal solution across all compilers is memcpy:
+        //nadeausoftware.com/articles/2012/05/c_c_tip_how_copy_memory_quickly
+        memcpy(state, input_state, (num+1)*sizeof(dcmplx));
+        //measurement
         d = 0;
         for (m=0; m<num; ++m) {
             // This loop is the most critical part of the entire program. It
