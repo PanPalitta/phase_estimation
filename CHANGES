@@ -1,4 +1,6 @@
 Since 0.1:
+  - Implemented basic logic of vectorized random number generation.
+  - Reorganization of time critical subroutines.
   - Test case added.
 
 Version 0.1: 2014-11-26
