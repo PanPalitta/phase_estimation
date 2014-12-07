@@ -13,8 +13,8 @@ bindir	 = @bindir@
 libdir	 = @libdir@
 
 # Tool-related substitution variables
-CC		         = @CC@
-CFLAGS         = @CFLAGS@
+CXX		         = @CXX@
+CXXFLAGS       = @CXXFLAGS@
 LIBS	         = @LIBS@
 DEFS           = @DEFS@
 INSTALL	       = @INSTALL@
@@ -34,10 +34,10 @@ OBJS=main.o phase_loss_opt.o
 all: phase_estimation
 	
 phase_estimation: $(OBJS)
-	$(CC) $(DEFS) $(CFLAGS) $(MPI_LIBDIR) -o $@ $^ $(LIBS) $(MPI_LIBS)
+	$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_LIBDIR) -o $@ $^ $(LIBS) $(MPI_LIBS)
 
 %.o: %.cpp
-		$(CC) $(DEFS) $(CFLAGS) $(MPI_INC) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
+		$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_INC) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
 clean:
 	-rm -f phase_estimation $(OBJS) 1>/dev/null

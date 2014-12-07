@@ -13,8 +13,8 @@ bindir	 = @bindir@
 libdir	 = @libdir@
 
 # Tool-related substitution variables
-CC		         = @CC@
-CFLAGS         = @CFLAGS@
+CXX		         = @CXX@
+CXXFLAGS       = @CXXFLAGS@
 LIBS	         = @LIBS@
 DEFS           = @DEFS@
 INSTALL	       = @INSTALL@
@@ -34,10 +34,10 @@ OBJS=test.o ../src/phase_loss_opt.o
 all: test
 	
 test: $(OBJS)
-	$(CC) $(DEFS) $(CFLAGS) $(MPI_LIBDIR) -o $@ $^ $(LIBS) $(MPI_LIBS)
+	$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_LIBDIR) -o $@ $^ $(LIBS) $(MPI_LIBS)
 
 %.o: %.cpp
-		$(CC) $(DEFS) $(CFLAGS) $(MPI_INC) -I$(srcdir) -I.. -I../src -o $@ -c $(srcdir)/$<
+		$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_INC) -I$(srcdir) -I.. -I../src -o $@ -c $(srcdir)/$<
 
 clean:
 	-rm -f test test.o 1>/dev/null
