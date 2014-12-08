@@ -1,6 +1,8 @@
 #ifndef CANDIDATE_H
 #define CANDIDATE_H
 
+#include <cstring>
+
 typedef complex<double> dcmplx;
 
 template<typename typeT>
@@ -62,11 +64,11 @@ private:
 };
 
 template<typename typeT>
-Candidate<typeT>::~Candidate()
-{   delete can_best;
-    delete contender;
-    delete velocity;
-    delete global_best;
+Candidate<typeT>::~Candidate() {   
+    delete[] can_best;
+    delete[] contender;
+    delete[] velocity;
+    delete[] global_best;
 }
 
 template<typename typeT>
@@ -85,10 +87,7 @@ void Candidate<typeT>::init_velocity() {
 
 template<typename typeT>
 void Candidate<typeT>::update_cont(typeT *input) {
-    int i;
-    for (i=0; i<num; i++) {
-        contender[i]=input[i];
-    }
+    memcpy(contender, input, num*sizeof(typeT));
 }
 
 template<typename typeT>

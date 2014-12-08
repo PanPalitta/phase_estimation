@@ -12,8 +12,8 @@ class Problem
 public:
     Problem() {};
     ~Problem() {
-        delete upper_bound;
-        delete lower_bound;
+        delete[] upper_bound;
+        delete[] lower_bound;
     }
 
     virtual double fitness(typeT *soln) {

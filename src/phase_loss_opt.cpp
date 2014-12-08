@@ -27,6 +27,9 @@ Phase::Phase(const int numvar) {
     for(i=0; i<num+1; ++i) {
       sqrt_cache[i] = sqrt(i);
     }
+    input_state = new dcmplx[num+1];
+    sqrtfac_mat = new double[num+1];
+    overfac_mat = new double[num+1];
     state = new dcmplx[num+1];
     update0 = new dcmplx[num+1];
     update1 = new dcmplx[num+1];
@@ -41,12 +44,14 @@ Phase::Phase(const int numvar) {
 }
 
 Phase::~Phase() {
-    delete state;
-    delete update0;
-    delete update1;
-    delete input_state;
-    delete grandom_numbers; 
-    delete urandom_numbers; 
+    delete[] state;
+    delete[] update0;
+    delete[] update1;
+    delete[] input_state;
+    delete[] sqrtfac_mat;
+    delete[] overfac_mat;
+    delete[] grandom_numbers; 
+    delete[] urandom_numbers; 
 }
 
 double Phase::fitness(double *soln) {
@@ -202,10 +207,6 @@ void Phase::WK_state() {
     double temp;
     //double total=0;
 
-    input_state = new dcmplx[num+1];
-    sqrtfac_mat = new double[num+1];
-    overfac_mat = new double[num+1];
-
     sqrtfac(sqrtfac_mat); //initializing
     one_over_fac(overfac_mat); //initializing
 
@@ -232,10 +233,8 @@ void Phase::WK_state() {
         input_state[n].real(input_state[n].real()*n_part[n]/sqrt(num/2+1));
         input_state[n].imag(input_state[n].imag()*n_part[n]/sqrt(num/2+1));
     }//end n
-    //releasing memories
-    delete sqrtfac_mat;
-    delete overfac_mat;
 }
+
 /*########### Measurement Functions ###########*///Measurement function
 inline bool Phase::outcome(const double phi, const double PHI, const int N) {
     //N is the number of photons currently available, not equal to 'num'
