@@ -29,26 +29,26 @@ MPI_LIBS       = @MPI_LIBS@
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
-OBJS=main.o phase_loss_opt.o
+OBJS=test.o ../src/phase_loss_opt.o
 
-all: phase_estimation
+all: test
 	
-phase_estimation: $(OBJS)
+test: $(OBJS)
 	$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_LIBDIR) -o $@ $^ $(LIBS) $(MPI_LIBS)
 
 %.o: %.cpp
-		$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_INC) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
+		$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_INC) -I$(srcdir) -I.. -I../src -o $@ -c $(srcdir)/$<
 
 clean:
-	-rm -f phase_estimation $(OBJS) 1>/dev/null
+	-rm -f test test.o 1>/dev/null
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
-	$(INSTALL_PROGRAM) -m 0755 phase_estimation \
+	$(INSTALL_PROGRAM) -m 0755 test \
 	 $(DESTDIR)$(bindir)
 	 
 uninstall:
-	-rm $(DESTDIR)$(bindir)/phase_estimation &>/dev/null
+	-rm $(DESTDIR)$(bindir)/test &>/dev/null
 
 Makefile: Makefile.in ../config.status
 	cd .. && ./config.status $@

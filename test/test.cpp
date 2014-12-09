@@ -13,6 +13,17 @@ using namespace std;
 typedef complex<double> dcmplx;
 
 int main(int argc, char **argv) {
+    /*parameter settings*/
+    int pop_size=48;
+    int N_begin=4;
+    int N_cut=8;
+    int N_end=4;
+    int iter=300;
+    int iter_begin=500;
+    int T_cut_off=N_cut;
+    double prev_dev=0.01*M_PI;
+    double new_dev=0.25*M_PI;
+    int repeat=10;
 
     /*mpi handlers*/
     int my_rank;
@@ -32,18 +43,6 @@ int main(int argc, char **argv) {
     double *x;
     double *y;
 
-    /*parameter settings*/
-    int pop_size=48;
-    int N_begin=4;
-    int N_cut=5;
-    int N_end=100;
-    int iter=300;
-    int iter_begin=500;
-    int T_cut_off=N_cut;
-    double prev_dev=0.01*M_PI;
-    double new_dev=0.25*M_PI;
-    int repeat=10;
-
     int data_start=N_begin;
     int data_end=155;
     int data_size=data_end-data_start;
@@ -60,13 +59,14 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD,&my_rank);
     MPI_Comm_size(MPI_COMM_WORLD,&nb_proc);
 
-    srand(time(NULL)+my_rank);
+    srand(0+my_rank);
 
-    soln_fit=new double[pop_size];//create an array to store global fitness from each candidate.
-    solution=new double[N_begin];
+    soln_fit = new double[pop_size];//create an array to store global fitness from each candidate.
+    memset(soln_fit, 0, pop_size*sizeof(double));
+    solution = new double[N_begin];
 
-    x=new double[data_size];
-    y=new double[data_size];
+    x = new double[data_size];
+    y = new double[data_size];
     //calculating number of candidate per processor and stores the number in an array.
     can_per_proc=new int[nb_proc];
     for(p=0; p<nb_proc; ++p) {
@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
 
         opt->put_to_best(my_rank,pop_size,nb_proc);
 
-        delete solution;
+        delete[] solution;
         solution=new double[numvar+1];//This initialization must happen after the initialization of candidates.
 
         //setting the success criterion
@@ -137,16 +137,15 @@ int main(int argc, char **argv) {
         do {
             opt->update_popfit();
             opt->combination(my_rank,pop_size,nb_proc);//this is where a lot of comm goes on between processors
+
             opt->selection(my_rank,pop_size,nb_proc);
             ++t;
-
             //root check for success
             final_fit=opt->Final_select(my_rank,pop_size,nb_proc,soln_fit,solution);//again, communicate to find the best solution that exist so far
 
-            opt->success = opt->check_success(t, numvar, final_fit, slope,
-                                              intercept);
+            opt->success=opt->check_success(t,numvar,final_fit,slope,intercept);
 
-            //cout<<t<<":"<<final_fit<<endl;
+            //cout<<my_rank<<" " <<t<<":"<<final_fit<<endl;
 
         } while(opt->success==0);
 
@@ -174,11 +173,11 @@ int main(int argc, char **argv) {
         prob_ptr->~Problem();
     }
 
-    delete solution;
-    delete soln_fit;
-    delete x;
-    delete y;
-    delete can_per_proc;
+    delete[] solution;
+    delete[] soln_fit;
+    delete[] x;
+    delete[] y;
+    delete[] can_per_proc;
 
     MPI_Finalize();
     cout<<"done"<<endl;
