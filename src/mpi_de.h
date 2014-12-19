@@ -2,8 +2,6 @@
 #define DE_H
 
 #include "mpi_optalg.h"
-#include<cstdlib>
-#include<ctime>
 
 template <typename typeT>
 class DE : public OptAlg<typeT> {
