@@ -97,7 +97,7 @@ void OptAlg<typeT>::Init_previous(double prev_dev, double new_dev,int psize, typ
         for(i=0; i<num; ++i) {
             temp[i]=rand_Gaussian(dcmplx(prev_soln[i]).real(),dev[i]);
             if(dcmplx(prev_soln[i]).imag()!=0) {
-                temp[i].imag()=rand_Gaussian(dcmplx(prev_soln[i]).imag(),dev[i]);
+                temp[i].imag(rand_Gaussian(dcmplx(prev_soln[i]).imag(),dev[i]));
             }
 
             if(temp[i].imag()==0) {}
@@ -263,11 +263,6 @@ double OptAlg<typeT>::Final_select(int my_rank, int total_pop,int nb_proc, doubl
     fit_to_global();//ensuring that global_best contains the solutions
 
     //roots needed all the global fitness
-	if(my_rank==0){
-		for(p=0;p<pop_size;p++){
-			fit[p*nb_proc]=global_fit=pop[p].read_globalfit();
-			}
-		}
     for(p=1; p<total_pop; ++p) {
         if(my_rank==p%nb_proc) {
             global_fit=pop[int(p/nb_proc)].read_globalfit();
@@ -286,14 +281,12 @@ double OptAlg<typeT>::Final_select(int my_rank, int total_pop,int nb_proc, doubl
         soln=&fit[0];
         indx=0;
         for(p=1; p<total_pop; ++p) {
-
             if(*soln<fit[p]) {
                 soln=&fit[p];
                 indx=p;
             }
             else {}
         }
-	
         for(p=1; p<nb_proc; ++p) {
             MPI_Send(&indx,1,MPI_INT,p%nb_proc,tag,MPI_COMM_WORLD);
         }
