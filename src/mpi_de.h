@@ -105,7 +105,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
                 while(fam[2]==p||fam[2]==fam[0]||fam[2]==fam[1]);
             }
             //create donor
-			cout<<p<<":"<<fam[0]<<","<<fam[1]<<","<<fam[2]<<endl;
+			//cout<<p<<":"<<fam[0]<<","<<fam[1]<<","<<fam[2]<<endl;
             for(i=0; i<this->num; ++i) {
                 //create donor
                 input[i]=all_soln[fam[0]][i]+F*(all_soln[fam[1]][i]-all_soln[fam[2]][i]);
