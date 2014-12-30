@@ -89,8 +89,8 @@ double Phase::fitness(double *soln) {
                 PHI = mod_2PI(PHI);
             }
         }
-        sharp.real(sharp.real()+cos(phi-PHI));
-        sharp.imag(sharp.imag()+sin(phi-PHI));
+        sharp.real()=sharp.real()+cos(phi-PHI);
+        sharp.imag()=sharp.imag()+sin(phi-PHI);
     }
     return abs(sharp)/double(K);
 }
@@ -137,8 +137,8 @@ double Phase::avg_fitness(double *soln, const int K) {
                 PHI = mod_2PI(PHI);
             }
         }
-        sharp.real(sharp.real()+cos(phi-PHI));
-        sharp.imag(sharp.imag()+sin(phi-PHI));
+        sharp.real()=sharp.real()+cos(phi-PHI);
+        sharp.imag()=sharp.imag()+sin(phi-PHI);
     }
     return abs(sharp)/double(K);
 }
@@ -221,17 +221,17 @@ void Phase::WK_state() {
 
     for (n=0; n<=num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
         temp=0;
-        input_state[n].real(0);
-        input_state[n].imag(0);
+        input_state[n].real()=0;
+        input_state[n].imag()=0;
         for (k=0; k<=num; ++k) {
             s_part = cal_spart(n,k,num);
             temp = s_part*k_part[k]*sin((k+1)*M_PI/(num+2));
-            input_state[n].real(input_state[n].real()+temp*cos(M_PI/2*(k-n)));
-            input_state[n].imag(input_state[n].imag()+temp*sin(M_PI/2*(k-n)));
+            input_state[n].real()=input_state[n].real()+temp*cos(M_PI/2.0*(k-n));
+            input_state[n].imag()=input_state[n].imag()+temp*sin(M_PI/2.0*(k-n));
         }//end k
-        // FIXME: This is most likely incorrect!!! Should be sqrt(num/2.0+1)?
-        input_state[n].real(input_state[n].real()*n_part[n]/sqrt(num/2+1));
-        input_state[n].imag(input_state[n].imag()*n_part[n]/sqrt(num/2+1));
+        // FIXED:This correction corrects the probability overshoot.
+        input_state[n].real()=input_state[n].real()*n_part[n]/sqrt(num/2.0+1);
+        input_state[n].imag()=input_state[n].imag()*n_part[n]/sqrt(num/2.0+1);
     }//end n
 }
 
@@ -254,6 +254,11 @@ inline bool Phase::outcome(const double phi, const double PHI, const int N) {
     }
     state[N] = 0;
     //FIXME: Why don't prob0+prob1 always sum to 1?
+	//The condition is set this way so that when the rounding error starts to kick in at num=82 
+	//it does not effect the random selection of output path.
+	//(The shape of the input state remains the same after num=82 but the numerical value 
+	//is slightly off to at most 3rd decimal of the norm at num=100). 
+	//Renormalization correct this.	
     if ((double(rand())/RAND_MAX) <= prob0/(prob0+prob1)) {
         //measurement outcome is 0
         prob0 = 1.0/sqrt(prob0);
@@ -296,7 +301,12 @@ inline bool Phase::noise_outcome(const double phi, const double PHI, const int N
         prob1 += abs(state[n]*conj(state[n]));
     }
     state[N] = 0;
-    //FIXME: Why don't prob0+prob1 always sum to 1?
+    //FIXME: Why don't prob0+prob1 always sum to 1?	
+	//The condition is set this way so that when the rounding error starts to kick in at num=82 
+	//it does not effect the random selection of output path.
+	//(The shape of the input state remains the same after num=82 but the numerical value 
+	//is slightly off to at most 3rd decimal of the norm at num=100). 
+	//Renormalization correct this.	
     if (next_urand() <= prob0/(prob0+prob1)) {
         //measurement outcome is 0
         prob0 = 1.0/sqrt(prob0);

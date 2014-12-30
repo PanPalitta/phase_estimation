@@ -43,7 +43,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
     MPI_Status status;
     MPI_Datatype MPI_TYPE;
     int tag=1;
-    int i,f,p;
+    int i,f,p,temp;
     double coin;
     int fam_size=3;
     typeT all_soln[total_pop][this->num];
@@ -60,7 +60,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
         MPI_TYPE=MPI_DOUBLE_COMPLEX;
     }
     else {}
-    //get the solution from all processor to root ***POTENTIAL BOTTLE NECK***
+    //get the solution from all processor to root ***POTENTIAL BOTTLENECK***
     for(p=0; p<total_pop; ++p) {
         if(p%nb_proc!=0) { //if candidate is not in root, send the solution to root.
             if(my_rank==p%nb_proc) {
@@ -85,10 +85,8 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
     }// p loop
     MPI_Barrier(MPI_COMM_WORLD);
 
-
     //select family members for the candidate on the processor other that root
     for(p=0; p<total_pop; ++p) {
-
         if(my_rank==0) {
             //srand(time(NULL)+p);
             //temp=rand();//flush out the first sampling which is not random
@@ -107,24 +105,24 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
                 while(fam[2]==p||fam[2]==fam[0]||fam[2]==fam[1]);
             }
             //create donor
-
-            //if(fam_size==3){//check that we have the combination rule
+			//cout<<p<<":"<<fam[0]<<","<<fam[1]<<","<<fam[2]<<endl;
             for(i=0; i<this->num; ++i) {
                 //create donor
                 input[i]=all_soln[fam[0]][i]+F*(all_soln[fam[1]][i]-all_soln[fam[2]][i]);
                 //cross-over
                 coin=double(rand())/RAND_MAX;
-                //temp=rand()%this->num;
-                //if(coin<=Cr||i==temp){can[i]=input[i];}
-                if(coin<=Cr) {
-                    can[i]=input[i];
-                }
+                if(coin<=Cr||i==rand()%this->num){
+					can[i]=input[i];
+					}
+                //if(coin<=Cr) {
+                //    can[i]=input[i];
+                //}
                 else {
                     can[i]=all_soln[p][i];
                 }
+				//cout<<can[i]<<"\t";
             }
-            //}
-            //else{cout<<"The combination rule does not fit the number of family members."<<endl;}
+			//cout<<endl;
 
             //send the new candidate back
             MPI_Send(&can,this->num,MPI_TYPE,p%nb_proc,tag,MPI_COMM_WORLD);

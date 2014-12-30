@@ -33,12 +33,12 @@ int main(int argc, char **argv) {
     double *y;
 
     /*parameter settings*/
-    int pop_size=48;
+    int pop_size=12;
     int N_begin=4;
-    int N_cut=5;
-    int N_end=100;
-    int iter=300;
-    int iter_begin=500;
+    int N_cut=7;
+    int N_end=15;
+    int iter=100;
+    int iter_begin=300;
     int T_cut_off=N_cut;
     double prev_dev=0.01*M_PI;
     double new_dev=0.25*M_PI;
@@ -81,6 +81,8 @@ int main(int argc, char **argv) {
         output_header();   //write header of result files
     }
     else {}
+	
+	//solution=new double[N_end];
 
     for(numvar=N_begin; numvar<=N_end; ++numvar) {
         //cout<<numvar<<":";
@@ -120,7 +122,7 @@ int main(int argc, char **argv) {
 
         opt->put_to_best(my_rank,pop_size,nb_proc);
 
-        delete solution;
+        delete [] solution;
         solution=new double[numvar+1];//This initialization must happen after the initialization of candidates.
 
         //setting the success criterion
@@ -174,11 +176,11 @@ int main(int argc, char **argv) {
         prob_ptr->~Problem();
     }
 
-    delete solution;
-    delete soln_fit;
-    delete x;
-    delete y;
-    delete can_per_proc;
+    delete [] solution;
+    delete [] soln_fit;
+    delete [] x;
+    delete [] y;
+    delete [] can_per_proc;
 
     MPI_Finalize();
     cout<<"done"<<endl;
