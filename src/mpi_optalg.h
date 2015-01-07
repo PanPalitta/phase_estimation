@@ -14,7 +14,7 @@ public:
         prob=problem_ptr;
         num=prob->num;
     }
-    ~OptAlg() {};
+    virtual ~OptAlg() {};
 
     virtual void put_to_best(int my_rank, int total_pop, int nb_proc) {};
     virtual void combination(int my_rank, int total_pop, int nb_proc) {};

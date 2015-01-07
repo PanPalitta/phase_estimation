@@ -11,7 +11,7 @@ class Problem
 {
 public:
     Problem() {};
-    ~Problem() {
+    virtual ~Problem() {
         delete[] upper_bound;
         delete[] lower_bound;
     }
