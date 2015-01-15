@@ -249,25 +249,28 @@ inline bool Phase::outcome(const double phi, const double PHI, const int N) {
         prob0 += abs(update0[n]*conj(update0[n]));
         //if C_1 is measured
         //This is cache-optimized: we update state[n] in-place        
-        state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
-        prob1 += abs(state[n]*conj(state[n]));        
+        //state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
+        //prob1 += abs(state[n]*conj(state[n]));        
     }
-    state[N] = 0;
     //FIXME: Why don't prob0+prob1 always sum to 1?
 	//The condition is set this way so that when the rounding error starts to kick in at num=82 
-	//it does not effect the random selection of output path.
-	//(The shape of the input state remains the same after num=82 but the numerical value 
-	//is slightly off to at most 3rd decimal of the norm at num=100). 
-	//Renormalization correct this.	
-    if ((double(rand())/RAND_MAX) <= prob0/(prob0+prob1)) {
+	//(the state is valid but the numerical value started to go off slightly)
+	//it does not effect the random selection of output path. 
+    if ((double(rand())/RAND_MAX) <= prob0) {
         //measurement outcome is 0
+		state[N] = 0;
         prob0 = 1.0/sqrt(prob0);
         for(n=0; n<N; ++n) {
             state[n] = update0[n] * prob0;
         }
         return 0;
     } else { 
-        //measurement outcome is 1
+		//measurement outcome is 1
+        for(n=0; n<N; ++n) {
+            state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
+			prob1 += abs(state[n]*conj(state[n]));
+        }
+		state[N] = 0;
         prob1 = 1.0/sqrt(prob1);
         for(n=0; n<N; ++n) {
             state[n] *= prob1;
@@ -297,25 +300,25 @@ inline bool Phase::noise_outcome(const double phi, const double PHI, const int N
         prob0 += abs(update0[n]*conj(update0[n]));
         //if C_1 is measured
         //This is cache-optimized: we update state[n] in-place
-        state[n] = state[n+1]*U10*sqrt_cache[n+1]-state[n]*U11*sqrt_cache[N-n];
-        prob1 += abs(state[n]*conj(state[n]));
+        //state[n] = state[n+1]*U10*sqrt_cache[n+1]-state[n]*U11*sqrt_cache[N-n];
+        //prob1 += abs(state[n]*conj(state[n]));
     }
-    state[N] = 0;
-    //FIXME: Why don't prob0+prob1 always sum to 1?	
-	//The condition is set this way so that when the rounding error starts to kick in at num=82 
-	//it does not effect the random selection of output path.
-	//(The shape of the input state remains the same after num=82 but the numerical value 
-	//is slightly off to at most 3rd decimal of the norm at num=100). 
-	//Renormalization correct this.	
-    if (next_urand() <= prob0/(prob0+prob1)) {
+    
+    if (next_urand() <= prob0) {
         //measurement outcome is 0
-        prob0 = 1.0/sqrt(prob0);
+        state[N] = 0;
+		prob0 = 1.0/sqrt(prob0);
         for(n=0; n<N; ++n) {
             state[n] = update0[n] * prob0;
         }
         return 0;
     } else { 
         //measurement outcome is 1
+        for(n=0; n<N; ++n) {
+            state[n] = state[n+1]*U10*sqrt_cache[n+1]-state[n]*U11*sqrt_cache[N-n];
+			prob1 += abs(state[n]*conj(state[n]));
+        }
+		state[N] = 0;
         prob1 = 1.0/sqrt(prob1);
         for(n=0; n<N; ++n) {
             state[n] *= prob1;
