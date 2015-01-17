@@ -30,6 +30,9 @@ Phase::Phase(const int numvar) {
     for(i=0; i<num+1; ++i) {
       sqrt_cache[i] = sqrt(i);
     }
+    input_state = new dcmplx[num+1];
+    sqrtfac_mat = new double[num+1];
+    overfac_mat = new double[num+1];
     state = new dcmplx[num+1];
     update0 = new dcmplx[num+1];
     update1 = new dcmplx[num+1];
@@ -47,12 +50,14 @@ Phase::Phase(const int numvar) {
 }
 
 Phase::~Phase() {
-    delete state;
-    delete update0;
-    delete update1;
-    delete input_state;
-    delete grandom_numbers; 
-    delete urandom_numbers;
+    delete[] state;
+    delete[] update0;
+    delete[] update1;
+    delete[] input_state;
+    delete[] sqrtfac_mat;
+    delete[] overfac_mat;
+    delete[] grandom_numbers; 
+    delete[] urandom_numbers; 
 #ifdef CUDA
     gpu_cache_free();
 #endif
@@ -93,8 +98,8 @@ double Phase::fitness(double *soln) {
                 PHI = mod_2PI(PHI);
             }
         }
-        sharp.real(sharp.real()+cos(phi-PHI));
-        sharp.imag(sharp.imag()+sin(phi-PHI));
+        sharp.real()=sharp.real()+cos(phi-PHI);
+        sharp.imag()=sharp.imag()+sin(phi-PHI);
     }
     return abs(sharp)/double(K);
 }
@@ -145,8 +150,8 @@ double Phase::avg_fitness(double *soln, const int K) {
                 PHI = mod_2PI(PHI);
             }
         }
-        sharp.real(sharp.real()+cos(phi-PHI));
-        sharp.imag(sharp.imag()+sin(phi-PHI));
+        sharp.real()=sharp.real()+cos(phi-PHI);
+        sharp.imag()=sharp.imag()+sin(phi-PHI);
     }
     return abs(sharp)/double(K);
 }
@@ -215,10 +220,6 @@ void Phase::WK_state() {
     double temp;
     //double total=0;
 
-    input_state = new dcmplx[num+1];
-    sqrtfac_mat = new double[num+1];
-    overfac_mat = new double[num+1];
-
     sqrtfac(sqrtfac_mat); //initializing
     one_over_fac(overfac_mat); //initializing
 
@@ -233,22 +234,20 @@ void Phase::WK_state() {
 
     for (n=0; n<=num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
         temp=0;
-        input_state[n].real(0);
-        input_state[n].imag(0);
+        input_state[n].real()=0;
+        input_state[n].imag()=0;
         for (k=0; k<=num; ++k) {
             s_part = cal_spart(n,k,num);
             temp = s_part*k_part[k]*sin((k+1)*M_PI/(num+2));
-            input_state[n].real(input_state[n].real()+temp*cos(M_PI/2*(k-n)));
-            input_state[n].imag(input_state[n].imag()+temp*sin(M_PI/2*(k-n)));
+            input_state[n].real()=input_state[n].real()+temp*cos(M_PI/2.0*(k-n));
+            input_state[n].imag()=input_state[n].imag()+temp*sin(M_PI/2.0*(k-n));
         }//end k
-        // FIXME: This is most likely incorrect!!! Should be sqrt(num/2.0+1)?
-        input_state[n].real(input_state[n].real()*n_part[n]/sqrt(num/2+1));
-        input_state[n].imag(input_state[n].imag()*n_part[n]/sqrt(num/2+1));
+        // FIXED:This correction corrects the probability overshoot.
+        input_state[n].real()=input_state[n].real()*n_part[n]/sqrt(num/2.0+1);
+        input_state[n].imag()=input_state[n].imag()*n_part[n]/sqrt(num/2.0+1);
     }//end n
-    //releasing memories
-    delete sqrtfac_mat;
-    delete overfac_mat;
 }
+
 /*########### Measurement Functions ###########*///Measurement function
 inline bool Phase::outcome(const double phi, const double PHI, const int N) {
     //N is the number of photons currently available, not equal to 'num'
@@ -263,20 +262,28 @@ inline bool Phase::outcome(const double phi, const double PHI, const int N) {
         prob0 += abs(update0[n]*conj(update0[n]));
         //if C_1 is measured
         //This is cache-optimized: we update state[n] in-place        
-        state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
-        prob1 += abs(state[n]*conj(state[n]));        
+        //state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
+        //prob1 += abs(state[n]*conj(state[n]));        
     }
-    state[N] = 0;
     //FIXME: Why don't prob0+prob1 always sum to 1?
-    if ((double(rand())/RAND_MAX) <= prob0/(prob0+prob1)) {
+	//The condition is set this way so that when the rounding error starts to kick in at num=82 
+	//(the state is valid but the numerical value started to go off slightly)
+	//it does not effect the random selection of output path. 
+    if ((double(rand())/RAND_MAX) <= prob0) {
         //measurement outcome is 0
+		state[N] = 0;
         prob0 = 1.0/sqrt(prob0);
         for(n=0; n<N; ++n) {
             state[n] = update0[n] * prob0;
         }
         return 0;
     } else { 
-        //measurement outcome is 1
+		//measurement outcome is 1
+        for(n=0; n<N; ++n) {
+            state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
+			prob1 += abs(state[n]*conj(state[n]));
+        }
+		state[N] = 0;
         prob1 = 1.0/sqrt(prob1);
         for(n=0; n<N; ++n) {
             state[n] *= prob1;
@@ -306,20 +313,25 @@ inline bool Phase::noise_outcome(const double phi, const double PHI, const int N
         prob0 += abs(update0[n]*conj(update0[n]));
         //if C_1 is measured
         //This is cache-optimized: we update state[n] in-place
-        state[n] = state[n+1]*U10*sqrt_cache[n+1]-state[n]*U11*sqrt_cache[N-n];
-        prob1 += abs(state[n]*conj(state[n]));
+        //state[n] = state[n+1]*U10*sqrt_cache[n+1]-state[n]*U11*sqrt_cache[N-n];
+        //prob1 += abs(state[n]*conj(state[n]));
     }
-    state[N] = 0;
-    //FIXME: Why don't prob0+prob1 always sum to 1?
-    if (next_urand() <= prob0/(prob0+prob1)) {
+    
+    if (next_urand() <= prob0) {
         //measurement outcome is 0
-        prob0 = 1.0/sqrt(prob0);
+        state[N] = 0;
+		prob0 = 1.0/sqrt(prob0);
         for(n=0; n<N; ++n) {
             state[n] = update0[n] * prob0;
         }
         return 0;
     } else { 
         //measurement outcome is 1
+        for(n=0; n<N; ++n) {
+            state[n] = state[n+1]*U10*sqrt_cache[n+1]-state[n]*U11*sqrt_cache[N-n];
+			prob1 += abs(state[n]*conj(state[n]));
+        }
+		state[N] = 0;
         prob1 = 1.0/sqrt(prob1);
         for(n=0; n<N; ++n) {
             state[n] *= prob1;
