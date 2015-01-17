@@ -45,7 +45,7 @@ Phase::Phase(const int numvar) {
     grandom_numbers = new double[n_grandom_numbers];
     index_grandom_numbers = 0;
 #ifdef CUDA
-    gpu_alloc_cache(n_urandom_numbers, n_grandom_numbers);
+    gpu_cache_alloc(n_urandom_numbers, n_grandom_numbers);
 #endif
 }
 

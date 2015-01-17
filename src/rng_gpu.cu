@@ -1,9 +1,14 @@
 #include <iostream>
 #include <cuda.h>
+#include <curand.h>
 
 #include "rng_gpu.h"
 
 using namespace std;
+
+double *dev_urandom_numbers;
+double *dev_grandom_numbers;
+curandGenerator_t gen;
 
 #define CUDA_CALL(x) do { if((x)!=cudaSuccess) { \
      cout << "CUDA call error at" << __FILE__<< ":" << __LINE__ << endl;\
