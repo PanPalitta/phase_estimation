@@ -26,7 +26,14 @@ else
 SUFFIX=""
 fi
 
-AS_IF([test "x$GXX" = "xyes"],[CXXFLAGS="${CXXFLAGS} -Ofast -march=native"])
+string=`$CXX --version`
+if [[[ $string == *"ICC"* ]]]
+then  
+  CXXFLAGS="${CXXFLAGS} -fast"
+else
+  AS_IF([test "x$GXX" = "xyes"],[CXXFLAGS="${CXXFLAGS} -Ofast -march=native -Wall"])
+fi
+
 #Setup MPI Paths
 # ------------------------------------------------------------------------------
 AC_ARG_WITH([mpi],
