@@ -26,7 +26,14 @@ else
 SUFFIX=""
 fi
 
-AS_IF([test "x$GXX" = "xyes"],[CXXFLAGS="${CXXFLAGS} -Ofast -march=native"])
+string=`$CXX --version`
+if [[[ $string == *"ICC"* ]]]
+then  
+  CXXFLAGS="${CXXFLAGS} -fast"
+else
+  AS_IF([test "x$GXX" = "xyes"],[CXXFLAGS="${CXXFLAGS} -Ofast -march=native -Wall"])
+fi
+
 #Setup MPI Paths
 # ------------------------------------------------------------------------------
 AC_ARG_WITH([mpi],
@@ -44,6 +51,48 @@ fi
 else
 AC_MSG_ERROR(MPI is necessary to compile)
 fi
+
+
+# Setup CUDA paths
+# ------------------------------------------------------------------------------
+CUDA_PATH=/usr/local/cuda
+AC_ARG_WITH([cuda],
+   [  --with-cuda=PATH    prefix where cuda is installed [default=/usr/local/cuda]])
+
+if test x"$with_cuda" != x"no" ; then
+
+  if test -n "$with_cuda"
+  then
+     CUDA_PATH=$with_cuda
+  fi
+
+  AC_CHECK_PROG(NVCC_CHECK,nvcc,yes,no,$CUDA_PATH/bin)
+  if test x"$NVCC_CHECK" = x"yes" ; then
+     cuda_enabled=yes
+     CUDA_CFLAGS="-I$CUDA_PATH/include -use_fast_math -Xcompiler \"${CXXFLAGS}\""
+     CUDA_LIBS="-lcudart -lcurand"
+     CUDA_LDFLAGS="-L$CUDA_PATH/lib$SUFFIX"
+     NVCC="$CUDA_PATH/bin/nvcc"
+     AC_SUBST(CUDA_CFLAGS)
+     AC_SUBST(CUDA_LIBS)
+     AC_SUBST(CUDA_LDFLAGS)
+     AC_SUBST(NVCC)
+     AC_DEFINE([CUDA], 1, [cuda enabled])
+  elif test -n "$with_cuda" ; then
+     echo "---------------------------------------"
+     echo "Unable to find CUDA in $with_cuda."
+     echo "Building a version without CUDA.    "
+     echo "---------------------------------------"
+     cuda_enabled=no
+  else 
+     cuda_enabled=no
+  fi
+else
+  cuda_enabled=no  
+fi
+AM_CONDITIONAL([HAVE_CUDA], [test x"$cuda_enabled" = x"yes"])
+
+
 AC_CONFIG_FILES([Makefile src/Makefile test/Makefile])
 AC_OUTPUT
 echo \
@@ -54,6 +103,7 @@ Compiler: ${CXX} ${CXXFLAGS} ${MPI_INC} ${MPI_LIBDIR} ${MPI_LIBS}
 Package features:
 OpenMP enabled: ${enable_openmp}
 MPI enabled: ${mpi_enabled}
+CUDA enabled: ${cuda_enabled}
 Now type 'make @<:@<target>@:>@'
 where the optional <target> is:
 all - build all binaries

@@ -64,7 +64,7 @@ private:
 };
 
 template<typename typeT>
-Candidate<typeT>::~Candidate() {   
+Candidate<typeT>::~Candidate() {
     delete[] can_best;
     delete[] contender;
     delete[] velocity;

@@ -81,8 +81,8 @@ int main(int argc, char **argv) {
         output_header();   //write header of result files
     }
     else {}
-	
-	//solution=new double[N_end];
+
+    //solution=new double[N_end];
 
     for(numvar=N_begin; numvar<=N_end; ++numvar) {
         //cout<<numvar<<":";

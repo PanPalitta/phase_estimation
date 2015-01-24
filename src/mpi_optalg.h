@@ -263,11 +263,11 @@ double OptAlg<typeT>::Final_select(int my_rank, int total_pop,int nb_proc, doubl
     fit_to_global();//ensuring that global_best contains the solutions
 
     //roots needed all the global fitness
-	if(my_rank==0){
-		for(p=0;p<pop_size;p++){
-			fit[p*nb_proc]=global_fit=pop[p].read_globalfit();
-			}
-		}
+    if(my_rank==0) {
+        for(p=0; p<pop_size; p++) {
+            fit[p*nb_proc]=global_fit=pop[p].read_globalfit();
+        }
+    }
     for(p=1; p<total_pop; ++p) {
         if(my_rank==p%nb_proc) {
             global_fit=pop[int(p/nb_proc)].read_globalfit();
@@ -293,7 +293,7 @@ double OptAlg<typeT>::Final_select(int my_rank, int total_pop,int nb_proc, doubl
             }
             else {}
         }
-	
+
         for(p=1; p<nb_proc; ++p) {
             MPI_Send(&indx,1,MPI_INT,p%nb_proc,tag,MPI_COMM_WORLD);
         }
