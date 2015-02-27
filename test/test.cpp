@@ -7,6 +7,9 @@
 #include "mpi_de.h"
 #include "subfunc.h"
 #include "mpi_pso.h"
+#ifdef CUDA
+#include "rng_gpu.h"
+#endif
 
 using namespace std;
 
@@ -58,7 +61,9 @@ int main(int argc, char **argv) {
     MPI_Init(&argc,&argv);
     MPI_Comm_rank(MPI_COMM_WORLD,&my_rank);
     MPI_Comm_size(MPI_COMM_WORLD,&nb_proc);
-
+#ifdef CUDA
+    setDevice(my_rank, nb_proc);
+#endif
     srand(0+my_rank);
 
     soln_fit = new double[pop_size];//create an array to store global fitness from each candidate.
