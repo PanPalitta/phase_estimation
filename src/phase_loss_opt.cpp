@@ -112,6 +112,8 @@ double Phase::avg_fitness(double *soln, const int K) {
     int m, k, d;
     // Random numbers are generated in advance to take advantage of
     // vectorization
+    index_urandom_numbers = 0;
+    index_grandom_numbers = 0;
 #ifndef CUDA
     init_urandom_number_cache(K+2*K*num);
     init_grandom_number_cache(3*K*num);
@@ -119,7 +121,9 @@ double Phase::avg_fitness(double *soln, const int K) {
     gpu_cache_init(urandom_numbers, K+2*K*num, grandom_numbers, 3*K*num);
 #endif
     WK_state();
+    //cout << "HERE " << K << "\n";
     for(k=0; k<K; ++k) {
+        //cout << k << " ";
         phi = next_urand()*(upper-lower)+lower;
         PHI = 0;
         //copy input state: the optimal solution across all compilers is memcpy:
@@ -152,7 +156,7 @@ double Phase::avg_fitness(double *soln, const int K) {
         sharp.real()=sharp.real()+cos(phi-PHI);
         sharp.imag()=sharp.imag()+sin(phi-PHI);
     }
-    return abs(sharp)/double(K);
+  return abs(sharp)/double(K);
 }
 
 /*private functions*/

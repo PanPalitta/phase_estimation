@@ -17,6 +17,7 @@ curandGenerator_t gen;
      }} while(0)
 #define CURAND_CALL(x) do { if((x)!=CURAND_STATUS_SUCCESS) { \
      cout << "CURAND call error at" << __FILE__<< ":" << __LINE__ << endl;\
+     exit(-1);\
      }} while(0)
 
 /// Note that this function was lifted from http://code.google.com/p/gpmr/
@@ -92,6 +93,11 @@ void setDevice(int commRank, int commSize)
     }
     MPI_Barrier(MPI_COMM_WORLD);
     CUDA_CALL(cudaSetDevice(deviceNum));
+    int device;
+    cudaGetDevice(&device);
+    cudaDeviceProp devProp;
+    cudaGetDeviceProperties(&devProp, device);
+    cout <<  device << " " << devProp.name << " Compute Capability: " << devProp.major << "." << devProp.minor << "\n";
 }
 
 void gpu_cache_alloc(int n_urandom_numbers, int n_grandom_numbers) {
