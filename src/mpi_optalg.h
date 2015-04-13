@@ -451,20 +451,21 @@ double OptAlg<typeT>::rand_Gaussian(double mean, /*the average theta*/
                                     double dev /*deviation for distribution*/
                                    ) {
     /*creating random number using Box-Muller Method/Transformation*/
-    double Z0;//,Z1;
-    double U1,U2; /*uniformly distributed random number input*/
-    double r;
-
+    //double Z0;//,Z1;
+    //double U1,U2; /*uniformly distributed random number input*/
+    //double r;
     /*create input between [-1,1]*/
-    do {
+    /*do {
         U1=2.0*double(rand())/RAND_MAX-1.0;
         U2=2.0*double(rand())/RAND_MAX-1.0;
         r=U1*U1+U2*U2;
-    } while(r==0.0||r>=1.0);
+    } while(r==0.0||r>=1.0);*/
     /*using Box-Muller Transformation*/
-    Z0=U1*sqrt(-2*log(r)/r);
-
-    return Z0*dev+mean;
+    //Z0=U1*sqrt(-2*log(r)/r);
+    //return Z0*dev+mean;
+	
+	//Approximating the Gaussian distribution with uniform distribution
+	return (double(rand())/RAND_MAX-0.5)*2*dev+mean;
 }/*end of rand_Gaussian*/
 
 template<typename typeT>

@@ -370,19 +370,21 @@ inline double Phase::mod_2PI(double PHI) {
 inline double Phase::rand_Gaussian(const double mean, /*the average theta*/
                                    const double dev /*deviation for distribution*/
                                   ) {
-    /*creating random number using Box-Muller Method/Transformation*/
-    double U1,U2; /*uniformly distributed random number input*/
-    double r;
-
+    
+	/*creating random number using Box-Muller Method/Transformation*/
+    //double U1,U2; /*uniformly distributed random number input*/
+    //double r;
     /*create input between [-1,1]*/
-    do {
+    /*do {
         U1=2.0*double(rand())/RAND_MAX-1.0;
         U2=2.0*double(rand())/RAND_MAX-1.0;
         r=U1*U1+U2*U2;
-    } while(r==0.0||r>=1.0);
+    } while(r==0.0||r>=1.0);*/
     /*using Box-Muller Transformation*/
-
-    return U1*sqrt(-2*log(r)/r)*dev+mean;
+    //return U1*sqrt(-2*log(r)/r)*dev+mean;
+	
+	//Approximating the Gaussian distribution with a uniform distribution
+	return (double(rand())/RAND_MAX-0.5)*2*dev+mean;
 }/*end of rand_Gaussian*/
 
 void Phase::init_urandom_number_cache(const int n) {
