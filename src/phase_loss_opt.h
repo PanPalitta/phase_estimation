@@ -8,6 +8,9 @@
  * interferometer (loss in fitness() set to other than zero) which is called
  * through avg_Final_select() in OptAlg class.
  * */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #define DEV_N 0.0 //level of noise in operator
 #define THETA_DEV 0.0 //M_PI;//phase noise level

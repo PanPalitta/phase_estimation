@@ -10,6 +10,9 @@
 #include <cstring>
 
 #include "phase_loss_opt.h"
+#ifdef CUDA
+#include "rng_gpu.h"
+#endif
 
 Phase::Phase(const int numvar) {
     int i;
@@ -25,7 +28,7 @@ Phase::Phase(const int numvar) {
     }
     sqrt_cache = new double[num+1];
     for(i=0; i<num+1; ++i) {
-      sqrt_cache[i] = sqrt(i);
+        sqrt_cache[i] = sqrt(i);
     }
     input_state = new dcmplx[num+1];
     sqrtfac_mat = new double[num+1];
@@ -40,7 +43,10 @@ Phase::Phase(const int numvar) {
     //Maximum number of Gaussian random numbers we will use in one go
     n_grandom_numbers = 3*num_repeat*num;
     grandom_numbers = new double[n_grandom_numbers];
-    index_grandom_numbers = 0;    
+    index_grandom_numbers = 0;
+#ifdef CUDA
+    gpu_cache_alloc(n_urandom_numbers, n_grandom_numbers);
+#endif
 }
 
 Phase::~Phase() {
@@ -50,8 +56,11 @@ Phase::~Phase() {
     delete[] input_state;
     delete[] sqrtfac_mat;
     delete[] overfac_mat;
-    delete[] grandom_numbers; 
-    delete[] urandom_numbers; 
+    delete[] grandom_numbers;
+    delete[] urandom_numbers;
+#ifdef CUDA
+    gpu_cache_free();
+#endif
 }
 
 double Phase::fitness(double *soln) {
@@ -96,18 +105,25 @@ double Phase::fitness(double *soln) {
 }
 
 double Phase::avg_fitness(double *soln, const int K) {
-    //TODO: This loss value differs from that of in fitness. Is this correct?
     const double loss = 0.0;//loss level
     dcmplx sharp(0.0, 0.0);
     bool dect_result;
     double PHI, phi, coin, PHI_in;
     int m, k, d;
-    // Random numbers are generated in advance to take advantage of 
+    // Random numbers are generated in advance to take advantage of
     // vectorization
+    index_urandom_numbers = 0;
+    index_grandom_numbers = 0;
+#ifndef CUDA
     init_urandom_number_cache(K+2*K*num);
     init_grandom_number_cache(3*K*num);
+#else
+    gpu_cache_init(urandom_numbers, K+2*K*num, grandom_numbers, 3*K*num);
+#endif
     WK_state();
+    //cout << "HERE " << K << "\n";
     for(k=0; k<K; ++k) {
+        //cout << k << " ";
         phi = next_urand()*(upper-lower)+lower;
         PHI = 0;
         //copy input state: the optimal solution across all compilers is memcpy:
@@ -140,7 +156,7 @@ double Phase::avg_fitness(double *soln, const int K) {
         sharp.real()=sharp.real()+cos(phi-PHI);
         sharp.imag()=sharp.imag()+sin(phi-PHI);
     }
-    return abs(sharp)/double(K);
+  return abs(sharp)/double(K);
 }
 
 /*private functions*/
@@ -162,7 +178,7 @@ inline void Phase::sqrtfac(double *fac_mat) { //calculate sqrt of factorial matr
     }//end i
 }
 
-inline double Phase::cal_spart(const int n, const int k, const int N) { 
+inline double Phase::cal_spart(const int n, const int k, const int N) {
     //calculating the Wigner d-matrix element
     int s;
     int s_min;
@@ -248,29 +264,33 @@ inline bool Phase::outcome(const double phi, const double PHI, const int N) {
         update0[n] = state[n+1]*sin_theta*sqrt_cache[n+1]+state[n]*cos_theta*sqrt_cache[N-n];
         prob0 += abs(update0[n]*conj(update0[n]));
         //if C_1 is measured
-        //This is cache-optimized: we update state[n] in-place        
+        //This is cache-optimized: we update state[n] in-place
         //state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
-        //prob1 += abs(state[n]*conj(state[n]));        
+        //prob1 += abs(state[n]*conj(state[n]));
     }
     //FIXME: Why don't prob0+prob1 always sum to 1?
-	//The condition is set this way so that when the rounding error starts to kick in at num=82 
-	//(the state is valid but the numerical value started to go off slightly)
-	//it does not effect the random selection of output path. 
+    //The condition is set this way so that when the rounding error starts to kick in at num=82
+    //(the state is valid but the numerical value started to go off slightly)
+    //it does not effect the random selection of output path.
     if ((double(rand())/RAND_MAX) <= prob0) {
         //measurement outcome is 0
-		state[N] = 0;
+        state[N] = 0;
         prob0 = 1.0/sqrt(prob0);
         for(n=0; n<N; ++n) {
             state[n] = update0[n] * prob0;
         }
         return 0;
-    } else { 
-		//measurement outcome is 1
+    } else {
+        //measurement outcome is 1
         for(n=0; n<N; ++n) {
+            //FIXME: Why don't we multiply the RHS with (1.0-prob0) and save the
+            //second for loop here? Can't we get rid of prob1 completely?
+            //If not, rename prob0 to prob, and reuse it here. It saves a double
+            //in a critical region of the code.
             state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
-			prob1 += abs(state[n]*conj(state[n]));
+            prob1 += abs(state[n]*conj(state[n]));
         }
-		state[N] = 0;
+        state[N] = 0;
         prob1 = 1.0/sqrt(prob1);
         for(n=0; n<N; ++n) {
             state[n] *= prob1;
@@ -303,22 +323,22 @@ inline bool Phase::noise_outcome(const double phi, const double PHI, const int N
         //state[n] = state[n+1]*U10*sqrt_cache[n+1]-state[n]*U11*sqrt_cache[N-n];
         //prob1 += abs(state[n]*conj(state[n]));
     }
-    
+
     if (next_urand() <= prob0) {
         //measurement outcome is 0
         state[N] = 0;
-		prob0 = 1.0/sqrt(prob0);
+        prob0 = 1.0/sqrt(prob0);
         for(n=0; n<N; ++n) {
             state[n] = update0[n] * prob0;
         }
         return 0;
-    } else { 
+    } else {
         //measurement outcome is 1
         for(n=0; n<N; ++n) {
             state[n] = state[n+1]*U10*sqrt_cache[n+1]-state[n]*U11*sqrt_cache[N-n];
-			prob1 += abs(state[n]*conj(state[n]));
+            prob1 += abs(state[n]*conj(state[n]));
         }
-		state[N] = 0;
+        state[N] = 0;
         prob1 = 1.0/sqrt(prob1);
         for(n=0; n<N; ++n) {
             state[n] *= prob1;
@@ -348,8 +368,8 @@ inline double Phase::mod_2PI(double PHI) {
 
 /*########### RNG Functions ###########*/
 inline double Phase::rand_Gaussian(const double mean, /*the average theta*/
-                            const double dev /*deviation for distribution*/
-                           ) {
+                                   const double dev /*deviation for distribution*/
+                                  ) {
     /*creating random number using Box-Muller Method/Transformation*/
     double U1,U2; /*uniformly distributed random number input*/
     double r;
@@ -366,10 +386,12 @@ inline double Phase::rand_Gaussian(const double mean, /*the average theta*/
 }/*end of rand_Gaussian*/
 
 void Phase::init_urandom_number_cache(const int n) {
+#ifndef CUDA
     for (int i=0; i<n; ++i) {
         // Comment out this line if not using vectorized version
         // urandom_numbers[i] = double(rand())/RAND_MAX;
     }
+#endif
     index_urandom_numbers = 0;
 }
 
@@ -378,9 +400,13 @@ inline double Phase::next_urand() {
     // nadeausoftware.com/articles/2013/12/
     // c_tip_considering_use_exceptions_asserts_and_bounds_checking
 
+#ifndef CUDA
     // Flip these lines to change between vectorized and non-vectorized variants
     return double(rand())/RAND_MAX;
     //return urandom_numbers[index_urandom_numbers++];
+#else
+    return urandom_numbers[index_urandom_numbers++];
+#endif
 }
 
 void Phase::init_grandom_number_cache(const int n) {
@@ -396,10 +422,15 @@ inline double Phase::next_grand(const double mean, const double dev) {
     // nadeausoftware.com/articles/2013/12/
     // c_tip_considering_use_exceptions_asserts_and_bounds_checking
 
+#ifndef CUDA
     // Flip these lines to change between vectorized and non-vectorized variants
     return rand_Gaussian(mean, dev);
     //return grandom_numbers[index_grandom_numbers++]*dev+mean;
+#else
+    return grandom_numbers[index_grandom_numbers++]*dev+mean;
+#endif
 }
+
 void Phase::status_rand() {
     cout << index_grandom_numbers << "/" << n_grandom_numbers << endl;
 }
