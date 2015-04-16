@@ -37,6 +37,11 @@ public:
     void set_success(int iter,bool goal);
     bool check_success(int t, int D, double fit,double slope, double intercept);
     void linear_fit(int data_size,double *x, double *y, double *slope, double *intercept);
+	double error_interval(double *x, double *y, double mean_x, int data_size, double *SSres, double slope, double intercept);
+	double error_update(int data_size, double *SSres, double *mean_x, double slope, double intercept, double *y, double *x);
+	inline int sgn(double x);
+	inline double inv_erf(double x);
+	inline double quantile(double p);
 
     double rand_Gaussian(double mean, double dev);
     void dev_gen(double *dev_array,double prev_dev, double new_dev, int cut_off);
@@ -239,6 +244,63 @@ void OptAlg<typeT>::linear_fit(int data_size,double *x, double *y, double *slope
 
 }
 
+template<typename typeT>
+double OptAlg<typeT>::error_interval(double *x, double *y, double mean_x, int data_size, double *SSres, double slope, double intercept){
+	int i;
+	double SSx=0;
+	
+	for(i=0;i<data_size;++i){
+		*SSres=*SSres+pow(y[i]-slope*x[i]-intercept,2);
+		SSx=SSx+(x[i]-mean_x)*(x[i]-mean_x);
+	}
+		
+	return sqrt(*SSres/double(data_size-2)*(1/data_size+(pow(x[data_size-1]-mean_x,2)/SSx)));
+}
+
+template<typename typeT>
+double OptAlg<typeT>::error_update(int data_size, double *SSres, double *mean_x, double slope, double intercept, double *y, double *x){
+	int i;
+	double SSx=0;
+
+	*mean_x=(*mean_x*data_size+x[data_size])/double(data_size+1);
+	*SSres=*SSres+pow(y[data_size]-slope*x[data_size]-intercept,2);
+	
+	for(i=0;i<data_size+1;++i){
+		SSx=SSx+(x[i]-*mean_x)*(x[i]-*mean_x);
+	}
+	
+	return sqrt(*SSres/double(data_size-1)*(1/data_size+(pow(x[data_size]-*mean_x,2)/SSx)));
+}
+
+
+/*quantile calculation*/
+
+template<typename typeT>
+inline int OptAlg<typeT>::sgn(double x){
+	if(x<0){
+		return -1;
+	}
+	else if(x==0){
+		return 0;
+	}
+	else{
+		return 1;
+	}
+}
+
+template<typename typeT>
+inline double OptAlg<typeT>::inv_erf(double x){
+	double a=0.140012;
+	double lnx=log(1-x*x);
+	double temp=sqrt(pow(2.0/(M_PI*a)+lnx/2.0,2)-lnx/a);
+
+	return sgn(x)*sqrt(temp-2.0/(M_PI*a)-lnx/2.0);
+}
+
+template<typename typeT>
+inline double OptAlg<typeT>::quantile(double p){//p is percentile
+	return sqrt(2)*inv_erf(2*p-1);
+	}
 
 
 /*##############################Final Selections#################################*/
