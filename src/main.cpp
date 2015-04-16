@@ -46,11 +46,15 @@ int main(int argc, char **argv) {
     double prev_dev=0.01*M_PI;
     double new_dev=0.25*M_PI;
     int repeat=10;
-
-    int data_start=N_begin;
-    int data_end=155;
+	
+	int data_start=N_begin;
+    int data_end=94;
+    double t_goal=0.98; //probability for calculating quantile
     int data_size=data_end-data_start;
     double slope=0.0, intercept=0.0;
+	double mean_x=0.0, SSres=0.0;
+	double TSSres,Tmean_x;
+	double fit_goal,error;
 
     if(N_cut<N_begin) {
         cout<<"please select new N_cut>"<<N_begin<<":";
@@ -70,8 +74,8 @@ int main(int argc, char **argv) {
     soln_fit=new double[pop_size];//create an array to store global fitness from each candidate.
     solution=new double[N_begin];
 
-    x=new double[data_size];
-    y=new double[data_size];
+    x=new double[N_end-data_start];
+    y=new double[N_end-data_start];
     //calculating number of candidate per processor and stores the number in an array.
     can_per_proc=new int[nb_proc];
     for(p=0; p<nb_proc; ++p) {
@@ -92,6 +96,8 @@ int main(int argc, char **argv) {
     for(numvar=N_begin; numvar<=N_end; ++numvar) {
         //cout<<numvar<<":";
         t=0;
+		x[numvar-data_start]=log10(numvar);//collect x data
+		
         Problem<double>* prob_ptr=new Phase(numvar);
         OptAlg<double>* opt= new DE<double>(prob_ptr);
 
@@ -150,6 +156,16 @@ int main(int argc, char **argv) {
             //root check for success
             final_fit=opt->Final_select(my_rank,pop_size,nb_proc,soln_fit,solution);//again, communicate to find the best solution that exist so far
 
+			if(numvar>=data_end){
+			    y[numvar-data_start]=log10(pow(final_fit,-2)-1);
+				TSSres=SSres;
+				Tmean_x=mean_x;
+				//error=opt->error_update(data_size,&TSSres,&Tmean_x,slope,intercept,y,x);
+				//cout<<numvar<<":error="<<error<<","<<abs(y[numvar-data_start]-slope*x[numvar-data_start]-intercept)<<endl;
+				fit_goal=1/sqrt(pow(10.0,intercept)*pow(double(numvar),slope)+1);				
+			}	
+
+
             opt->success = opt->check_success(t, numvar, final_fit, slope,
                                               intercept);
 
@@ -164,18 +180,36 @@ int main(int argc, char **argv) {
         }
         else {}
         //if(my_rank==0){cout<<t<<":"<<final_fit<<endl;}else{}
-
-        //collect data for linear fit
+		
+		//collect data for linear fit
         if(numvar>=data_start&&numvar<data_end) {
-            x[numvar-data_start]=log10(numvar);
             y[numvar-data_start]=log10(pow(final_fit,-2)-1);
         }
         else {}
 
         if(numvar==data_end-1) {
-            opt->linear_fit(data_size,x,y,&slope,&intercept);
+            opt->linear_fit(data_size,x,y,&slope,&intercept,&mean_x);
+			t_goal=(t_goal+1)/2;
+			t_goal=opt->quantile(t_goal);
+			error=opt->error_interval(x,y,mean_x,data_size,&SSres,slope,intercept);
+			error=error*t_goal;
+			cout<<slope<<","<<intercept<<endl;
+			//cout<<numvar<<":error="<<error<<endl;
         }
-        else {}
+        else if (numvar>=data_end){
+			SSres=TSSres;
+			mean_x=Tmean_x;
+			++data_size;
+		}
+		else {}
+
+	//testing loss
+	
+
+	if(my_rank==0){
+		final_fit=prob_ptr->fitness(solution);
+		cout<<numvar<<"\t"<<final_fit<<endl;
+	}
 
         opt->~OptAlg();
         prob_ptr->~Problem();
