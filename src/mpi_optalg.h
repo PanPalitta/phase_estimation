@@ -36,7 +36,7 @@ public:
 
     void set_success(int iter,bool goal);
     bool check_success(int t, int D, double fit,double slope, double intercept);
-    void linear_fit(int data_size,double *x, double *y, double *slope, double *intercept);
+	void linear_fit(int data_size,double *x, double *y, double *slope, double *intercept, double *mean_x);
 	double error_interval(double *x, double *y, double mean_x, int data_size, double *SSres, double slope, double intercept);
 	double error_update(int data_size, double *SSres, double *mean_x, double slope, double intercept, double *y, double *x);
 	inline int sgn(double x);
@@ -203,23 +203,22 @@ bool OptAlg<typeT>::check_success(int t, int D, double fit,double slope, double 
 }
 
 template<typename typeT>
-void OptAlg<typeT>::linear_fit(int data_size,double *x, double *y, double *slope, double *intercept) {
+void OptAlg<typeT>::linear_fit(int data_size,double *x, double *y, double *slope, double *intercept, double *mean_x) {
     int v;
     double sum_x=0;
     double sum_xx=0;
     double sum_y=0;
     double sum_xy=0;
-    double mean_x=0;
 
     for(v=0; v<data_size; ++v) {
         sum_x=sum_x+x[v];
         sum_xx=sum_xx+x[v]*x[v];
         sum_y=sum_y+y[v];
         sum_xy=sum_xy+x[v]*y[v];
-        mean_x=mean_x+x[v];
+        *mean_x=*mean_x+x[v];
     }
 
-    mean_x=mean_x/double(data_size);
+    *mean_x=*mean_x/double(data_size);
 
     *slope=(sum_xy-sum_y*sum_x/double(data_size))/(sum_xx-sum_x*sum_x/double(data_size));
     *intercept=sum_y/double(data_size)-*slope*sum_x/double(data_size);
