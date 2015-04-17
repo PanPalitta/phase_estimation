@@ -41,20 +41,20 @@ void Problem<typeT>::modulo(typeT *can1) {
 
     for(i=0; i<num; ++i) {
         if(dcmplx(can1[i]).real()<dcmplx(lower_bound[i]).real()) {
-            dcmplx(can1[i]).real(dcmplx(lower_bound[i]).real());
+            dcmplx(can1[i]).real()=dcmplx(lower_bound[i]).real();
         }
         else if (dcmplx(can1[i]).real()>dcmplx(upper_bound[i]).real()) {
-            dcmplx(can1[i]).real(dcmplx(upper_bound[i]).real());
+            dcmplx(can1[i]).real()=dcmplx(upper_bound[i]).real();
         }
         else {
             /*doesn't change anything*/
         }
         if(dcmplx(can1[i]).imag()!=0) {
             if (dcmplx(can1[i]).imag()<dcmplx(lower_bound[i]).imag()) {
-                dcmplx(can1[i]).imag(dcmplx(lower_bound[i]).imag());
+                dcmplx(can1[i]).imag()=dcmplx(lower_bound[i]).imag();
             }
             else if (dcmplx(can1[i]).imag()>dcmplx(upper_bound[i]).imag()) {
-                dcmplx(can1[i]).imag(dcmplx(upper_bound[i]).imag());
+                dcmplx(can1[i]).imag()=dcmplx(upper_bound[i]).imag();
             }
             else {
                 /*doesn't change anything*/
