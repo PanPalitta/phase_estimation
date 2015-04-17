@@ -258,11 +258,12 @@ inline bool Phase::outcome(const double phi, const double PHI, const int N) {
     const double cos_theta=cos(theta)/sqrt_cache[N];
     const double sin_theta=sin(theta)/sqrt_cache[N];
     int n;
-    double prob0 = 0.0, prob1 = 0.0;
+	double prob=0.0;
+    //double prob0 = 0.0, prob1 = 0.0;
     for (n=0; n<N; ++n) {
         //if C_0 is measured
         update0[n] = state[n+1]*sin_theta*sqrt_cache[n+1]+state[n]*cos_theta*sqrt_cache[N-n];
-        prob0 += abs(update0[n]*conj(update0[n]));
+        prob += abs(update0[n]*conj(update0[n]));
         //if C_1 is measured
         //This is cache-optimized: we update state[n] in-place
         //state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
@@ -272,12 +273,12 @@ inline bool Phase::outcome(const double phi, const double PHI, const int N) {
     //The condition is set this way so that when the rounding error starts to kick in at num=82
     //(the state is valid but the numerical value started to go off slightly)
     //it does not effect the random selection of output path.
-    if ((double(rand())/RAND_MAX) <= prob0) {
+    if ((double(rand())/RAND_MAX) <= prob) {
         //measurement outcome is 0
         state[N] = 0;
-        prob0 = 1.0/sqrt(prob0);
+        prob = 1.0/sqrt(prob);
         for(n=0; n<N; ++n) {
-            state[n] = update0[n] * prob0;
+            state[n] = update0[n] * prob;
         }
         return 0;
     } else {
@@ -288,12 +289,12 @@ inline bool Phase::outcome(const double phi, const double PHI, const int N) {
             //If not, rename prob0 to prob, and reuse it here. It saves a double
             //in a critical region of the code.
             state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
-            prob1 += abs(state[n]*conj(state[n]));
+            prob += abs(state[n]*conj(state[n]));
         }
         state[N] = 0;
-        prob1 = 1.0/sqrt(prob1);
+        prob = 1.0/sqrt(prob);
         for(n=0; n<N; ++n) {
-            state[n] *= prob1;
+            state[n] *= prob;
         }
         return 1;
     }
