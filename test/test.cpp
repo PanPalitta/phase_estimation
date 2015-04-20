@@ -50,7 +50,8 @@ int main(int argc, char **argv) {
     int data_end=155;
     int data_size=data_end-data_start;
     double slope=0.0, intercept=0.0;
-
+    double mean_x=0.0;
+    
     if(N_cut<N_begin) {
         cout<<"please select new N_cut>"<<N_begin<<":";
         cin >> N_cut;
@@ -170,7 +171,8 @@ int main(int argc, char **argv) {
         else {}
 
         if(numvar==data_end-1) {
-            opt->linear_fit(data_size,x,y,&slope,&intercept);
+            //opt->linear_fit(data_size,x,y,&slope,&intercept);
+            opt->linear_fit(data_size,x,y,&slope,&intercept,&mean_x);
         }
         else {}
 

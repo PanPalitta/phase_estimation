@@ -92,6 +92,28 @@ else
 fi
 AM_CONDITIONAL([HAVE_CUDA], [test x"$cuda_enabled" = x"yes"])
 
+# Set up VSL
+# ------------------------------------------------------------------------------
+AC_ARG_WITH([vsl],
+   [  --with-vsl=PATH    prefix where Intel MKL/VSL is installed])
+if test x"$with_vsl" != x"no" ; then
+
+  if test -n "$with_vsl"
+  then
+    VSL_PATH=$with_vsl
+    vsl_enabled=yes
+    VSL_LIBDIR="-L$VSL_PATH/lib/intel$SUFFIX"
+    VSL_INC="-I$VSL_PATH/include"
+    VSL_LIBS="-lmkl_intel_ilp64 -lmkl_sequential -lmkl_core"
+    AC_SUBST(VSL_INC)
+    AC_SUBST(VSL_LIBS)
+    AC_SUBST(VSL_LIBDIR)
+    AC_DEFINE([VSL], 1, [vsl enabled])
+  else
+    vsl_enabled=no
+  fi
+fi
+AM_CONDITIONAL([HAVE_VSL], [test x"$vsl_enabled" = x"yes"])
 
 AC_CONFIG_FILES([Makefile src/Makefile test/Makefile])
 AC_OUTPUT
@@ -99,11 +121,12 @@ echo \
 "-------------------------------------------------
 ${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 Prefix: ${prefix}.
-Compiler: ${CXX} ${CXXFLAGS} ${MPI_INC} ${MPI_LIBDIR} ${MPI_LIBS}
+Compiler: ${CXX} ${CXXFLAGS} ${MPI_INC} ${MPI_LIBDIR} ${MPI_LIBS} ${VSL_INC} ${VSL_LIBDIR} ${VSL_LIBS}
 Package features:
 OpenMP enabled: ${enable_openmp}
 MPI enabled: ${mpi_enabled}
 CUDA enabled: ${cuda_enabled}
+VSL enabled: ${vsl_enabled}
 Now type 'make @<:@<target>@:>@'
 where the optional <target> is:
 all - build all binaries

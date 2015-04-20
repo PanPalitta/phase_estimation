@@ -24,6 +24,9 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 MPI_INC        = @MPI_INC@
 MPI_LIBDIR     = @MPI_LIBDIR@
 MPI_LIBS       = @MPI_LIBS@
+VSL_INC        = @VSL_INC@
+VSL_LIBDIR     = @VSL_LIBDIR@
+VSL_LIBS       = @VSL_LIBS@
 CUDA_CFLAGS    = @CUDA_CFLAGS@
 CUDA_LIBS      = @CUDA_LIBS@
 CUDA_LDFLAGS   = @CUDA_LDFLAGS@
@@ -39,13 +42,17 @@ ifdef CUDA_LIBS
 	OBJS+=rng_gpu.cu.co
 endif
 
+ifdef VSL_LIBS
+	OBJS+=rng_vsl.o
+endif
+
 all: phase_estimation
 	
 phase_estimation: $(OBJS)
-	$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_LIBDIR) $(CUDA_LDFLAGS) -o $@ $^ $(LIBS) $(MPI_LIBS) $(CUDA_LIBS)
+	$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_LIBDIR) $(VSL_LIBDIR) $(CUDA_LDFLAGS) -o $@ $^ $(LIBS) $(MPI_LIBS) $(VSL_LIBS) $(CUDA_LIBS)
 
 %.o: %.cpp
-		$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_INC) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
+		$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_INC) $(VSL_INC) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
 %.cu.co: %.cu
 		$(NVCC) $(DEFS) $(CUDA_CFLAGS) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<

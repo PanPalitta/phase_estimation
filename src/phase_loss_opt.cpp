@@ -12,6 +12,8 @@
 #include "phase_loss_opt.h"
 #ifdef CUDA
 #include "rng_gpu.h"
+#elif defined(VSL)
+#include "rng_vsl.h"
 #endif
 
 Phase::Phase(const int numvar) {
@@ -46,6 +48,8 @@ Phase::Phase(const int numvar) {
     index_grandom_numbers = 0;
 #ifdef CUDA
     gpu_cache_alloc(n_urandom_numbers, n_grandom_numbers);
+#elif defined(VSL)
+    vsl_init();
 #endif
 }
 
@@ -60,6 +64,8 @@ Phase::~Phase() {
     delete[] urandom_numbers;
 #ifdef CUDA
     gpu_cache_free();
+#elif defined(VSL)
+    vsl_close();
 #endif
 }
 
@@ -114,11 +120,13 @@ double Phase::avg_fitness(double *soln, const int K) {
     // vectorization
     index_urandom_numbers = 0;
     index_grandom_numbers = 0;
-#ifndef CUDA
+#ifdef CUDA
+    gpu_cache_init(urandom_numbers, K+2*K*num, grandom_numbers, 3*K*num);
+#elif defined(VSL)
+    vsl_cache_init(urandom_numbers, K+2*K*num, grandom_numbers, 3*K*num);
+#else
     init_urandom_number_cache(K+2*K*num);
     init_grandom_number_cache(3*K*num);
-#else
-    gpu_cache_init(urandom_numbers, K+2*K*num, grandom_numbers, 3*K*num);
 #endif
     WK_state();
     //cout << "HERE " << K << "\n";
@@ -389,12 +397,6 @@ inline double Phase::rand_Gaussian(const double mean, /*the average theta*/
 }/*end of rand_Gaussian*/
 
 void Phase::init_urandom_number_cache(const int n) {
-#ifndef CUDA
-    for (int i=0; i<n; ++i) {
-        // Comment out this line if not using vectorized version
-        // urandom_numbers[i] = double(rand())/RAND_MAX;
-    }
-#endif
     index_urandom_numbers = 0;
 }
 
@@ -403,20 +405,14 @@ inline double Phase::next_urand() {
     // nadeausoftware.com/articles/2013/12/
     // c_tip_considering_use_exceptions_asserts_and_bounds_checking
 
-#ifndef CUDA
-    // Flip these lines to change between vectorized and non-vectorized variants
-    return double(rand())/RAND_MAX;
-    //return urandom_numbers[index_urandom_numbers++];
-#else
+#if defined(CUDA) || defined(VSL)
     return urandom_numbers[index_urandom_numbers++];
+#else
+    return double(rand())/RAND_MAX;
 #endif
 }
 
 void Phase::init_grandom_number_cache(const int n) {
-    for (int i=0; i<n; ++i) {
-        // Comment out this line if not using vectorized version
-        // grandom_numbers[i] = rand_Gaussian(0.0, 1.0);
-    }
     index_grandom_numbers = 0;
 }
 
@@ -425,12 +421,10 @@ inline double Phase::next_grand(const double mean, const double dev) {
     // nadeausoftware.com/articles/2013/12/
     // c_tip_considering_use_exceptions_asserts_and_bounds_checking
 
-#ifndef CUDA
-    // Flip these lines to change between vectorized and non-vectorized variants
-    return rand_Gaussian(mean, dev);
-    //return grandom_numbers[index_grandom_numbers++]*dev+mean;
-#else
+#if defined(CUDA) || defined(VSL)
     return grandom_numbers[index_grandom_numbers++]*dev+mean;
+#else
+    return rand_Gaussian(mean, dev);
 #endif
 }
 
