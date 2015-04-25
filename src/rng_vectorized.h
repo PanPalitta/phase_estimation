@@ -1,15 +1,15 @@
-#ifndef RNG_VSL_H
-#define RNG_VSL_H
+#ifndef RNG_VECTORIZED_H
+#define RNG_VECTORIZED_H
 
-#include "rng_vectorized.h"
+#include "rng.h"
 
 using namespace std;
 
-class RngVsl: public RngVectorized
+class RngVectorized: public Rng
 {
 public:
-    RngVsl(int n_urandom_numbers, int n_grandom_numbers);
-    ~RngVsl();
+    RngVectorized(int n_urandom_numbers, int n_grandom_numbers);
+    ~RngVectorized();
     double next_grand(const double mean, const double dev);
     double next_urand();
 
@@ -20,6 +20,6 @@ private:
     double *grandom_numbers;
     int n_grandom_numbers;
     int index_grandom_numbers;
-}
+};
 
-#endif
+#endif // RNG_VECTORIZED_H
