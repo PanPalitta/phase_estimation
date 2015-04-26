@@ -27,6 +27,7 @@ MPI_LIBS       = @MPI_LIBS@
 VSL_INC        = @VSL_INC@
 VSL_LIBDIR     = @VSL_LIBDIR@
 VSL_LIBS       = @VSL_LIBS@
+CUDA_INC       = @CUDA_INC@
 CUDA_CFLAGS    = @CUDA_CFLAGS@
 CUDA_LIBS      = @CUDA_LIBS@
 CUDA_LDFLAGS   = @CUDA_LDFLAGS@
@@ -36,14 +37,16 @@ NVCC       	   = @NVCC@
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
-OBJS=test.o ../src/rng_simple.o ../src/phase_loss_opt.o
+OBJS=test.o ../src/phase_loss_opt.o
 
 ifdef CUDA_LIBS
 	OBJS+=../src/rng_gpu.cu.co
-endif
-
-ifdef VSL_LIBS
-	OBJS+=../src/rng_vsl.o
+else 
+  ifdef VSL_LIBS
+		OBJS+=../src/rng_vsl.o
+	else
+		OBJS+=../src/rng_simple.o
+	endif
 endif
 
 all: test
@@ -52,10 +55,10 @@ test: $(OBJS)
 	$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_LIBDIR) $(VSL_LIBDIR) $(CUDA_LDFLAGS) -o $@ $^ $(LIBS) $(MPI_LIBS) $(VSL_LIBS) $(CUDA_LIBS)
 
 %.o: %.cpp
-		$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_INC) $(VSL_INC) -I$(srcdir) -I.. -I../src -o $@ -c $(srcdir)/$<
+		$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_INC) $(CUDA_INC) $(VSL_INC) -I$(srcdir) -I.. -I../src -o $@ -c $(srcdir)/$<
 
 %.cu.co: %.cu
-		$(NVCC) $(DEFS) $(CUDA_CFLAGS) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
+		$(NVCC) $(DEFS) $(CUDA_INC) $(CUDA_CFLAGS) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
 clean:
 	-rm -f test test.o 1>/dev/null

@@ -8,8 +8,7 @@ using namespace std;
 class RngVectorized: public Rng
 {
 public:
-    RngVectorized(int n_urandom_numbers, int n_grandom_numbers);
-    ~RngVectorized();
+    ~RngVectorized() {};
     double next_grand(const double mean, const double dev);
     double next_urand();
 

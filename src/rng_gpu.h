@@ -1,13 +1,11 @@
 #ifndef RNG_GPU_H
 #define RNG_GPU_H
-
+#include <curand.h>
 #include <mpi.h>
 
 #include "rng_vectorized.h"
 
-extern "C" {
-    void setDevice(int commRank, int commSize);
-}
+void setDevice(int commRank, int commSize);
 
 class RngGpu: public RngVectorized
 {
@@ -28,6 +26,6 @@ private:
     double *dev_urandom_numbers;
     double *dev_grandom_numbers;
     curandGenerator_t gen;
-}
+};
 
 #endif

@@ -1,8 +1,8 @@
 #include <iostream>
-#include <cuda.h>
-#include <curand.h>
 #include <map>
 #include <vector>
+#include <cuda.h>
+#include <curand.h>
 
 #include "rng_gpu.h"
 
@@ -96,14 +96,14 @@ void setDevice(int commRank, int commSize)
     cout <<  device << " " << devProp.name << " Compute Capability: " << devProp.major << "." << devProp.minor << "\n";
 }
 
-void RngGpu::RngGpu(int n_urandom_numbers, int n_grandom_numbers):
+RngGpu::RngGpu(int _n_urandom_numbers, int _n_grandom_numbers):
     n_urandom_numbers(_n_urandom_numbers),
-    n_grandom_numbers(_n_urandom_numbers) {
+    n_grandom_numbers(_n_grandom_numbers) {
 
     urandom_numbers = new double[n_urandom_numbers];
-    index_urandom_numbers = 0;
+    index_urandom_numbers = n_urandom_numbers;
     grandom_numbers = new double[n_grandom_numbers];
-    index_grandom_numbers = 0;
+    index_grandom_numbers = n_grandom_numbers;
     CUDA_CALL(cudaMalloc((void **)&dev_urandom_numbers,
                          n_urandom_numbers*sizeof(double)));
     CUDA_CALL(cudaMalloc((void **)&dev_grandom_numbers,
@@ -118,16 +118,10 @@ void RngGpu::RngGpu(int n_urandom_numbers, int n_grandom_numbers):
                                             n_urandom_numbers));
     CURAND_CALL(curandGenerateNormalDouble(gen, dev_grandom_numbers,
                                            n_grandom_numbers, 0.0, 1.0));
-    CUDA_CALL(cudaMemcpy(urandom_numbers, dev_urandom_numbers,
-                         n_urandom_numbers * sizeof(double),
-                         cudaMemcpyDeviceToHost));
-    CUDA_CALL(cudaMemcpy(grandom_numbers, dev_grandom_numbers,
-                         n_grandom_numbers * sizeof(double),
-                         cudaMemcpyDeviceToHost));
 }
 
-double RngVsl::next_grand(const double mean, const double dev) {
-    if index_grandom_numbers >= n_grandom_numbers {
+double RngGpu::next_grand(const double mean, const double dev) {
+    if (index_grandom_numbers >= n_grandom_numbers) {
         index_grandom_numbers = 0;
         CUDA_CALL(cudaMemcpy(grandom_numbers, dev_grandom_numbers,
                              n_grandom_numbers * sizeof(double),
@@ -138,8 +132,8 @@ double RngVsl::next_grand(const double mean, const double dev) {
   	return grandom_numbers[index_grandom_numbers++]*dev+mean;
 }
 
-double RngVsl::next_grand(const double mean, const double dev) {
-    if index_urandom_numbers >= n_urandom_numbers {
+double RngGpu::next_urand() {
+    if (index_urandom_numbers >= n_urandom_numbers) {
         index_urandom_numbers = 0;
         CUDA_CALL(cudaMemcpy(urandom_numbers, dev_urandom_numbers,
                              n_urandom_numbers * sizeof(double),
@@ -150,8 +144,7 @@ double RngVsl::next_grand(const double mean, const double dev) {
   	return urandom_numbers[index_urandom_numbers++];
 }
 
-
-void RngGpu::~RngGpu() {
+RngGpu::~RngGpu() {
     delete[] grandom_numbers;
     delete[] urandom_numbers;
     CURAND_CALL(curandDestroyGenerator(gen));
