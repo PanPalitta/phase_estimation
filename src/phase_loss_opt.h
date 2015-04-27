@@ -16,6 +16,13 @@
 #define THETA_DEV 0.0 //M_PI;//phase noise level
 
 #include "problem.h"
+#ifdef CUDA
+#include "rng_gpu.h"
+#elif defined(VSL)
+#include "rng_vsl.h"
+#else
+#include "rng_simple.h"
+#endif
 
 class Phase: public Problem<double>
 {
@@ -23,7 +30,7 @@ public:
     Phase(const int numvar);
     ~Phase();
 
-    double fitness(double *soln);
+    //double fitness(double *soln);
     double avg_fitness(double *soln, const int K);
 
 private:
@@ -31,18 +38,13 @@ private:
     double upper;
     //array to avoid calculation of expensive sqrt calls for integers
     double *sqrt_cache;
-    //infrastructure to store random numbers that are generated vectorized
-    double *urandom_numbers;
-    int n_urandom_numbers;
-    int index_urandom_numbers;
-    void init_urandom_number_cache(const int n);
-    inline double next_urand();
-    double *grandom_numbers;
-    int n_grandom_numbers;
-    int index_grandom_numbers;
-    void init_grandom_number_cache(const int n);
-    inline double next_grand(const double mean, const double dev);
-    void status_rand();
+    #ifdef CUDA
+    RngGpu *rng;
+    #elif defined(VSL)
+    RngVsl *rng;
+    #else
+    RngSimple *rng;
+    #endif
 
     //variables for WK state generation
     dcmplx *input_state;
@@ -61,10 +63,9 @@ private:
     inline double cal_spart(const int n, const int k, const int N);//N is is the same as total number of photon 'num', but I'll leave it like this.
     void WK_state();
     //Measurement function
-    inline bool outcome(const double phi, const double PHI, const int N);//N is the number of photons currently available, not equal to 'num'
+    //inline bool outcome(const double phi, const double PHI, const int N);//N is the number of photons currently available, not equal to 'num'
     inline bool noise_outcome(const double phi, const double PHI, const int N);
     inline void state_loss(const int N);
-    inline double rand_Gaussian(const double mean, const double dev);
     inline double mod_2PI(double PHI);
 };
 #endif // PHASE_H

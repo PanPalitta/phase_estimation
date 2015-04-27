@@ -10,11 +10,6 @@
 #include <cstring>
 
 #include "phase_loss_opt.h"
-#ifdef CUDA
-#include "rng_gpu.h"
-#elif defined(VSL)
-#include "rng_vsl.h"
-#endif
 
 Phase::Phase(const int numvar) {
     int i;
@@ -39,18 +34,16 @@ Phase::Phase(const int numvar) {
     update0 = new dcmplx[num+1];
     update1 = new dcmplx[num+1];
     //Maximum number of uniform random numbers we will use in one go
-    n_urandom_numbers = num_repeat+2*num_repeat*num;
-    urandom_numbers = new double[n_urandom_numbers];
-    index_urandom_numbers = 0;
+    int n_urandom_numbers = num_repeat+2*num_repeat*num;
     //Maximum number of Gaussian random numbers we will use in one go
-    n_grandom_numbers = 3*num_repeat*num;
-    grandom_numbers = new double[n_grandom_numbers];
-    index_grandom_numbers = 0;
-#ifdef CUDA
-    gpu_cache_alloc(n_urandom_numbers, n_grandom_numbers);
-#elif defined(VSL)
-    vsl_init();
-#endif
+    int n_grandom_numbers = 3*num_repeat*num;
+    #ifdef CUDA
+    rng = new RngGpu(n_urandom_numbers, n_grandom_numbers);
+    #elif defined(VSL)
+    rng = new RngVsl(n_urandom_numbers, n_grandom_numbers);
+    #else
+    rng = new RngSimple(n_urandom_numbers, n_grandom_numbers);
+    #endif
 }
 
 Phase::~Phase() {
@@ -60,15 +53,9 @@ Phase::~Phase() {
     delete[] input_state;
     delete[] sqrtfac_mat;
     delete[] overfac_mat;
-    delete[] grandom_numbers;
-    delete[] urandom_numbers;
-#ifdef CUDA
-    gpu_cache_free();
-#elif defined(VSL)
-    vsl_close();
-#endif
+    delete rng;
 }
-
+/*
 double Phase::fitness(double *soln) {
     const double loss = 0.2;//loss level
     const int K = 10*num*num;
@@ -108,7 +95,7 @@ double Phase::fitness(double *soln) {
         sharp.imag()=sharp.imag()+sin(phi-PHI);
     }
     return abs(sharp)/double(K);
-}
+}*/
 
 double Phase::avg_fitness(double *soln, const int K) {
     const double loss = 0.0;//loss level
@@ -116,23 +103,11 @@ double Phase::avg_fitness(double *soln, const int K) {
     bool dect_result;
     double PHI, phi, coin, PHI_in;
     int m, k, d;
-    // Random numbers are generated in advance to take advantage of
-    // vectorization
-    index_urandom_numbers = 0;
-    index_grandom_numbers = 0;
-#ifdef CUDA
-    gpu_cache_init(urandom_numbers, K+2*K*num, grandom_numbers, 3*K*num);
-#elif defined(VSL)
-    vsl_cache_init(urandom_numbers, K+2*K*num, grandom_numbers, 3*K*num);
-#else
-    init_urandom_number_cache(K+2*K*num);
-    init_grandom_number_cache(3*K*num);
-#endif
     WK_state();
     //cout << "HERE " << K << "\n";
     for(k=0; k<K; ++k) {
         //cout << k << " ";
-        phi = next_urand()*(upper-lower)+lower;
+        phi = rng->next_urand()*(upper-lower)+lower;
         PHI = 0;
         //copy input state: the optimal solution across all compilers is memcpy:
         //nadeausoftware.com/articles/2012/05/c_c_tip_how_copy_memory_quickly
@@ -145,11 +120,11 @@ double Phase::avg_fitness(double *soln, const int K) {
             // optimization should focus on this loop.
 
             //randomly decide whether loss occurs
-            coin = next_urand();
+            coin = rng->next_urand();
             if(coin<=loss) {
                 state_loss(num-m);//update only the state using loss function
             } else {
-                PHI_in = next_grand(PHI, THETA_DEV);
+                PHI_in = rng->next_grand(PHI, THETA_DEV);
                 PHI_in = mod_2PI(PHI_in);//noisy PHI
                 dect_result = noise_outcome(phi, PHI_in, num-m);
                 //dect_result = outcome(phi,PHI_in,num-m);
@@ -260,6 +235,7 @@ void Phase::WK_state() {
 }
 
 /*########### Measurement Functions ###########*///Measurement function
+/*
 inline bool Phase::outcome(const double phi, const double PHI, const int N) {
     //N is the number of photons currently available, not equal to 'num'
     const double theta = (phi-PHI)/2;
@@ -306,7 +282,7 @@ inline bool Phase::outcome(const double phi, const double PHI, const int N) {
         }
         return 1;
     }
-}
+}*/
 
 inline bool Phase::noise_outcome(const double phi, const double PHI, const int N) {
     //N is the number of photons currently available, not equal to 'num'
@@ -314,8 +290,8 @@ inline bool Phase::noise_outcome(const double phi, const double PHI, const int N
     const double cos_theta = cos(theta)/sqrt_cache[N];
     const double sin_theta = sin(theta)/sqrt_cache[N];
     //noise in operator: currently not in use
-    const double oper_n0 = next_grand(0.0, DEV_N);//n_x
-    const double oper_n2 = next_grand(0.0, DEV_N);//n_z
+    const double oper_n0 = rng->next_grand(0.0, DEV_N);//n_x
+    const double oper_n2 = rng->next_grand(0.0, DEV_N);//n_z
     const double oper_n1 = sqrt(1.0-(oper_n0*oper_n0+oper_n2*oper_n2));
     const dcmplx U00(sin_theta*oper_n1, -oper_n0*sin_theta);
     const dcmplx U01(cos_theta, oper_n2*sin_theta);
@@ -333,7 +309,7 @@ inline bool Phase::noise_outcome(const double phi, const double PHI, const int N
         //prob1 += abs(state[n]*conj(state[n]));
     }
 
-    if (next_urand() <= prob0) {
+    if (rng->next_urand() <= prob0) {
         //measurement outcome is 0
         state[N] = 0;
         prob0 = 1.0/sqrt(prob0);
@@ -373,61 +349,4 @@ inline double Phase::mod_2PI(double PHI) {
         PHI=PHI+2*M_PI;
     }
     return PHI;
-}
-
-/*########### RNG Functions ###########*/
-inline double Phase::rand_Gaussian(const double mean, /*the average theta*/
-                                   const double dev /*deviation for distribution*/
-                                  ) {
-    
-	/*creating random number using Box-Muller Method/Transformation*/
-    //double U1,U2; /*uniformly distributed random number input*/
-    //double r;
-    /*create input between [-1,1]*/
-    /*do {
-        U1=2.0*double(rand())/RAND_MAX-1.0;
-        U2=2.0*double(rand())/RAND_MAX-1.0;
-        r=U1*U1+U2*U2;
-    } while(r==0.0||r>=1.0);*/
-    /*using Box-Muller Transformation*/
-    //return U1*sqrt(-2*log(r)/r)*dev+mean;
-	
-	//Approximating the Gaussian distribution with a uniform distribution
-	return (double(rand())/RAND_MAX-0.5)*2*dev+mean;
-}/*end of rand_Gaussian*/
-
-void Phase::init_urandom_number_cache(const int n) {
-    index_urandom_numbers = 0;
-}
-
-inline double Phase::next_urand() {
-    // Warning: for speed, there is no bound checking! See
-    // nadeausoftware.com/articles/2013/12/
-    // c_tip_considering_use_exceptions_asserts_and_bounds_checking
-
-#if defined(CUDA) || defined(VSL)
-    return urandom_numbers[index_urandom_numbers++];
-#else
-    return double(rand())/RAND_MAX;
-#endif
-}
-
-void Phase::init_grandom_number_cache(const int n) {
-    index_grandom_numbers = 0;
-}
-
-inline double Phase::next_grand(const double mean, const double dev) {
-    // Warning: for speed, there is no bound checking! See
-    // nadeausoftware.com/articles/2013/12/
-    // c_tip_considering_use_exceptions_asserts_and_bounds_checking
-
-#if defined(CUDA) || defined(VSL)
-    return grandom_numbers[index_grandom_numbers++]*dev+mean;
-#else
-    return rand_Gaussian(mean, dev);
-#endif
-}
-
-void Phase::status_rand() {
-    cout << index_grandom_numbers << "/" << n_grandom_numbers << endl;
 }

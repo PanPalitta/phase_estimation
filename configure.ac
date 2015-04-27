@@ -69,10 +69,12 @@ if test x"$with_cuda" != x"no" ; then
   AC_CHECK_PROG(NVCC_CHECK,nvcc,yes,no,$CUDA_PATH/bin)
   if test x"$NVCC_CHECK" = x"yes" ; then
      cuda_enabled=yes
-     CUDA_CFLAGS="-I$CUDA_PATH/include -use_fast_math -Xcompiler \"${CXXFLAGS}\""
+     CUDA_INC="-I$CUDA_PATH/include"
+     CUDA_CFLAGS="-use_fast_math -Xcompiler \"${CXXFLAGS}\""
      CUDA_LIBS="-lcudart -lcurand"
      CUDA_LDFLAGS="-L$CUDA_PATH/lib$SUFFIX"
      NVCC="$CUDA_PATH/bin/nvcc"
+     AC_SUBST(CUDA_INC)
      AC_SUBST(CUDA_CFLAGS)
      AC_SUBST(CUDA_LIBS)
      AC_SUBST(CUDA_LDFLAGS)
@@ -121,7 +123,7 @@ echo \
 "-------------------------------------------------
 ${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 Prefix: ${prefix}.
-Compiler: ${CXX} ${CXXFLAGS} ${MPI_INC} ${MPI_LIBDIR} ${MPI_LIBS} ${VSL_INC} ${VSL_LIBDIR} ${VSL_LIBS}
+Compiler: ${CXX} ${CXXFLAGS} ${MPI_INC} ${MPI_LIBDIR} ${MPI_LIBS} ${CUDA_INC} ${VSL_INC} ${VSL_LIBDIR} ${VSL_LIBS}
 Package features:
 OpenMP enabled: ${enable_openmp}
 MPI enabled: ${mpi_enabled}
