@@ -100,54 +100,62 @@ RngGpu::RngGpu(int _n_urandom_numbers, int _n_grandom_numbers):
     n_urandom_numbers(_n_urandom_numbers),
     n_grandom_numbers(_n_grandom_numbers) {
 
-    urandom_numbers = new double[n_urandom_numbers];
+    CUDA_CALL(cudaMallocHost((void **)&urandom_numbers, 
+                             n_urandom_numbers*sizeof(double)));
+    CUDA_CALL(cudaMallocHost((void **)&grandom_numbers, 
+                             n_grandom_numbers*sizeof(double)));
     index_urandom_numbers = n_urandom_numbers;
-    grandom_numbers = new double[n_grandom_numbers];
     index_grandom_numbers = n_grandom_numbers;
     CUDA_CALL(cudaMalloc((void **)&dev_urandom_numbers,
                          n_urandom_numbers*sizeof(double)));
     CUDA_CALL(cudaMalloc((void **)&dev_grandom_numbers,
                          n_grandom_numbers*sizeof(double)));
     /* Create pseudo-random number generator */
-    CURAND_CALL(curandCreateGenerator(&gen,
-                                      CURAND_RNG_PSEUDO_DEFAULT));
+    CURAND_CALL(curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT));
     /* Set seed */
-    CURAND_CALL(curandSetPseudoRandomGeneratorSeed(gen,
-                1234ULL));
+    CURAND_CALL(curandSetPseudoRandomGeneratorSeed(gen, 1234ULL));
     CURAND_CALL(curandGenerateUniformDouble(gen, dev_urandom_numbers,
                                             n_urandom_numbers));
     CURAND_CALL(curandGenerateNormalDouble(gen, dev_grandom_numbers,
                                            n_grandom_numbers, 0.0, 1.0));
-}
-
-double RngGpu::next_grand(const double mean, const double dev) {
-    if (index_grandom_numbers >= n_grandom_numbers) {
-        index_grandom_numbers = 0;
-        CUDA_CALL(cudaMemcpy(grandom_numbers, dev_grandom_numbers,
-                             n_grandom_numbers * sizeof(double),
-                             cudaMemcpyDeviceToHost));
-        CURAND_CALL(curandGenerateNormalDouble(gen, dev_grandom_numbers,
-                                               n_grandom_numbers, 0.0, 1.0));
-    }
-  	return grandom_numbers[index_grandom_numbers++]*dev+mean;
+    CUDA_CALL(cudaMemcpyAsync(urandom_numbers, dev_urandom_numbers,
+                              n_urandom_numbers * sizeof(double),
+                              cudaMemcpyDeviceToHost));
+    CUDA_CALL(cudaMemcpyAsync(grandom_numbers, dev_grandom_numbers,
+                              n_grandom_numbers * sizeof(double),
+                              cudaMemcpyDeviceToHost));
 }
 
 double RngGpu::next_urand() {
     if (index_urandom_numbers >= n_urandom_numbers) {
         index_urandom_numbers = 0;
-        CUDA_CALL(cudaMemcpy(urandom_numbers, dev_urandom_numbers,
-                             n_urandom_numbers * sizeof(double),
-                             cudaMemcpyDeviceToHost));
+        cudaDeviceSynchronize();
         CURAND_CALL(curandGenerateUniformDouble(gen, dev_urandom_numbers,
                                                 n_urandom_numbers));
+        CUDA_CALL(cudaMemcpyAsync(urandom_numbers, dev_urandom_numbers,
+                                  n_urandom_numbers * sizeof(double),
+                                  cudaMemcpyDeviceToHost));
     }
   	return urandom_numbers[index_urandom_numbers++];
 }
 
+double RngGpu::next_grand(const double mean, const double dev) {
+    if (index_grandom_numbers >= n_grandom_numbers) {
+        index_grandom_numbers = 0;
+        cudaDeviceSynchronize();
+        CURAND_CALL(curandGenerateNormalDouble(gen, dev_grandom_numbers,
+                                               n_grandom_numbers, 0.0, 1.0));
+        CUDA_CALL(cudaMemcpyAsync(grandom_numbers, dev_grandom_numbers,
+                                  n_grandom_numbers * sizeof(double),
+                                  cudaMemcpyDeviceToHost));
+    }
+  	return grandom_numbers[index_grandom_numbers++]*dev+mean;
+}
+
 RngGpu::~RngGpu() {
-    delete[] grandom_numbers;
-    delete[] urandom_numbers;
     CURAND_CALL(curandDestroyGenerator(gen));
     CUDA_CALL(cudaFree(dev_urandom_numbers));
     CUDA_CALL(cudaFree(dev_grandom_numbers));
+    CUDA_CALL(cudaFreeHost(grandom_numbers));
+    CUDA_CALL(cudaFreeHost(urandom_numbers));
 }

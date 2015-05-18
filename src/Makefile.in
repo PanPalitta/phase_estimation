@@ -58,7 +58,7 @@ phase_estimation: $(OBJS)
 		$(CXX) $(DEFS) $(CXXFLAGS) $(MPI_INC) $(CUDA_INC) $(VSL_INC) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
 %.cu.co: %.cu
-		$(NVCC) $(DEFS) $(CUDA_INC) $(CUDA_CFLAGS) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
+		$(NVCC) $(DEFS) $(MPI_INC) $(CUDA_INC) $(CUDA_CFLAGS) -I$(srcdir) -I.. -o $@ -c $(srcdir)/$<
 
 clean:
 	-rm -f phase_estimation $(OBJS) 1>/dev/null
