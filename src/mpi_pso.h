@@ -55,8 +55,9 @@ void PSO<typeT>::find_global(int my_rank, int total_pop, int nb_proc) {
     MPI_Status status;
     MPI_Datatype MPI_TYPE;
     int tag=1;
-    int p,ptr,prev,forw;
+    int p,ptr,prev,forw,i;
     double prev_fit,forw_fit,fit;
+	double fitarray[this->prob->num_fit];
     typeT array[this->num];
 
     if(typeid(array[0])==typeid(double)) {
@@ -79,7 +80,7 @@ void PSO<typeT>::find_global(int my_rank, int total_pop, int nb_proc) {
         forw=(p+1)%total_pop;
 
         if(my_rank==prev%nb_proc) {
-            prev_fit=this->pop[prev/nb_proc].read_bestfit();
+            prev_fit=this->pop[prev/nb_proc].read_bestfit(0);
             MPI_Send(&prev_fit,1,MPI_DOUBLE,p%nb_proc,tag,MPI_COMM_WORLD);
         }
         else if(my_rank==p%nb_proc) {
@@ -88,7 +89,7 @@ void PSO<typeT>::find_global(int my_rank, int total_pop, int nb_proc) {
         else {}
 
         if(my_rank==forw%nb_proc) {
-            forw_fit=this->pop[forw/nb_proc].read_bestfit();
+            forw_fit=this->pop[forw/nb_proc].read_bestfit(0);
             MPI_Send(&forw_fit,1,MPI_DOUBLE,p%nb_proc,tag,MPI_COMM_WORLD);
         }
         else if(my_rank==p%nb_proc) {
@@ -100,7 +101,7 @@ void PSO<typeT>::find_global(int my_rank, int total_pop, int nb_proc) {
 
         //fitness values sent to p
         if(my_rank==p%nb_proc) {
-            fit=this->pop[p/nb_proc].read_bestfit();//read fitness of p
+            fit=this->pop[p/nb_proc].read_bestfit(0);//read fitness of p
             ptr=prev;
             if(prev_fit<=fit) {
                 ptr=p;
@@ -149,7 +150,10 @@ void PSO<typeT>::find_global(int my_rank, int total_pop, int nb_proc) {
             if(my_rank==ptr%nb_proc) {
                 this->pop[p/nb_proc].read_best(array);
                 this->pop[p/nb_proc].update_global(array);
-                this->pop[p/nb_proc].write_globalfit(fit);
+			for(i=0;i<this->prob->num_fit;i++) {
+				fitarray[i]=this->pop[p/nb_proc].read_bestfit(i);					
+			}
+                this->pop[p/nb_proc].write_globalfit(fitarray);
             }
             else {}
             //cout<<"ptr=p:"<<ptr<<","<<p<<endl;
@@ -158,21 +162,24 @@ void PSO<typeT>::find_global(int my_rank, int total_pop, int nb_proc) {
             //cout<<"ptr:"<<ptr<<",prev="<<prev<<",forw="<<forw<<endl;
             if(my_rank==ptr%nb_proc) {
                 this->pop[ptr/nb_proc].read_best(array);
-                MPI_Send(&array,this->num,MPI_TYPE,p%nb_proc,tag,MPI_COMM_WORLD);
+                MPI_Send(&array[0],this->num,MPI_TYPE,p%nb_proc,tag,MPI_COMM_WORLD);
             }
             else if(my_rank==p%nb_proc) {
-                MPI_Recv(&array,this->num,MPI_TYPE,ptr%nb_proc,tag,MPI_COMM_WORLD,&status);
+                MPI_Recv(&array[0],this->num,MPI_TYPE,ptr%nb_proc,tag,MPI_COMM_WORLD,&status);
                 this->pop[p/nb_proc].update_global(array);
-                if(ptr==prev) {
-                    this->pop[p/nb_proc].write_globalfit(prev_fit);
-                }
-                else if(ptr==forw) {
-                    this->pop[p/nb_proc].write_globalfit(forw_fit);
-                }
-                else {
-                    cout<<"Error!! ptr not pointing correctly"<<endl;
-                }
             }
+			//sending the fitarray
+			if(my_rank==ptr%nb_proc){
+				for(i=0;i<this->prob->num_fit;i++){
+					fitarray[i]=this->pop[ptr/nb_proc].read_globalfit(i);
+				}
+				MPI_Send(&fitarray[0],this->prob->num_fit,MPI_DOUBLE,p%nb_proc,tag,MPI_COMM_WORLD);
+			}
+			else if(my_rank==p%nb_proc){
+				MPI_Recv(&fitarray[0],this->prob->num_fit,MPI_DOUBLE,ptr%nb_proc,tag,MPI_COMM_WORLD,&status);
+				this->pop[p/nb_proc].write_globalfit(fitarray);
+			}
+			else{}
         }
         else {
             //cout<<"ptr:"<<ptr<<",prev="<<prev<<",forw="<<forw<<endl;
@@ -224,7 +231,7 @@ template <typename typeT>
 void PSO<typeT>::selection(int my_rank, int total_pop, int nb_proc) {
     int p;
     for(p=0; p<this->pop_size; ++p) {
-        if(this->pop[p].read_bestfit()<this->pop[p].read_contfit()) {
+        if(this->pop[p].read_bestfit(0)<this->pop[p].read_contfit(0)) {
             this->pop[p].update_best();
         }
         else {

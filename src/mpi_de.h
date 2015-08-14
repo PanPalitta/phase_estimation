@@ -83,6 +83,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
             }
         }
     }// p loop
+
     MPI_Barrier(MPI_COMM_WORLD);
 
     //select family members for the candidate on the processor other that root
@@ -90,7 +91,6 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
         if(my_rank==0) {
             //srand(time(NULL)+p);
             //temp=rand();//flush out the first sampling which is not random
-
             if(total_pop<=fam_size+1) {
                 for(f=0; f<fam_size; ++f) {
                     fam[f]=rand()%total_pop;
@@ -104,8 +104,10 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
                 do fam[2]=rand()%total_pop;
                 while(fam[2]==p||fam[2]==fam[0]||fam[2]==fam[1]);
             }
+
+		//cout<<"family="<<fam[0]<<","<<fam[1]<<","<<fam[2]<<endl;
+
             //create donor
-            //cout<<p<<":"<<fam[0]<<","<<fam[1]<<","<<fam[2]<<endl;
             for(i=0; i<this->num; ++i) {
                 //create donor
                 input[i]=all_soln[fam[0]][i]+F*(all_soln[fam[1]][i]-all_soln[fam[2]][i]);
@@ -120,11 +122,8 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
                 else {
                     can[i]=all_soln[p][i];
                 }
-                //cout<<can[i]<<"\t";
             }
-            //cout<<endl;
-
-            //send the new candidate back
+             //send the new candidate back
             MPI_Send(&can,this->num,MPI_TYPE,p%nb_proc,tag,MPI_COMM_WORLD);
         }//my_rank==0
 
@@ -150,7 +149,7 @@ template <typename typeT>
 void DE<typeT>::selection(int my_rank, int total_pop, int nb_proc) {
     int p;
     for(p=0; p<this->pop_size; ++p) {
-        if(this->pop[p].read_bestfit()<this->pop[p].read_contfit()) {
+        if(this->pop[p].read_bestfit(0)<this->pop[p].read_contfit(0)) {
             this->pop[p].update_best();
             //cout<<"can select:"<<this->pop[p].read_bestfit()<<endl;
         }
@@ -165,7 +164,7 @@ void DE<typeT>::fit_to_global() {
     int p;
     for(p=0; p<this->pop_size; ++p) {
         this->pop[p].put_to_global();
-        //cout<<p<<":"<<this->pop[p].read_globalfit()<<endl;
+        //cout<<p<<":"<<this->pop[p].read_globalfit(0)<<","<<this->pop[p].read_globalfit(1)<<endl;
     }
 }
 

@@ -16,6 +16,7 @@ Phase::Phase(const int numvar) {
     lower = 0;
     upper = 2*M_PI;
     num = numvar;
+    num_fit=2;
     num_repeat = 10*num*num;
     lower_bound = new double[num];
     upper_bound = new double[num];
@@ -37,13 +38,13 @@ Phase::Phase(const int numvar) {
     int n_urandom_numbers = num_repeat+2*num_repeat*num;
     //Maximum number of Gaussian random numbers we will use in one go
     int n_grandom_numbers = 3*num_repeat*num;
-    #ifdef CUDA
-    rng = new RngGpu(n_urandom_numbers, n_grandom_numbers);
-    #elif defined(VSL)
-    rng = new RngVsl(n_urandom_numbers, n_grandom_numbers);
-    #else
+//    #ifdef CUDA
+//    rng = new RngGpu(n_urandom_numbers, n_grandom_numbers);
+//    #elif defined(VSL)
+//    rng = new RngVsl(n_urandom_numbers, n_grandom_numbers);
+//    #else
     rng = new RngSimple(n_urandom_numbers, n_grandom_numbers);
-    #endif
+//    #endif
 }
 
 Phase::~Phase() {
@@ -70,6 +71,7 @@ double Phase::fitness(double *soln) {
         PHI = 0;
         //copy input state: the optimal solution across all compilers is memcpy:
         //nadeausoftware.com/articles/2012/05/c_c_tip_how_copy_memory_quickly
+	cout<<"state copied"<<endl;
         memcpy(state, input_state, (num+1)*sizeof(dcmplx));
         //measurement
         d = 0;
@@ -97,16 +99,18 @@ double Phase::fitness(double *soln) {
     return abs(sharp)/double(K);
 }*/
 
-double Phase::avg_fitness(double *soln, const int K) {
+void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
     const double loss = 0.0;//loss level
     dcmplx sharp(0.0, 0.0);
     bool dect_result;
     double PHI, phi, coin, PHI_in;
     int m, k, d;
+	double error=0.0;
+	
     WK_state();
     //cout << "HERE " << K << "\n";
     for(k=0; k<K; ++k) {
-        //cout << k << " ";
+        //cout << k << endl;
         phi = rng->next_urand()*(upper-lower)+lower;
         PHI = 0;
         //copy input state: the optimal solution across all compilers is memcpy:
@@ -121,6 +125,7 @@ double Phase::avg_fitness(double *soln, const int K) {
 
             //randomly decide whether loss occurs
             coin = rng->next_urand();
+
             if(coin<=loss) {
                 state_loss(num-m);//update only the state using loss function
             } else {
@@ -138,8 +143,11 @@ double Phase::avg_fitness(double *soln, const int K) {
         }
         sharp.real()=sharp.real()+cos(phi-PHI);
         sharp.imag()=sharp.imag()+sin(phi-PHI);
+		error+=abs(phi-PHI);
     }
-  return abs(sharp)/double(K);
+  	fitarray[0]=abs(sharp)/double(K);
+	fitarray[1]=error/double(K);
+
 }
 
 /*private functions*/

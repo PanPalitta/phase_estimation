@@ -16,11 +16,11 @@ public:
         delete[] lower_bound;
     }
 
-    virtual double fitness(typeT *soln) {
-        return 0;
+    virtual void fitness(typeT *soln, double *fitarray) {
+        //return 0;
     }
-    virtual double avg_fitness(typeT *soln, int K) {
-        return 0;   //K is the number of samples to calculate the average
+    virtual void avg_fitness(typeT *soln, int K, double *fitarray) {
+        //return 0;   //K is the number of samples to calculate the average
     }
 
     typeT *lower_bound;
@@ -28,6 +28,7 @@ public:
 
     int num; //number of variables in the problem
     int num_repeat; //number of repeats (calculated from num of var)
+    int num_fit; //number of fitness
 
     /*functions that don't need to be linked to specific problems*/
     void modulo(typeT *can1);
