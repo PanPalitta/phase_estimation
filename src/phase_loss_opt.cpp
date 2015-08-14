@@ -38,13 +38,13 @@ Phase::Phase(const int numvar) {
     int n_urandom_numbers = num_repeat+2*num_repeat*num;
     //Maximum number of Gaussian random numbers we will use in one go
     int n_grandom_numbers = 3*num_repeat*num;
-//    #ifdef CUDA
-//    rng = new RngGpu(n_urandom_numbers, n_grandom_numbers);
-//    #elif defined(VSL)
-//    rng = new RngVsl(n_urandom_numbers, n_grandom_numbers);
-//    #else
+    #ifdef CUDA
+    rng = new RngGpu(n_urandom_numbers, n_grandom_numbers);
+    #elif defined(VSL)
+    rng = new RngVsl(n_urandom_numbers, n_grandom_numbers);
+    #else
     rng = new RngSimple(n_urandom_numbers, n_grandom_numbers);
-//    #endif
+    #endif
 }
 
 Phase::~Phase() {

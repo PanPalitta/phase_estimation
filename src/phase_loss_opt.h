@@ -16,13 +16,13 @@
 #define THETA_DEV 0.0 //M_PI;//phase noise level
 
 #include "problem.h"
-/*#ifdef CUDA
+#ifdef CUDA
 #include "rng_gpu.h"
 #elif defined(VSL)
 #include "rng_vsl.h"
 #else*/
 #include "rng_simple.h"
-//#endif
+#endif
 
 class Phase: public Problem<double>
 {
@@ -38,13 +38,13 @@ private:
     double upper;
     //array to avoid calculation of expensive sqrt calls for integers
     double *sqrt_cache;
-/*    #ifdef CUDA
+    #ifdef CUDA
     RngGpu *rng;
     #elif defined(VSL)
     RngVsl *rng;
     #else*/
     RngSimple *rng;
-//    #endif
+    #endif
 
     //variables for WK state generation
     dcmplx *input_state;
