@@ -56,15 +56,15 @@ The library also contain a function for changing the parameters during runtime:
 
 The beginning of the main function contains a set of parameters including
 
--the smallest (N\_begin) and the largest number of variables (N\_end). 
+- the smallest (N\_begin) and the largest number of variables (N\_end). 
 
--number of variables where the program use cluster initialization around previous solution (N\_cut)
+- number of variables where the program use cluster initialization around previous solution (N\_cut)
 
--number of variables where accept-reject criteria starts (data\_end)
+- number of variables where accept-reject criteria starts (data\_end)
 
--population size (pop\_size)
+- population size (pop\_size)
 
--number of iterations (iter, iter\_begin)
+- number of iterations (iter, iter\_begin)
 
 #### Compilation
 
