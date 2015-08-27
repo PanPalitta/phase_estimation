@@ -1,12 +1,8 @@
-#Reinforcement learning algorithm for adaptive phase estimation
-
- 
+##Reinforcement learning algorithm for adaptive phase estimation
 
         This project aims to show the use of reinforcement learning algorithm in finding a feedback policy for adaptive quantum-enhanced measurement, which has the goal of achieving the scaling in precision that exceeds the conventional techniques. We use adaptive phase estimation that includes phase noise and loss as the test problem.
-
-        The program is designed to streamline the implementation of population-based optimization algorithms on high-performance computing clusters and support parallel computing using MPI.
-
- 
+        
+		The program is designed to streamline the implementation of population-based optimization algorithms on high-performance computing clusters and support parallel computing using MPI.
 
     **Features:**
 
@@ -40,7 +36,7 @@
 
  
 
-## Usage:
+### Usage:
 
  
 
@@ -48,7 +44,7 @@
 
 
 
-    ### Selecting problem and optimization algorithm
+    #### Selecting problem and optimization algorithm
 
  
 
@@ -89,7 +85,7 @@ The library also contain a function for changing the parameters during runtime:
 
  
 
-    ### Parameters setting
+    #### Parameters setting
 
  
 
@@ -117,7 +113,7 @@ The library also contain a function for changing the parameters during runtime:
 
  
 
-    ### Compilation
+    #### Compilation
 
  
 
@@ -141,7 +137,7 @@ The library also contain a function for changing the parameters during runtime:
 
 
 
-##Acknowledgement:
+###Acknowledgement:
 
  
 
@@ -153,7 +149,7 @@ The library also contain a function for changing the parameters during runtime:
 
  
 
-##References: 
+###References: 
 
 
 
