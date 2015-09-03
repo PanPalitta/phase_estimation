@@ -37,7 +37,7 @@ NVCC       	   = @NVCC@
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
-OBJS=main.o phase_loss_opt.o io.o problem.o
+OBJS=main.o phase_loss_opt.o io.o problem.o mpi_optalg.o mpi_pso.o mpi_de.o
 
 ifdef CUDA_LIBS
 	OBJS+=rng_gpu.cu.co
