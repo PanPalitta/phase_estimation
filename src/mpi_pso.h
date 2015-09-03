@@ -3,11 +3,10 @@
 
 #include "mpi_optalg.h"
 
-template <typename typeT>
-class PSO : public OptAlg<typeT> {
+class PSO : public OptAlg {
     public:
         PSO() {};
-        PSO(Problem<typeT> *problem_ptr): w(0.8), phi1(0.6), phi2(1.0), v_max(0.2) {
+        PSO(Problem *problem_ptr): w(0.8), phi1(0.6), phi2(1.0), v_max(0.2) {
             this->prob = problem_ptr;
             this->num = this->prob->num;
             }
@@ -24,18 +23,16 @@ class PSO : public OptAlg<typeT> {
         double w, phi1, phi2, v_max;
     };
 
-template <typename typeT>
-void PSO<typeT>::write_param(double *param_array) {
+void PSO::write_param(double *param_array) {
     w = param_array[1];
     phi1 = param_array[2];
     phi2 = param_array[3];
     v_max = param_array[4];
     }
 
-template <typename typeT>
-void PSO<typeT>::put_to_best(int my_rank, int total_pop, int nb_proc) {
+void PSO::put_to_best(int my_rank, int total_pop, int nb_proc) {
     int i, p;
-    typeT array[this->num];
+    double array[this->num];
 
     for(p = 0; p < this->pop_size; ++p) {
         this->pop[p].update_best();
@@ -50,23 +47,13 @@ void PSO<typeT>::put_to_best(int my_rank, int total_pop, int nb_proc) {
 
     }
 
-template <typename typeT>
-void PSO<typeT>::find_global(int my_rank, int total_pop, int nb_proc) {
+void PSO::find_global(int my_rank, int total_pop, int nb_proc) {
     MPI_Status status;
-    MPI_Datatype MPI_TYPE;
     int tag = 1;
     int p, ptr, prev, forw, i;
     double prev_fit, forw_fit, fit;
     double fitarray[this->prob->num_fit];
-    typeT array[this->num];
-
-    if(typeid(array[0]) == typeid(double)) {
-        MPI_TYPE = MPI_DOUBLE;
-        }
-    else if(typeid(array[0]) == typeid(dcmplx)) {
-        MPI_TYPE = MPI_DOUBLE_COMPLEX;
-        }
-    else {}
+    double array[this->num];
 
     for(p = 0; p < total_pop; ++p) {
 
@@ -162,10 +149,10 @@ void PSO<typeT>::find_global(int my_rank, int total_pop, int nb_proc) {
             //cout<<"ptr:"<<ptr<<",prev="<<prev<<",forw="<<forw<<endl;
             if(my_rank == ptr % nb_proc) {
                 this->pop[ptr / nb_proc].read_best(array);
-                MPI_Send(&array[0], this->num, MPI_TYPE, p % nb_proc, tag, MPI_COMM_WORLD);
+                MPI_Send(&array[0], this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
                 }
             else if(my_rank == p % nb_proc) {
-                MPI_Recv(&array[0], this->num, MPI_TYPE, ptr % nb_proc, tag, MPI_COMM_WORLD, &status);
+                MPI_Recv(&array[0], this->num, MPI_DOUBLE, ptr % nb_proc, tag, MPI_COMM_WORLD, &status);
                 this->pop[p / nb_proc].update_global(array);
                 }
             //sending the fitarray
@@ -190,14 +177,13 @@ void PSO<typeT>::find_global(int my_rank, int total_pop, int nb_proc) {
         }//p loop
     }
 
-template <typename typeT>
-void PSO<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
+void PSO::combination(int my_rank, int total_pop, int nb_proc) {
     int p, i;
-    typeT global_pos[this->num];
-    typeT personal_pos[this->num];
-    typeT pos[this->num];
-    typeT vel[this->num];
-    typeT new_pos[this->num];
+    double global_pos[this->num];
+    double personal_pos[this->num];
+    double pos[this->num];
+    double vel[this->num];
+    double new_pos[this->num];
 
     for(p = 0; p < this->pop_size; ++p) {
         srand(time(NULL) + p);
@@ -227,8 +213,7 @@ void PSO<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
         }
     }
 
-template <typename typeT>
-void PSO<typeT>::selection(int my_rank, int total_pop, int nb_proc) {
+void PSO::selection(int my_rank, int total_pop, int nb_proc) {
     int p;
     for(p = 0; p < this->pop_size; ++p) {
         if(this->pop[p].read_bestfit(0) < this->pop[p].read_contfit(0)) {

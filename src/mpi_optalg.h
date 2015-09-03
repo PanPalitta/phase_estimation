@@ -4,13 +4,10 @@
 #include "problem.h"
 #include "candidate.h"
 
-typedef complex<double> dcmplx;
-
-template<typename typeT>
 class OptAlg {
     public:
         OptAlg() {};
-        OptAlg(Problem<typeT> *problem_ptr) {
+        OptAlg(Problem *problem_ptr) {
             prob = problem_ptr;
             num = prob->num;
             num_fit = prob->num_fit;
@@ -24,16 +21,16 @@ class OptAlg {
         virtual void fit_to_global() {};
         virtual void find_global(int my_rank, int total_pop, int nb_proc) {};
 
-        Problem<typeT>* prob;
+        Problem* prob;
 
         //functions and variables that are not algorithm specific
         void Init_population(int psize);
-        void Init_previous(double prev_dev, double new_dev, int psize, typeT *prev_soln);
+        void Init_previous(double prev_dev, double new_dev, int psize, double *prev_soln);
         void Cont_fitness(int p);
         void Best_fitness(int p);
         void update_popfit();
-        double Final_select(int my_rank, int total_pop, int nb_proc, double *fit, typeT *solution, double *fitarray);
-        double avg_Final_select(typeT* solution, int repeat, int my_rank, int total_pop, int nb_proc, double *soln_fit);
+        double Final_select(int my_rank, int total_pop, int nb_proc, double *fit, double *solution, double *fitarray);
+        double avg_Final_select(double* solution, int repeat, int my_rank, int total_pop, int nb_proc, double *soln_fit);
 
         void set_success(int iter, bool goal);
         bool check_success(int t, int D, double fit, double slope, double intercept);
@@ -55,19 +52,18 @@ class OptAlg {
 
     protected:
         int pop_size, T, t;
-        Candidate<typeT> *pop;
+        Candidate<double> *pop;
 
         bool goal;
     };
 
 
-template<typename typeT>
-void OptAlg<typeT>::Init_population(int psize) {
+void OptAlg::Init_population(int psize) {
     int i, p;
-    typeT input[num];
+    double input[num];
     //store the variables
     pop_size = psize;
-    pop = new Candidate<typeT>[pop_size];
+    pop = new Candidate<double>[pop_size];
 
     //srand(0);
 
@@ -84,57 +80,26 @@ void OptAlg<typeT>::Init_population(int psize) {
 
     }
 
-template<typename typeT>
-void OptAlg<typeT>::Init_previous(double prev_dev, double new_dev, int psize, typeT *prev_soln) {
+void OptAlg::Init_previous(double prev_dev, double new_dev, int psize, double *prev_soln) {
     int i, p;
-    int sum_im = 0;
     int dev_cut_off = num - 1;
-    dcmplx temp[num];
-    typeT input[num];
+    double input[num];
     double dev[num];
     //store the variables
     pop_size = psize;
-    pop = new Candidate<typeT>[pop_size];
-
-
+    pop = new Candidate<double>[pop_size];
 
     prev_soln[num - 1] = prev_soln[num - 2];
     dev_gen(dev, prev_dev, new_dev, dev_cut_off);
 
     //srand(0);
 
-
-
     for(p = 0; p < pop_size; ++p) {
         //generate candidate
 
         for(i = 0; i < num; ++i) {
-            temp[i] = rand_Gaussian(dcmplx(prev_soln[i]).real(), dev[i]);
-            if(dcmplx(prev_soln[i]).imag() != 0) {
-                temp[i].imag() = rand_Gaussian(dcmplx(prev_soln[i]).imag(), dev[i]);
-                }
-
-            if(temp[i].imag() == 0) {}
-            else {
-                sum_im += 1;
-                }
-            }
-
-
-        if(sum_im == 0) {
-            for(i = 0; i < num; ++i) {
-                input[i] = abs(temp[i]);
-                }
-            }
-        else if(sum_im != 0) { //TEST THIS FOR COMPLEX VAR LATER!!!!!!
-            for(i = 0; i < num; ++i) {
-                //           input[i]=temp[i];
-                static_cast<dcmplx>(input[i]) = temp[i]; //need this line if the typeT is not complex
-
-                }
-            }
-        else {}
-
+            input[i] = abs(rand_Gaussian(prev_soln[i], dev[i]));
+        }
 
         //prob->normalize(input);
         prob->modulo(input);
@@ -143,16 +108,15 @@ void OptAlg<typeT>::Init_previous(double prev_dev, double new_dev, int psize, ty
 
         pop[p].update_cont(input);
         Cont_fitness(p);
-        }
-
     }
 
-template<typename typeT>
-void OptAlg<typeT>::Cont_fitness(int p) {
+}
+
+void OptAlg::Cont_fitness(int p) {
     int i;
     double fit1[prob->num_fit];
     double fit2[prob->num_fit];
-    typeT soln[num];
+    double soln[num];
 
     pop[p].read_cont(soln);
     prob->avg_fitness(soln, prob->num_repeat, fit1);
@@ -164,18 +128,16 @@ void OptAlg<typeT>::Cont_fitness(int p) {
 
     }
 
-template<typename typeT>
-void OptAlg<typeT>::Best_fitness(int p) {
+void OptAlg::Best_fitness(int p) {
     double fit[prob->num_fit];
-    typeT soln[num];
+    double soln[num];
 
     pop[p].read_best(soln);
     prob->avg_fitness(soln, prob->num_repeat, fit);
     pop[p].write_bestfit(fit);
     }
 
-template<typename typeT>
-void OptAlg<typeT>::update_popfit() {
+void OptAlg::update_popfit() {
     int p;
     for(p = 0; p < pop_size; ++p) {
         Best_fitness(p);
@@ -183,15 +145,13 @@ void OptAlg<typeT>::update_popfit() {
     }
 /*##############################Success Criteria#################################*/
 
-template<typename typeT>
-void OptAlg<typeT>::set_success(int iter, bool goal_in) {
+void OptAlg::set_success(int iter, bool goal_in) {
     success = 0;
     T = iter;
     goal = goal_in;
     }
 
-template<typename typeT>
-bool OptAlg<typeT>::check_success(int t, int D, double fit, double slope, double intercept) {
+bool OptAlg::check_success(int t, int D, double fit, double slope, double intercept) {
     double fit_goal;
     double fit_del = 0;
 
@@ -219,8 +179,7 @@ bool OptAlg<typeT>::check_success(int t, int D, double fit, double slope, double
         }
     }
 
-template<typename typeT>
-void OptAlg<typeT>::linear_fit(int data_size, double *x, double *y, double *slope, double *intercept, double *mean_x) {
+void OptAlg::linear_fit(int data_size, double *x, double *y, double *slope, double *intercept, double *mean_x) {
     int v;
     double sum_x = 0;
     double sum_xx = 0;
@@ -259,8 +218,7 @@ void OptAlg<typeT>::linear_fit(int data_size, double *x, double *y, double *slop
 
     }
 
-template<typename typeT>
-double OptAlg<typeT>::error_interval(double *x, double *y, double mean_x, int data_size, double *SSres, double slope, double intercept) {
+double OptAlg::error_interval(double *x, double *y, double mean_x, int data_size, double *SSres, double slope, double intercept) {
     int i;
     double SSx = 0;
 
@@ -272,8 +230,7 @@ double OptAlg<typeT>::error_interval(double *x, double *y, double mean_x, int da
     return sqrt(*SSres / double(data_size - 2) * (1 / data_size + (pow(x[data_size - 1] - mean_x, 2) / SSx)));
     }
 
-template<typename typeT>
-double OptAlg<typeT>::error_update(int data_size, double *SSres, double *mean_x, double slope, double intercept, double *y, double *x) {
+double OptAlg::error_update(int data_size, double *SSres, double *mean_x, double slope, double intercept, double *y, double *x) {
     int i;
     double SSx = 0;
 
@@ -290,8 +247,7 @@ double OptAlg<typeT>::error_update(int data_size, double *SSres, double *mean_x,
 
 /*quantile calculation*/
 
-template<typename typeT>
-inline int OptAlg<typeT>::sgn(double x) {
+inline int OptAlg::sgn(double x) {
     if(x < 0) {
         return -1;
         }
@@ -303,8 +259,7 @@ inline int OptAlg<typeT>::sgn(double x) {
         }
     }
 
-template<typename typeT>
-inline double OptAlg<typeT>::inv_erf(double x) {
+inline double OptAlg::inv_erf(double x) {
     double a = 0.140012;
     double lnx = log(1 - x * x);
     double temp = sqrt(pow(2.0 / (M_PI * a) + lnx / 2.0, 2) - lnx / a);
@@ -312,13 +267,11 @@ inline double OptAlg<typeT>::inv_erf(double x) {
     return sgn(x) * sqrt(temp - 2.0 / (M_PI * a) - lnx / 2.0);
     }
 
-template<typename typeT>
-inline double OptAlg<typeT>::quantile(double p) { //p is percentile
+inline double OptAlg::quantile(double p) { //p is percentile
     return sqrt(2) * inv_erf(2 * p - 1);
     }
 /*##############################Policy Type#################################*/
-template<typename typeT>
-bool OptAlg<typeT>::check_policy(double error, double sharp) {
+bool OptAlg::check_policy(double error, double sharp) {
     double sd = sqrt(1 / (sharp * sharp) - 1);
     if(error >= M_PI - sd) {
         return 1;
@@ -331,23 +284,13 @@ bool OptAlg<typeT>::check_policy(double error, double sharp) {
 
 
 /*##############################Final Selections#################################*/
-template<typename typeT>
-double OptAlg<typeT>::Final_select(int my_rank, int total_pop, int nb_proc, double *fit, typeT *solution, double *fitarray) {
+double OptAlg::Final_select(int my_rank, int total_pop, int nb_proc, double *fit, double *solution, double *fitarray) {
     double *soln;
     int p, i;
     int indx;
     MPI_Status status;
-    MPI_Datatype MPI_TYPE;
     int tag = 1;
     double global_fit;
-
-    if(typeid(solution[0]) == typeid(double)) {
-        MPI_TYPE = MPI_DOUBLE;
-        }
-    else if(typeid(solution[0]) == typeid(dcmplx)) {
-        MPI_TYPE = MPI_DOUBLE_COMPLEX;
-        }
-    else {}
 
     fit_to_global();//ensuring that global_best contains the solutions
 
@@ -430,10 +373,10 @@ double OptAlg<typeT>::Final_select(int my_rank, int total_pop, int nb_proc, doub
     else {
         if(my_rank == indx % nb_proc) {
             pop[int(indx / nb_proc)].read_global(solution);
-            MPI_Send(&solution[0], num, MPI_TYPE, 0, tag, MPI_COMM_WORLD);
+            MPI_Send(&solution[0], num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
             }
         else if(my_rank == 0) {
-            MPI_Recv(&solution[0], num, MPI_TYPE, indx % nb_proc, tag, MPI_COMM_WORLD, &status);
+            MPI_Recv(&solution[0], num, MPI_DOUBLE, indx % nb_proc, tag, MPI_COMM_WORLD, &status);
             }
         else {}
         }
@@ -444,25 +387,15 @@ double OptAlg<typeT>::Final_select(int my_rank, int total_pop, int nb_proc, doub
     return global_fit;
     }
 
-template<typename typeT>
-double OptAlg<typeT>::avg_Final_select(typeT* solution, int repeat, int my_rank, int total_pop, int nb_proc, double *soln_fit) {
+double OptAlg::avg_Final_select(double* solution, int repeat, int my_rank, int total_pop, int nb_proc, double *soln_fit) {
     MPI_Status status;
-    MPI_Datatype MPI_TYPE;
     int tag = 1;
     double *soln;
     double final_fit;
     int p, i, indx;
-    typeT array[num];
+    double array[num];
     double fit[pop_size];
     double fitarray[prob->num_fit];
-
-    if(typeid(array[0]) == typeid(double)) {
-        MPI_TYPE = MPI_DOUBLE;
-        }
-    else if(typeid(array[0]) == typeid(dcmplx)) {
-        MPI_TYPE = MPI_DOUBLE_COMPLEX;
-        }
-    else {}
 
     fit_to_global();//move solution to global_best array in case we're using DE.
 
@@ -531,10 +464,10 @@ double OptAlg<typeT>::avg_Final_select(typeT* solution, int repeat, int my_rank,
     //get solution from the processor
     if(my_rank == indx % nb_proc) {
         pop[indx / nb_proc].read_global(array);
-        MPI_Send(&array[0], num, MPI_TYPE, 0, tag, MPI_COMM_WORLD);
+        MPI_Send(&array[0], num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
         }
     else if(my_rank == 0) {
-        MPI_Recv(&array[0], num, MPI_TYPE, indx % nb_proc, tag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&array[0], num, MPI_DOUBLE, indx % nb_proc, tag, MPI_COMM_WORLD, &status);
         }
     else {}
 
@@ -551,8 +484,7 @@ double OptAlg<typeT>::avg_Final_select(typeT* solution, int repeat, int my_rank,
 
 /*####################Auxilliary functions####################*/
 
-template<typename typeT>
-double OptAlg<typeT>::rand_Gaussian(double mean, /*the average theta*/
+double OptAlg::rand_Gaussian(double mean, /*the average theta*/
                                     double dev /*deviation for distribution*/
                                    ) {
     /*creating random number using Box-Muller Method/Transformation*/
@@ -573,8 +505,7 @@ double OptAlg<typeT>::rand_Gaussian(double mean, /*the average theta*/
     return (double(rand()) / RAND_MAX - 0.5) * 2 * dev + mean;
     }/*end of rand_Gaussian*/
 
-template<typename typeT>
-void OptAlg<typeT>::dev_gen(double *dev_array, double prev_dev, double new_dev, int cut_off) {
+void OptAlg::dev_gen(double *dev_array, double prev_dev, double new_dev, int cut_off) {
     int i;
     for(i = 0; i < num; ++i) {
         if(i < cut_off) {

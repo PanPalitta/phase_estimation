@@ -9,3 +9,4 @@ time=`cat test_time.dat|awk '{print $2}'|tail -n 5|tr '\n' ' '`
 time_baseline=`cat baseline-time.dat|awk '{print $2}'|tail -n 5|tr '\n' ' '`
 echo "Time:          $time"
 echo "Time baseline: $time_baseline"
+rm test_*dat

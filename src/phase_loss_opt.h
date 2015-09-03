@@ -8,6 +8,7 @@
  * interferometer (loss in fitness() set to other than zero) which is called
  * through avg_Final_select() in OptAlg class.
  * */
+#include <complex>
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -24,7 +25,9 @@
 #include "rng_simple.h"
 #endif
 
-class Phase: public Problem<double> {
+typedef complex<double> dcmplx;
+
+class Phase: public Problem {
     public:
         Phase(const int numvar);
         ~Phase();

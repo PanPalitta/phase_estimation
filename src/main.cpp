@@ -4,6 +4,7 @@
 #include <string>
 #include <typeinfo>
 #include <mpi.h>
+#include <complex>
 
 #include "phase_loss_opt.h"
 #include "mpi_de.h"
@@ -99,8 +100,8 @@ int main(int argc, char **argv) {
         t = 0;
         x[numvar - data_start] = log10(numvar); //collect x data
 
-        Problem<double>* problem = new Phase(numvar);
-        OptAlg<double>* opt = new DE<double>(problem);
+        Problem* problem = new Phase(numvar);
+        OptAlg* opt = new DE(problem);
 
         fitarray = new double[problem->num_fit];
 
