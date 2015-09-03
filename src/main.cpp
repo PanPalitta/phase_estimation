@@ -1,11 +1,12 @@
 #include <cstdlib>
 #include <iostream>
+#include <string>
 #include <typeinfo>
 #include <mpi.h>
 
 #include "phase_loss_opt.h"
 #include "mpi_de.h"
-#include "subfunc.h"
+#include "io.h"
 #include "mpi_pso.h"
 #ifdef CUDA
 #include "rng_gpu.h"
@@ -38,17 +39,21 @@ int main(int argc, char **argv) {
     bool mem_ptype[2] = {false, false};
 
     /*parameter settings*/
-    int pop_size = 20;
-    int N_begin = 4;
-    int N_cut = 5;
-    int N_end = 10;
-    int iter = 100;
-    int iter_begin = 300;
+    int pop_size, N_begin, N_cut, N_end, iter, iter_begin, repeat, seed;
+    string output_filename, time_filename;
+    char const *config_filename;
+    if (argc > 1) {
+        config_filename = argv[1];
+    } else {
+        config_filename = NULL;
+    }
+    read_config_file(config_filename, &pop_size, &N_begin,&N_cut, &N_end, &iter, 
+                     &iter_begin, &repeat, &seed, &output_filename, 
+                     &time_filename);
+
     int T_cut_off = N_cut;
     double prev_dev = 0.01 * M_PI;
     double new_dev = 0.25 * M_PI;
-    int repeat = 10;
-
     int data_start = N_begin;
     int data_end = 94;
     double t_goal = 0.98; //probability for calculating quantile
@@ -71,7 +76,7 @@ int main(int argc, char **argv) {
 #ifdef CUDA
     setDevice(my_rank, nb_proc);
 #endif
-    srand(time(NULL) + my_rank);
+    srand(seed + my_rank);
 
     soln_fit = new double[pop_size]; //create an array to store global fitness from each candidate.
     solution = new double[N_end];
@@ -89,7 +94,7 @@ int main(int argc, char **argv) {
 
 
     if(my_rank == 0) {
-        output_header();   //write header of result files
+        output_header(output_filename.c_str(), time_filename.c_str());
         }
     else {}
 
@@ -209,7 +214,8 @@ int main(int argc, char **argv) {
                 //Bad policy. Don't write anything.
                 }
             else {
-                output_result(numvar, final_fit, solution, start_time);
+                output_result(numvar, final_fit, solution, start_time,
+                              output_filename.c_str(), time_filename.c_str());
                 }
             }
         else {}

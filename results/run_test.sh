@@ -1,6 +1,6 @@
 #/bin/bash
 rm -fr output.dat time.dat
-mpirun -np 8 ./test
+mpirun -np 8 ../src/phase_estimation ../test.cfg
 sharpness=`cat output.dat|awk '{print $2}'|tail -n 5|tr '\n' ' '`
 sharpness_baseline=`cat output-baseline.dat|awk '{print $2}'|tail -n 5|tr '\n' ' '`
 echo "Sharpness:          $sharpness"

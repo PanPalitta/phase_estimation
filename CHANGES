@@ -1,7 +1,8 @@
 Since 0.1:
-  - Implemented basic logic of vectorized random number generation.
-  - Reorganization of time critical subroutines.
-  - Test case added.
+  - New: Implemented basic logic of vectorized random number generation.
+  - New: Reorganization of time critical subroutines.
+  - New: Test case added.
+  - New: Parser of configuration file.
 
 Version 0.1: 2014-11-26
 
