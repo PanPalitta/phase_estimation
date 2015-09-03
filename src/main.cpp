@@ -1,19 +1,8 @@
-#include <cstdlib>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <typeinfo>
-#include <mpi.h>
-#include <complex>
-
 #include "phase_loss_opt.h"
 #include "mpi_optalg.h"
 #include "io.h"
-#include "rng.h"
 
 using namespace std;
-
-typedef complex<double> dcmplx;
 
 int main(int argc, char **argv) {
 
@@ -22,7 +11,6 @@ int main(int argc, char **argv) {
     int nb_proc;
     time_t start_time;
     MPI_Status status;
-    MPI_Datatype MPI_TYPE;
     int tag = 1;
 
     /*variables*/
@@ -108,22 +96,12 @@ int main(int argc, char **argv) {
         if (numvar < N_cut) {
             opt->Init_population(can_per_proc[my_rank]);
         } else {
-            //create candidates according to how many should be on that particular processor.
-            //previous solution must be send from root processor.
-            //set MPI_type ***NEED A GENERAL SOLUTION FOR THIS TASK***
-            if (typeid(solution[0]) == typeid(double)) {
-                MPI_TYPE = MPI_DOUBLE;
-                }
-            else if (typeid(solution[0]) == typeid(dcmplx)) {
-                MPI_TYPE = MPI_DOUBLE_COMPLEX;
-                }
-
             if (my_rank == 0) {
                 for(p = 1; p < nb_proc; ++p) {
-                    MPI_Send(&solution[0], numvar, MPI_TYPE, p, tag, MPI_COMM_WORLD);
+                    MPI_Send(&solution[0], numvar, MPI_DOUBLE, p, tag, MPI_COMM_WORLD);
                     }
             } else {
-                MPI_Recv(&solution[0], numvar, MPI_TYPE, 0, tag, MPI_COMM_WORLD, &status);
+                MPI_Recv(&solution[0], numvar, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
             }
             opt->Init_previous(prev_dev, new_dev, can_per_proc[my_rank], solution);
             //each processor initialize the candidates.

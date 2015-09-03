@@ -1,8 +1,6 @@
 #ifndef CANDIDATE_H
 #define CANDIDATE_H
 
-#include <cstring>
-
 template<typename typeT>
 class Candidate {
     public:
