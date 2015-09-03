@@ -37,9 +37,7 @@ class Problem {
 
 template<typename typeT>
 void Problem<typeT>::modulo(typeT *can1) {
-    int i;
-
-    for(i = 0; i < num; ++i) {
+    for(int i = 0; i < num; ++i) {
         if(dcmplx(can1[i]).real() < dcmplx(lower_bound[i]).real()) {
             dcmplx(can1[i]).real() = dcmplx(lower_bound[i]).real();
             }
@@ -67,13 +65,12 @@ void Problem<typeT>::modulo(typeT *can1) {
 
 template<typename typeT>
 void Problem<typeT>::normalize(typeT *can1) {
-    int i;
     double norm = 0;
-    for(i = 0; i < num; ++i) {
+    for (int i = 0; i < num; ++i) {
         norm += abs(can1[i] * can1[i]);
         }
     norm = sqrt(norm);
-    for(i = 0; i < num; ++i) {
+    for (int i = 0; i < num; ++i) {
         can1[i] = can1[i] / norm;
         }
     }

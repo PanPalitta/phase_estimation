@@ -12,4 +12,5 @@ void read_config_file(char const *filename, int *pop_size, int *N_begin,
                       int *N_cut, int *N_end, int *iter, int *iter_begin, 
                       int *repeat, int *seed, string *output_filename, 
                       string *time_filename);
+
 #endif // IO_H

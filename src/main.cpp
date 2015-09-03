@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <typeinfo>
 #include <mpi.h>
@@ -30,7 +31,7 @@ int main(int argc, char **argv) {
     int numvar;
     double *solution;//the type of this array must correspond to that of the solution of the problem.
     double *fitarray;
-    int p, t, T;
+    int p, t, T=0;
     double final_fit;
     double *soln_fit;
     int *can_per_proc;
@@ -63,12 +64,6 @@ int main(int argc, char **argv) {
     double TSSres, Tmean_x;
     double error;
 
-    if(N_cut < N_begin) {
-        cout << "please select new N_cut>" << N_begin << ":";
-        cin >> N_cut;
-        }
-    else {}
-
     /*start mpi*/
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
@@ -85,72 +80,68 @@ int main(int argc, char **argv) {
     y = new double[N_end - data_start];
     //calculating number of candidate per processor and stores the number in an array.
     can_per_proc = new int[nb_proc];
-    for(p = 0; p < nb_proc; ++p) {
+    for (p = 0; p < nb_proc; ++p) {
         can_per_proc[p] = 0; //make sure the array started with zeroes.
-        }
-    for(p = 0; p < pop_size; ++p) {
+    }
+    for (p = 0; p < pop_size; ++p) {
         can_per_proc[p % nb_proc] += 1;
-        }
+    }
 
 
-    if(my_rank == 0) {
+    if (my_rank == 0) {
         output_header(output_filename.c_str(), time_filename.c_str());
-        }
-    else {}
+    }
 
-    for(numvar = N_begin; numvar <= N_end; ++numvar) {
-        cout << numvar << endl;
+    for (numvar = N_begin; numvar <= N_end; ++numvar) {
+        if (my_rank == 0) {
+            cout << numvar << endl;
+        }
         t = 0;
         x[numvar - data_start] = log10(numvar); //collect x data
 
-        Problem<double>* prob_ptr = new Phase(numvar);
-        OptAlg<double>* opt = new DE<double>(prob_ptr);
+        Problem<double>* problem = new Phase(numvar);
+        OptAlg<double>* opt = new DE<double>(problem);
 
-        fitarray = new double[prob_ptr->num_fit];
+        fitarray = new double[problem->num_fit];
 
         start_time = time(NULL);
 
-        if(numvar < N_cut) {
+        if (numvar < N_cut) {
             opt->Init_population(can_per_proc[my_rank]);
-            }
-        //create candidates according to how many should be on that particular processor.
-        else {
+        } else {
+            //create candidates according to how many should be on that particular processor.
             //previous solution must be send from root processor.
             //set MPI_type ***NEED A GENERAL SOLUTION FOR THIS TASK***
-            if(typeid(solution[0]) == typeid(double)) {
+            if (typeid(solution[0]) == typeid(double)) {
                 MPI_TYPE = MPI_DOUBLE;
                 }
-            else if(typeid(solution[0]) == typeid(dcmplx)) {
+            else if (typeid(solution[0]) == typeid(dcmplx)) {
                 MPI_TYPE = MPI_DOUBLE_COMPLEX;
                 }
-            else {}
 
-            if(my_rank == 0) {
+            if (my_rank == 0) {
                 for(p = 1; p < nb_proc; ++p) {
                     MPI_Send(&solution[0], numvar, MPI_TYPE, p, tag, MPI_COMM_WORLD);
                     }
-                }
-            else {
+            } else {
                 MPI_Recv(&solution[0], numvar, MPI_TYPE, 0, tag, MPI_COMM_WORLD, &status);
-                }
+            }
             opt->Init_previous(prev_dev, new_dev, can_per_proc[my_rank], solution);
             //each processor initialize the candidates.
-            }
+        }
 
         opt->put_to_best(my_rank, pop_size, nb_proc);
 
         //setting the success criterion
-        if(numvar < T_cut_off) {
+        if (numvar < T_cut_off) {
             opt->set_success(iter_begin, 0);
             T = iter_begin;
-            }
-        else if(numvar >= data_end) {
+        } else if (numvar >= data_end) {
             opt->set_success(1000, 1);  //stop after perform 1000 iteration or exceeding the goal.
-            }
-        else {
+        } else {
             opt->set_success(iter, 0);
             T = iter;
-            }
+        }
 
         do {
             ++t;
@@ -174,83 +165,90 @@ int main(int argc, char **argv) {
             if(numvar == N_cut - 1) {
                 if(t == T - 1) {
                     opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
-                    cout << fitarray[1] << endl;
+                    if (my_rank == 0) {
+                        cout << fitarray[1] << endl;
+                    }
                     mem_ptype[0] = opt->policy_type;
-                    cout << "type[0]=" << mem_ptype[0] << endl;
+                    if (my_rank == 0) {
+                        cout << "type[0]=" << mem_ptype[0];
+                    }
                     if(mem_ptype[0] == 1) {
                         numvar = numvar - 1;
                         break;
-                        }
                     }
                 }
-            else if(numvar == N_cut) {
+            } else if(numvar == N_cut) {
                 if(t == T / 3) {
                     opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
-                    cout << fitarray[1] << endl;
+                    if (my_rank == 0) {
+                        cout << fitarray[1] << endl;
+                    }
                     mem_ptype[1] = opt->policy_type;
-                    cout << "type[1]=" << mem_ptype[1] << endl;
+                    if (my_rank == 0) {
+                        cout << "type[1]=" << mem_ptype[1] << endl;
+                    }
                     if(mem_ptype[0] | mem_ptype[1]) {
                         //the policy is bad
                         //reset the policy found in numvar=N_cut-1
-                        cout << "numvar=" << numvar << " is set to";
-                        numvar = N_cut - 2;
-                        cout << numvar << endl;
-                        break;
+                        if (my_rank == 0) {
+                            cout << "numvar=" << numvar << " is set to";
                         }
+                        numvar = N_cut - 2;
+                        if (my_rank == 0) {
+                            cout << numvar << endl;
+                        }
+                        break;
                     }
                 }
-            else {}
+            }
 
 
             opt->success = opt->check_success(t, numvar, final_fit, slope, intercept);
 
             }
-        while(opt->success == 0);
+        while (opt->success == 0);
 
         final_fit = opt->avg_Final_select(solution, repeat, my_rank, pop_size, nb_proc, soln_fit);
 
-        if(my_rank == 0) {
-            if((numvar != 4) && (mem_ptype[0] | mem_ptype[1])) {
-                //Bad policy. Don't write anything.
-                }
-            else {
+        if (my_rank == 0) {
+            if ((numvar == 4) || (!mem_ptype[0] && !mem_ptype[1])) {
                 output_result(numvar, final_fit, solution, start_time,
                               output_filename.c_str(), time_filename.c_str());
-                }
             }
-        else {}
+        }
         //collect data for linear fit
-        if(numvar >= data_start && numvar < data_end) {
+        if (numvar >= data_start && numvar < data_end) {
             y[numvar - data_start] = log10(pow(final_fit, -2) - 1);
-            }
-        else {}
+        }
 
-        if(numvar == data_end - 1) {
+        if (numvar == data_end - 1) {
             opt->linear_fit(data_size, x, y, &slope, &intercept, &mean_x);
             t_goal = (t_goal + 1) / 2;
             t_goal = opt->quantile(t_goal);
             error = opt->error_interval(x, y, mean_x, data_size, &SSres, slope, intercept);
             error = error * t_goal;
-            cout << slope << "," << intercept << endl;
-            //cout<<numvar<<":error="<<error<<endl;
+            if (my_rank == 0) {
+                cout << slope << "," << intercept << endl;
             }
-        else if (numvar >= data_end) {
+            //cout<<numvar<<":error="<<error<<endl;
+        } else if (numvar >= data_end) {
             SSres = TSSres;
             mean_x = Tmean_x;
             ++data_size;
-            }
-        else {}
+        }
 
         //testing loss
-        if(my_rank == 0) {
-            prob_ptr->fitness(solution, fitarray);
+        if (my_rank == 0) {
+            problem->fitness(solution, fitarray);
             final_fit = fitarray[0];
-            cout << numvar << "\t" << final_fit << endl;
+            if (my_rank == 0) {
+                cout << numvar << "\t" << final_fit << endl;
             }
-
-        opt->~OptAlg();
-        prob_ptr->~Problem();
         }
+
+        delete opt;
+        delete problem;
+    }
 
     delete [] solution;
     delete [] soln_fit;
@@ -259,7 +257,9 @@ int main(int argc, char **argv) {
     delete [] can_per_proc;
 
     MPI_Finalize();
-    cout << "done" << endl;
+    if (my_rank == 0) {
+        cout << "done" << endl;
+    }
 
     return 0;
-    }
+}

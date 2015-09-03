@@ -106,7 +106,10 @@ void read_config_file(char const *filename, int *pop_size, int *N_begin,
        } else if (it->first == "random_seed") {
            istringstream (it->second) >> *seed;
        } else {
-           throw runtime_error("Unknown config option: " + it->first);
+
        }
     }
+    if(N_cut < N_begin) {
+        throw runtime_error("Select new N_cut");
+        }
 }
