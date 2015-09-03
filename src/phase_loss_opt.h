@@ -20,7 +20,7 @@
 #include "rng_gpu.h"
 #elif defined(VSL)
 #include "rng_vsl.h"
-#else*/
+#else
 #include "rng_simple.h"
 #endif
 
@@ -41,7 +41,7 @@ class Phase: public Problem<double> {
         RngGpu *rng;
 #elif defined(VSL)
         RngVsl *rng;
-#else*/
+#else
         RngSimple *rng;
 #endif
 

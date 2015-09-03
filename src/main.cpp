@@ -29,13 +29,13 @@ int main(int argc, char **argv) {
     int numvar;
     double *solution;//the type of this array must correspond to that of the solution of the problem.
     double *fitarray;
-    int p, t, T, i;
+    int p, t, T;
     double final_fit;
     double *soln_fit;
     int *can_per_proc;
     double *x;
     double *y;
-    bool mem_ptype[2];
+    bool mem_ptype[2] = {false, false};
 
     /*parameter settings*/
     int pop_size = 20;
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
     double slope = 0.0, intercept = 0.0;
     double mean_x = 0.0, SSres = 0.0;
     double TSSres, Tmean_x;
-    double fit_goal, error;
+    double error;
 
     if(N_cut < N_begin) {
         cout << "please select new N_cut>" << N_begin << ":";
@@ -163,7 +163,6 @@ int main(int argc, char **argv) {
                 Tmean_x = mean_x;
                 //error=opt->error_update(data_size,&TSSres,&Tmean_x,slope,intercept,y,x);
                 //cout<<numvar<<":error="<<error<<","<<abs(y[numvar-data_start]-slope*x[numvar-data_start]-intercept)<<endl;
-                fit_goal = 1 / sqrt(pow(10.0, intercept) * pow(double(numvar), slope) + 1);
                 }
 
             //checking policy type
