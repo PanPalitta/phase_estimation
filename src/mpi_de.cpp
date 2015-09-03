@@ -1,4 +1,4 @@
-#include "mpi_de.h"
+#include "mpi_optalg.h"
 
 void DE::put_to_best(int my_rank, int total_pop, int nb_proc) {
     int p;

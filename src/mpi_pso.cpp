@@ -1,4 +1,4 @@
-#include "mpi_pso.h"
+#include "mpi_optalg.h"
 
 void PSO::write_param(double *param_array) {
     w = param_array[1];

@@ -3,20 +3,20 @@
 #include <vector>
 #include "mkl_vsl.h"
 
-#include "rng_vsl.h"
+#include "rng.h"
 
 #define BRNG VSL_BRNG_MCG31
 #define METHOD VSL_RNG_METHOD_GAUSSIAN_ICDF
-#define SEED 0
 
 VSLStreamStatePtr stream;
 
 using namespace std;
 
-RngVsl::RngVsl(int _n_urandom_numbers, int _n_grandom_numbers):
+RngVsl::RngVsl(int _n_urandom_numbers, int _n_grandom_numbers, int seed, 
+               int rank):
     n_urandom_numbers(_n_urandom_numbers),
     n_grandom_numbers(_n_urandom_numbers) {
-    vslNewStream(&stream, BRNG, SEED);
+    vslNewStream(&stream, BRNG, seed + rank);
     urandom_numbers = new double[n_urandom_numbers];
     index_urandom_numbers = 0;
     grandom_numbers = new double[n_grandom_numbers];

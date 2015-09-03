@@ -7,12 +7,9 @@
 #include <complex>
 
 #include "phase_loss_opt.h"
-#include "mpi_de.h"
+#include "mpi_optalg.h"
 #include "io.h"
-#include "mpi_pso.h"
-#ifdef CUDA
-#include "rng_gpu.h"
-#endif
+#include "rng.h"
 
 using namespace std;
 
@@ -69,11 +66,12 @@ int main(int argc, char **argv) {
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &nb_proc);
-#ifdef CUDA
-    setDevice(my_rank, nb_proc);
-#endif
-    srand(seed + my_rank);
-
+    int num_repeat = 10 * N_end * N_end;
+    //Maximum number of uniform random numbers we will use in one go
+    int n_urandom_numbers = num_repeat + 2 * num_repeat * N_end;
+    //Maximum number of Gaussian random numbers we will use in one go
+    int n_grandom_numbers = 3 * num_repeat * N_end;
+    Rng *rng = new Rng(n_urandom_numbers, n_grandom_numbers, seed, my_rank);
     soln_fit = new double[pop_size]; //create an array to store global fitness from each candidate.
     solution = new double[N_end];
 
@@ -100,7 +98,7 @@ int main(int argc, char **argv) {
         t = 0;
         x[numvar - data_start] = log10(numvar); //collect x data
 
-        Problem* problem = new Phase(numvar);
+        Problem* problem = new Phase(numvar, rng);
         OptAlg* opt = new DE(problem);
 
         fitarray = new double[problem->num_fit];
@@ -250,7 +248,7 @@ int main(int argc, char **argv) {
         delete opt;
         delete problem;
     }
-
+    delete rng;
     delete [] solution;
     delete [] soln_fit;
     delete [] x;

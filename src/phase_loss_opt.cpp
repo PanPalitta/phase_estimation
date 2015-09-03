@@ -11,7 +11,7 @@
 
 #include "phase_loss_opt.h"
 
-Phase::Phase(const int numvar) {
+Phase::Phase(const int numvar, Rng *rng): rng(rng) {
     int i;
     lower = 0;
     upper = 2 * M_PI;
@@ -34,17 +34,6 @@ Phase::Phase(const int numvar) {
     state = new dcmplx[num + 1];
     update0 = new dcmplx[num + 1];
     update1 = new dcmplx[num + 1];
-    //Maximum number of uniform random numbers we will use in one go
-    int n_urandom_numbers = num_repeat + 2 * num_repeat * num;
-    //Maximum number of Gaussian random numbers we will use in one go
-    int n_grandom_numbers = 3 * num_repeat * num;
-#ifdef CUDA
-    rng = new RngGpu(n_urandom_numbers, n_grandom_numbers);
-#elif defined(VSL)
-    rng = new RngVsl(n_urandom_numbers, n_grandom_numbers);
-#else
-    rng = new RngSimple(n_urandom_numbers, n_grandom_numbers);
-#endif
     }
 
 Phase::~Phase() {
@@ -54,7 +43,6 @@ Phase::~Phase() {
     delete[] input_state;
     delete[] sqrtfac_mat;
     delete[] overfac_mat;
-    delete rng;
     }
 /*
 double Phase::fitness(double *soln) {

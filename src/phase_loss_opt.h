@@ -17,19 +17,13 @@
 #define THETA_DEV 0.0 //M_PI;//phase noise level
 
 #include "problem.h"
-#ifdef CUDA
-#include "rng_gpu.h"
-#elif defined(VSL)
-#include "rng_vsl.h"
-#else
-#include "rng_simple.h"
-#endif
+#include "rng.h"
 
 typedef complex<double> dcmplx;
 
 class Phase: public Problem {
     public:
-        Phase(const int numvar);
+        Phase(const int numvar, Rng *rng);
         ~Phase();
 
         //double fitness(double *soln);
@@ -40,14 +34,8 @@ class Phase: public Problem {
         double upper;
         //array to avoid calculation of expensive sqrt calls for integers
         double *sqrt_cache;
-#ifdef CUDA
-        RngGpu *rng;
-#elif defined(VSL)
-        RngVsl *rng;
-#else
-        RngSimple *rng;
-#endif
-
+        Rng *rng;
+        
         //variables for WK state generation
         dcmplx *input_state;
         double *sqrtfac_mat; //matrix to keep values of square roots of factorials
