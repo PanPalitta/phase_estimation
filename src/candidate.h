@@ -1,10 +1,6 @@
 #ifndef CANDIDATE_H
 #define CANDIDATE_H
 
-#include <cstring>
-
-typedef complex<double> dcmplx;
-
 template<typename typeT>
 class Candidate {
     public:

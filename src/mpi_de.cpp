@@ -1,74 +1,39 @@
-#ifndef DE_H
-#define DE_H
-
 #include "mpi_optalg.h"
 
-template <typename typeT>
-class DE : public OptAlg<typeT> {
-    public:
-        DE() {};
-        DE(Problem<typeT> *problem_ptr): F(0.1), Cr(0.6) {
-            this->prob = problem_ptr;
-            this->num = this->prob->num;
-            }
-        ~DE() {};
-
-        void put_to_best(int my_rank, int total_pop, int nb_proc);
-        void combination(int my_rank, int total_pop, int nb_proc);
-        void selection(int my_rank, int total_pop, int nb_proc);
-        void write_param(double *param_array);
-        void fit_to_global();
-        void find_global(int my_rank, int total_pop, int nb_proc) {};
-
-    private:
-        double F, Cr;
-    };
-
-template <typename typeT>
-void DE<typeT>::put_to_best(int my_rank, int total_pop, int nb_proc) {
+void DE::put_to_best(int my_rank, int total_pop, int nb_proc) {
     int p;
     for(p = 0; p < this->pop_size; ++p) { //pop_size here is the number of candidates assigned for a processor from the initialization.
         this->pop[p].update_best();
         }
     }
 
-template <typename typeT>
-void DE<typeT>::write_param(double *param_array) {
+void DE::write_param(double *param_array) {
     F = param_array[1];
     Cr = param_array[2];
     }
 
-template <typename typeT>
-void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
+void DE::combination(int my_rank, int total_pop, int nb_proc) {
     MPI_Status status;
-    MPI_Datatype MPI_TYPE;
     int tag = 1;
     int i, f, p;
     double coin;
     int fam_size = 3;
-    typeT all_soln[total_pop][this->num];
+    double all_soln[total_pop][this->num];
     int fam[fam_size];
-    typeT input[this->num];
-    typeT can[this->num];
+    double input[this->num];
+    double can[this->num];
 
     srand(0 + my_rank);
 
-    if(typeid(input[0]) == typeid(double)) {
-        MPI_TYPE = MPI_DOUBLE;
-        }
-    else if(typeid(input[0]) == typeid(dcmplx)) {
-        MPI_TYPE = MPI_DOUBLE_COMPLEX;
-        }
-    else {}
     //get the solution from all processor to root ***POTENTIAL BOTTLENECK***
     for(p = 0; p < total_pop; ++p) {
         if(p % nb_proc != 0) { //if candidate is not in root, send the solution to root.
             if(my_rank == p % nb_proc) {
                 this->pop[int(p / nb_proc)].read_best(input);
-                MPI_Send(&input, this->num, MPI_TYPE, 0, tag, MPI_COMM_WORLD);
+                MPI_Send(&input, this->num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
                 }
             else if(my_rank == 0) {
-                MPI_Recv(&input, this->num, MPI_TYPE, p % nb_proc, tag, MPI_COMM_WORLD, &status);
+                MPI_Recv(&input, this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD, &status);
                 for(i = 0; i < this->num; ++i) {
                     all_soln[p][i] = input[i];
                     }
@@ -124,11 +89,11 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
                     }
                 }
             //send the new candidate back
-            MPI_Send(&can, this->num, MPI_TYPE, p % nb_proc, tag, MPI_COMM_WORLD);
+            MPI_Send(&can, this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
             }//my_rank==0
 
         if(my_rank == p % nb_proc) { //receive and store the new candidates in contender
-            MPI_Recv(&can, this->num, MPI_TYPE, 0, tag, MPI_COMM_WORLD, &status);
+            MPI_Recv(&can, this->num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
             //this->prob->normalize(input);
             this->prob->modulo(can);
             this->pop[int(p / nb_proc)].update_cont(can);
@@ -145,8 +110,7 @@ void DE<typeT>::combination(int my_rank, int total_pop, int nb_proc) {
     MPI_Barrier(MPI_COMM_WORLD);
     }
 
-template <typename typeT>
-void DE<typeT>::selection(int my_rank, int total_pop, int nb_proc) {
+void DE::selection(int my_rank, int total_pop, int nb_proc) {
     int p;
     for(p = 0; p < this->pop_size; ++p) {
         if(this->pop[p].read_bestfit(0) < this->pop[p].read_contfit(0)) {
@@ -159,14 +123,10 @@ void DE<typeT>::selection(int my_rank, int total_pop, int nb_proc) {
         }
     };
 
-template <typename typeT>
-void DE<typeT>::fit_to_global() {
+void DE::fit_to_global() {
     int p;
     for(p = 0; p < this->pop_size; ++p) {
         this->pop[p].put_to_global();
         //cout<<p<<":"<<this->pop[p].read_globalfit(0)<<","<<this->pop[p].read_globalfit(1)<<endl;
         }
     }
-
-
-#endif // DE_H

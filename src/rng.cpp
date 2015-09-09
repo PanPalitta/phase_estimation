@@ -2,9 +2,11 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "rng_simple.h"
+#include "rng.h"
 
-RngSimple::RngSimple(int n_urandom_numbers, int n_grandom_numbers) {
+RngSimple::RngSimple(int n_urandom_numbers, int n_grandom_numbers, int seed, 
+                     int rank) {
+    srand(seed + rank);
     }
 
 RngSimple::~RngSimple() {

@@ -1,7 +1,11 @@
 Since 0.1:
-  - Implemented basic logic of vectorized random number generation.
-  - Reorganization of time critical subroutines.
-  - Test case added.
+
+  - New: Implemented basic logic of vectorized random number generation.
+  - New: Test case added.
+  - New: Parser of configuration file.
+  - Changed: Complex type is restricted to phase_loss_opt.
+  - Changed: Reorganization of time critical subroutines.
+  - Changed: Simplified RNG interface.
 
 Version 0.1: 2014-11-26
 

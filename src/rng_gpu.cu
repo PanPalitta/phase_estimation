@@ -1,10 +1,11 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <mpi.h>
 #include <cuda.h>
 #include <curand.h>
 
-#include "rng_gpu.h"
+#include "rng.h"
 
 using namespace std;
 
@@ -84,12 +85,14 @@ void setDevice(int commRank, int commSize) {
     cudaDeviceProp devProp;
     cudaGetDeviceProperties(&devProp, device);
     cout <<  device << " " << devProp.name << " Compute Capability: " << devProp.major << "." << devProp.minor << "\n";
-    }
+}
 
-RngGpu::RngGpu(int _n_urandom_numbers, int _n_grandom_numbers):
+RngGpu::RngGpu(int _n_urandom_numbers, int _n_grandom_numbers, int seed, int rank):
     n_urandom_numbers(_n_urandom_numbers),
     n_grandom_numbers(_n_grandom_numbers) {
-
+    int nb_proc;
+    MPI_Comm_size(MPI_COMM_WORLD, &nb_proc);
+    setDevice(rank, nb_proc);
     CUDA_CALL(cudaMallocHost((void **)&urandom_numbers,
                              n_urandom_numbers * sizeof(double)));
     CUDA_CALL(cudaMallocHost((void **)&grandom_numbers,
@@ -103,7 +106,7 @@ RngGpu::RngGpu(int _n_urandom_numbers, int _n_grandom_numbers):
     /* Create pseudo-random number generator */
     CURAND_CALL(curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT));
     /* Set seed */
-    CURAND_CALL(curandSetPseudoRandomGeneratorSeed(gen, 1234ULL));
+    CURAND_CALL(curandSetPseudoRandomGeneratorSeed(gen, seed));
     CURAND_CALL(curandGenerateUniformDouble(gen, dev_urandom_numbers,
                                             n_urandom_numbers));
     CURAND_CALL(curandGenerateNormalDouble(gen, dev_grandom_numbers,
