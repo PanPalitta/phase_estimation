@@ -12,6 +12,7 @@
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <stdexcept>
 
 #define DEV_N 0.0 //level of noise in operator
 #define THETA_DEV 0.0 //M_PI;//phase noise level
