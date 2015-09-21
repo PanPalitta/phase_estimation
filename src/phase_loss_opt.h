@@ -28,8 +28,9 @@ class Phase: public Problem {
 
         //double fitness(double *soln);
         void avg_fitness(double *soln, const int K, double *fitarray);
+		void boundary(double *can1);
 
-    private:
+//    private:
         double lower;
         double upper;
         //array to avoid calculation of expensive sqrt calls for integers

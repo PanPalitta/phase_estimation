@@ -12,11 +12,13 @@ class Problem {
             }
 
         virtual void fitness(double *soln, double *fitarray) {
-            //return 0;
+            //return 0;//Do we still need this here?
             }
         virtual void avg_fitness(double *soln, int K, double *fitarray) {
             //return 0;   //K is the number of samples to calculate the average
             }
+		virtual void boundary(double *can1){
+			}
 
         double *lower_bound;
         double *upper_bound;
@@ -24,11 +26,6 @@ class Problem {
         int num; //number of variables in the problem
         int num_repeat; //number of repeats (calculated from num of var)
         int num_fit; //number of fitness
-
-        /*functions that don't need to be linked to specific problems*/
-        void modulo(double *can1);
-        void normalize(double *can1);
-
     };
 
 #endif // PROBLEM_H
