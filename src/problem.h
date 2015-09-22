@@ -17,8 +17,8 @@ class Problem {
         virtual void avg_fitness(double *soln, int K, double *fitarray) {
             //return 0;   //K is the number of samples to calculate the average
             }
-		virtual void boundary(double *can1){
-			}
+        virtual void boundary(double *can1) {
+            }
 
         double *lower_bound;
         double *upper_bound;
