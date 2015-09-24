@@ -12,6 +12,10 @@
 #include "phase_loss_opt.h"
 
 Phase::Phase(const int numvar, Rng *rng): rng(rng) {
+    if(numvar <= 0) {
+        throw invalid_argument("numvar<=0. Instantiating Phase fails.");
+        }
+
     int i;
     lower = 0;
     upper = 2 * M_PI;
@@ -44,48 +48,6 @@ Phase::~Phase() {
     delete[] sqrtfac_mat;
     delete[] overfac_mat;
     }
-/*
-double Phase::fitness(double *soln) {
-    const double loss = 0.2;//loss level
-    const int K = 10*num*num;
-    dcmplx sharp(0.0, 0.0);
-    bool dect_result;
-    double PHI, phi, coin, PHI_in;
-    int m, k, d;
-
-    WK_state();
-    for(k=0; k<K; ++k) {
-        phi = double(rand())/RAND_MAX*(upper-lower)+lower;
-        PHI = 0;
-        //copy input state: the optimal solution across all compilers is memcpy:
-        //nadeausoftware.com/articles/2012/05/c_c_tip_how_copy_memory_quickly
-	cout<<"state copied"<<endl;
-        memcpy(state, input_state, (num+1)*sizeof(dcmplx));
-        //measurement
-        d = 0;
-        for (m=0; m<num; ++m) {
-            //randomly decide whether loss occurs
-            coin = double(rand())/RAND_MAX;
-            if(coin<=loss) {
-                state_loss(num-m);//update only the state using loss function
-            } else {
-                PHI_in = rand_Gaussian(PHI, THETA_DEV);
-                PHI_in = mod_2PI(PHI_in);//noisy PHI
-                dect_result = noise_outcome(phi, PHI_in, num-m);
-                //dect_result=outcome(phi,PHI_in,num-m);
-                if(dect_result == 0) {
-                    PHI = PHI-soln[d++];
-                } else {
-                    PHI = PHI+soln[d++];
-                }
-                PHI = mod_2PI(PHI);
-            }
-        }
-        sharp.real()=sharp.real()+cos(phi-PHI);
-        sharp.imag()=sharp.imag()+sin(phi-PHI);
-    }
-    return abs(sharp)/double(K);
-}*/
 
 void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
     const double loss = 0.0;//loss level
@@ -96,9 +58,7 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
     double error = 0.0;
 
     WK_state();
-    //cout << "HERE " << K << "\n";
     for(k = 0; k < K; ++k) {
-        //cout << k << endl;
         phi = rng->next_urand() * (upper - lower) + lower;
         PHI = 0;
         //copy input state: the optimal solution across all compilers is memcpy:
@@ -121,7 +81,6 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
                 PHI_in = rng->next_grand(PHI, THETA_DEV);
                 PHI_in = mod_2PI(PHI_in);//noisy PHI
                 dect_result = noise_outcome(phi, PHI_in, num - m);
-                //dect_result = outcome(phi,PHI_in,num-m);
                 if (dect_result == 0) {
                     PHI = PHI - soln[d++];
                     }
@@ -140,23 +99,57 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
 
     }
 
-/*private functions*/
-/*########### Generating Input State ###########*/
-/*Aux functions*/
-inline void Phase::one_over_fac(double *over_mat) { //calculate one over factorial matrix
-    int i;
-    over_mat[0] = 1;
-    for (i = 1; i <= num; ++i) {
-        over_mat[i] = over_mat[i - 1] / i;
-        }//end i
+void Phase::boundary(double *can1) {
+    for(int i = 0; i < num; ++i) {
+        if(can1[i] < lower_bound[i]) {
+            can1[i] = lower_bound[i];
+            }
+        else if (can1[i] > upper_bound[i]) {
+            can1[i] = upper_bound[i];
+            }
+        }
     }
 
-inline void Phase::sqrtfac(double *fac_mat) { //calculate sqrt of factorial matrix
-    int i;
-    fac_mat[0] = 1;
-    for (i = 1; i <= num; ++i) {
-        fac_mat[i] = fac_mat[i - 1] * sqrt_cache[i];
-        }//end i
+/*private functions*/
+/*########### Generating Input State ###########*/
+/*Generation function*/
+void Phase::WK_state() {
+    const double beta = M_PI / 2;
+    const double cosN = pow(cos(beta / 2), num);
+    tan_beta = tan(beta / 2);
+
+    int n, k;
+    double n_part[num + 1];
+    double k_part[num + 1];
+    double s_part;
+    double temp;
+
+    sqrtfac(sqrtfac_mat); //initializing
+    one_over_fac(overfac_mat); //initializing
+
+    /*factors in d_matrix calculated*/
+    //calculating n_parts and k_parts in
+    for (n = 0; n <= num; ++n) {
+        n_part[n] = pow(-1.0, n) * sqrtfac_mat[n] * sqrtfac_mat[num - n] * cosN * pow(tan_beta, n);
+        }
+    for (k = 0; k <= num; ++k) {
+        k_part[k] = 1 / pow(-1.0, k) * sqrtfac_mat[k] * sqrtfac_mat[num - k] * pow(1 / tan_beta, k);
+        }
+
+    for (n = 0; n <= num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
+        temp = 0;
+        input_state[n].real() = 0;
+        input_state[n].imag() = 0;
+        for (k = 0; k <= num; ++k) {
+            s_part = cal_spart(n, k, num);
+            temp = s_part * k_part[k] * sin((k + 1) * M_PI / (num + 2));
+            input_state[n].real() = input_state[n].real() + temp * cos(M_PI / 2.0 * (k - n));
+            input_state[n].imag() = input_state[n].imag() + temp * sin(M_PI / 2.0 * (k - n));
+            }//end k
+        // FIXED:This correction corrects the probability overshoot.
+        input_state[n].real() = input_state[n].real() * n_part[n] / sqrt(num / 2.0 + 1);
+        input_state[n].imag() = input_state[n].imag() * n_part[n] / sqrt(num / 2.0 + 1);
+        }//end n
     }
 
 inline double Phase::cal_spart(const int n, const int k, const int N) {
@@ -190,46 +183,20 @@ inline double Phase::cal_spart(const int n, const int k, const int N) {
     return s_part;
     }
 
+inline void Phase::one_over_fac(double *over_mat) { //calculate one over factorial matrix
+    int i;
+    over_mat[0] = 1;
+    for (i = 1; i <= num; ++i) {
+        over_mat[i] = over_mat[i - 1] / i;
+        }//end i
+    }
 
-/*Generation function*/
-void Phase::WK_state() {
-    const double beta = M_PI / 2;
-    const double cosN = pow(cos(beta / 2), num);
-    tan_beta = tan(beta / 2);
-
-    int n, k;
-    double n_part[num + 1];
-    double k_part[num + 1];
-    double s_part;
-    double temp;
-    //double total=0;
-
-    sqrtfac(sqrtfac_mat); //initializing
-    one_over_fac(overfac_mat); //initializing
-
-    /*factors in d_matrix calculated*/
-    //calculating n_parts and k_parts in
-    for (n = 0; n <= num; ++n) {
-        n_part[n] = pow(-1.0, n) * sqrtfac_mat[n] * sqrtfac_mat[num - n] * cosN * pow(tan_beta, n);
-        }
-    for (k = 0; k <= num; ++k) {
-        k_part[k] = 1 / pow(-1.0, k) * sqrtfac_mat[k] * sqrtfac_mat[num - k] * pow(1 / tan_beta, k);
-        }
-
-    for (n = 0; n <= num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
-        temp = 0;
-        input_state[n].real() = 0;
-        input_state[n].imag() = 0;
-        for (k = 0; k <= num; ++k) {
-            s_part = cal_spart(n, k, num);
-            temp = s_part * k_part[k] * sin((k + 1) * M_PI / (num + 2));
-            input_state[n].real() = input_state[n].real() + temp * cos(M_PI / 2.0 * (k - n));
-            input_state[n].imag() = input_state[n].imag() + temp * sin(M_PI / 2.0 * (k - n));
-            }//end k
-        // FIXED:This correction corrects the probability overshoot.
-        input_state[n].real() = input_state[n].real() * n_part[n] / sqrt(num / 2.0 + 1);
-        input_state[n].imag() = input_state[n].imag() * n_part[n] / sqrt(num / 2.0 + 1);
-        }//end n
+inline void Phase::sqrtfac(double *fac_mat) { //calculate sqrt of factorial matrix
+    //check array size
+    fac_mat[0] = 1;
+    for (int i = 1; i <= num; ++i) {
+        fac_mat[i] = fac_mat[i - 1] * sqrt_cache[i];
+        }//end i
     }
 
 /*########### Measurement Functions ###########*///Measurement function
@@ -296,36 +263,33 @@ inline bool Phase::noise_outcome(const double phi, const double PHI, const int N
     const dcmplx U10(cos_theta, -oper_n2 * sin_theta);
     const dcmplx U11(sin_theta * oper_n1, sin_theta * oper_n0);
     int n;
-    double prob0 = 0.0, prob1 = 0.0;
+    double prob = 0.0;
     for (n = 0; n < N; ++n) {
         //if C_0 is measured
         update0[n] = state[n + 1] * U00 * sqrt_cache[n + 1] + state[n] * U01 * sqrt_cache[N - n];
-        prob0 += abs(update0[n] * conj(update0[n]));
-        //if C_1 is measured
-        //This is cache-optimized: we update state[n] in-place
-        //state[n] = state[n+1]*U10*sqrt_cache[n+1]-state[n]*U11*sqrt_cache[N-n];
-        //prob1 += abs(state[n]*conj(state[n]));
+        prob += abs(update0[n] * conj(update0[n]));
         }
 
-    if (rng->next_urand() <= prob0) {
+    if (rng->next_urand() <= prob) {
         //measurement outcome is 0
         state[N] = 0;
-        prob0 = 1.0 / sqrt(prob0);
+        prob = 1.0 / sqrt(prob);
         for(n = 0; n < N; ++n) {
-            state[n] = update0[n] * prob0;
+            state[n] = update0[n] * prob;
             }
         return 0;
         }
     else {
         //measurement outcome is 1
+        prob = 0;
         for(n = 0; n < N; ++n) {
             state[n] = state[n + 1] * U10 * sqrt_cache[n + 1] - state[n] * U11 * sqrt_cache[N - n];
-            prob1 += abs(state[n] * conj(state[n]));
+            prob += abs(state[n] * conj(state[n]));
             }
         state[N] = 0;
-        prob1 = 1.0 / sqrt(prob1);
+        prob = 1.0 / sqrt(prob);
         for(n = 0; n < N; ++n) {
-            state[n] *= prob1;
+            state[n] *= prob;
             }
         return 1;
         }
@@ -333,11 +297,17 @@ inline bool Phase::noise_outcome(const double phi, const double PHI, const int N
 
 inline void Phase::state_loss(const int N) {
     //state update if the photon is loss
+    double total = 0;
     double factor = 1 / sqrt(2 * N);
     for(int n = 0; n < N; ++n) {
         state[n] = (state[n] * sqrt_cache[N - n] + state[n + 1] * sqrt_cache[n + 1]) * factor;
+        total += state[n].real() * state[n].real() + state[n].imag() * state[n].imag();
         }
     state[N] = 0;
+    //Necessary state renormalization
+    for(int n = 0; n < N; ++n) {
+        state[n] = state[n] / sqrt(total);
+        }
     }
 
 inline double Phase::mod_2PI(double PHI) {

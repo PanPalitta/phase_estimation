@@ -1,6 +1,10 @@
 #ifndef CANDIDATE_H
 #define CANDIDATE_H
 
+#include <stdexcept>
+
+using namespace std;
+
 template<typename typeT>
 class Candidate {
     public:
@@ -60,7 +64,7 @@ class Candidate {
                 }
             }
 
-    private:
+//    private:
         int num;
         int num_fit;
         typeT *can_best;
@@ -87,6 +91,12 @@ Candidate<typeT>::~Candidate() {
 
 template<typename typeT>
 void Candidate<typeT>::init_can(int numvar, int fit_size) {
+    if(numvar <= 0) {
+        throw out_of_range("numvar is not positive.");
+        }
+    if(fit_size <= 0) {
+        throw invalid_argument("fit size is not positive");
+        }
     num = numvar;
     can_best = new typeT[num];
     contender = new typeT[num];

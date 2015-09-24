@@ -95,7 +95,7 @@ void DE::combination(int my_rank, int total_pop, int nb_proc) {
         if(my_rank == p % nb_proc) { //receive and store the new candidates in contender
             MPI_Recv(&can, this->num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
             //this->prob->normalize(input);
-            this->prob->modulo(can);
+            this->prob->boundary(can);
             this->pop[int(p / nb_proc)].update_cont(can);
             }
 

@@ -45,8 +45,7 @@ void OptAlg::Init_previous(double prev_dev, double new_dev, int psize, double *p
             input[i] = abs(rand_Gaussian(prev_soln[i], dev[i]));
         }
 
-        //prob->normalize(input);
-        prob->modulo(input);
+        prob->boundary(input);
         //store it in candidate object
         pop[p].init_can(num, prob->num_fit);
 

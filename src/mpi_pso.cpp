@@ -183,7 +183,7 @@ void PSO::combination(int my_rank, int total_pop, int nb_proc) {
                 }
             }
         //this->prob->normalize(new_pos);
-        this->prob->modulo(new_pos);
+        this->prob->boundary(new_pos);
         this->pop[p].update_cont(new_pos);
         this->pop[p].update_vel(vel);
         this->Cont_fitness(p);
