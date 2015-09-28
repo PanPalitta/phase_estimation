@@ -42,7 +42,7 @@ class Candidate {
             }
 
 
-//to become private
+    private:
 
         int num, num_fit;
         double *best_fit, *cont_fit, *global_fit;
