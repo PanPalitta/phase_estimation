@@ -1,6 +1,5 @@
 #ifndef CANDIDATE_H
 #define CANDIDATE_H
-
 #include <stdexcept>
 
 using namespace std;
@@ -25,6 +24,10 @@ class Candidate {
         void read_best(typeT *output);
         void read_global(typeT *output);
 
+        void write_contfit(double *fit, int tt);
+        void write_bestfit(double *fit);
+        void write_globalfit(double *fit);
+
         double read_contfit(int i) {
             return cont_fit[i];
             }
@@ -38,46 +41,24 @@ class Candidate {
             return best_times;
             }
 
-        void write_contfit(double *fit, int tt) {
-            int i;
-            for(i = 0; i < num_fit; i++) {
-                cont_fit[i] = fit[i] / double(tt);
-                //cout<<cont_fit[i]<<",";
-                }
-            times = tt;
-            //cout<<endl;
-            }
-        void write_bestfit(double *fit) {
-            int i;
-            for(i = 0; i < num_fit; i++) {
-                best_fit[i] = best_fit[i] * double(best_times) + fit[i];
-                }
-            best_times += 1;
-            for(i = 0; i < num_fit; i++) {
-                best_fit[i] = best_fit[i] / double(best_times);
-                }
-            }
-        void write_globalfit(double *fit) {
-            int i;
-            for(i = 0; i < num_fit; i++) {
-                global_fit[i] = fit[i];
-                }
-            }
 
-//    private:
-        int num;
-        int num_fit;
+    private:
+
+        int num, num_fit;
+        double *best_fit, *cont_fit, *global_fit;
+        int times, best_times, global_times;//number of samples used to calculate average best_fit
+
+        //memory arrays
         typeT *can_best;
         typeT *contender;
         typeT *velocity;
         typeT *global_best;
-        double *best_fit, *cont_fit, *global_fit; //should this be double or another type?
-        int times, best_times, global_times; //number of samples used to calculate average best_fit
 
     };
 
 template<typename typeT>
 Candidate<typeT>::~Candidate() {
+    //delete[] must be commented out for unit testing in order for the framework to operate properly.
     delete[] can_best;
     delete[] contender;
     delete[] velocity;
@@ -86,16 +67,15 @@ Candidate<typeT>::~Candidate() {
     delete[] best_fit;
     delete[] cont_fit;
     delete[] global_fit;
-
     }
 
 template<typename typeT>
 void Candidate<typeT>::init_can(int numvar, int fit_size) {
     if(numvar <= 0) {
-        throw out_of_range("numvar is not positive.");
+        throw out_of_range("numvar must be positive.");
         }
     if(fit_size <= 0) {
-        throw invalid_argument("fit size is not positive");
+        throw invalid_argument("num_fit must be positive.");
         }
     num = numvar;
     can_best = new typeT[num];
@@ -109,10 +89,9 @@ void Candidate<typeT>::init_can(int numvar, int fit_size) {
     }
 
 template<typename typeT>
-void Candidate<typeT>::init_velocity() {
+void Candidate<typeT>::init_velocity() { //This function can only be called after init_can. What can we do make sure it is safe to use?
     velocity = new typeT[num];
     }
-
 
 template<typename typeT>
 void Candidate<typeT>::update_cont(typeT *input) {
@@ -121,75 +100,70 @@ void Candidate<typeT>::update_cont(typeT *input) {
 
 template<typename typeT>
 void Candidate<typeT>::update_vel(typeT *input) {
-    int i;
-    for (i = 0; i < num; i++) {
-        velocity[i] = input[i];
-        }
+    memcpy(velocity, input, num * sizeof(typeT));
     }
 
 template<typename typeT>
 void Candidate<typeT>::update_best() {
-    int i;
-    for (i = 0; i < num; i++) {
-        can_best[i] = contender[i];
-        }
-    for (i = 0; i < num_fit; i++) {
-        best_fit[i] = cont_fit[i];
-        }
+    memcpy(can_best, contender, num * sizeof(typeT));
+    memcpy(best_fit, cont_fit, num_fit * sizeof(double));
     best_times = times;
     }
 
 template<typename typeT>
 void Candidate<typeT>::update_global(typeT *input) {
-    int i;
-    for (i = 0; i < num; i++) {
-        global_best[i] = input[i];
-        }
+    memcpy(global_best, input, num * sizeof(typeT));
     }
 
 template<typename typeT>
 void Candidate<typeT>::put_to_global() {
-    int i;
-    for (i = 0; i < num; i++) {
-        global_best[i] = can_best[i];
-        }
-    for (i = 0; i < num_fit; i++) {
-        global_fit[i] = best_fit[i];
-        }
+    memcpy(global_best, can_best, num * sizeof(typeT));
+    memcpy(global_fit, best_fit, num_fit * sizeof(double));
     global_times = best_times;
     }
 
 template<typename typeT>
 void Candidate<typeT>::read_cont(typeT *output) {
-    int i;
-    for (i = 0; i < num; i++) {
-        output[i] = contender[i];
-        }
+    memcpy(output, contender, num * sizeof(typeT));
     }
 
 template<typename typeT>
 void Candidate<typeT>::read_vel(typeT *output) {
-    int i;
-    for (i = 0; i < num; i++) {
-        output[i] = velocity[i];
-        }
+    memcpy(output, velocity, num * sizeof(typeT));
     }
 
 template<typename typeT>
 void Candidate<typeT>::read_best(typeT *output) {
-    int i;
-    for (i = 0; i < num; i++) {
-        output[i] = can_best[i];
-        }
+    memcpy(output, can_best, num * sizeof(typeT));
     }
 
 template<typename typeT>
 void Candidate<typeT>::read_global(typeT *output) {
-    int i;
-    for (i = 0; i < num; i++) {
-        output[i] = global_best[i];
+    memcpy(output, global_best, num * sizeof(typeT));
+    }
+
+template<typename typeT>
+void Candidate<typeT>::write_contfit(double *fit, int tt) {
+    for(int i = 0; i < num_fit; i++) {
+        cont_fit[i] = fit[i] / double(tt);
+        }
+    times = tt;
+    }
+
+template<typename typeT>
+void Candidate<typeT>::write_bestfit(double *fit) {
+    for(int i = 0; i < num_fit; i++) {
+        best_fit[i] = best_fit[i] * double(best_times) + fit[i];
+        }
+    best_times += 1;
+    for(int i = 0; i < num_fit; i++) {
+        best_fit[i] = best_fit[i] / double(best_times);
         }
     }
 
+template<typename typeT>
+void Candidate<typeT>::write_globalfit(double *fit) {
+    memcpy(global_fit, fit, num_fit * sizeof(double));
+    }
 
 #endif // CANDIDATE_H
