@@ -345,7 +345,7 @@ bool OptAlg::check_policy(double error, double sharp) {
 
 /*############################Linear Regression############################*/
 void OptAlg::linear_fit(int data_size, double *x, double *y, double *slope, double *intercept, double *mean_x) {
-    if(data_size < 0) {
+    if(data_size <= 0) {
         throw invalid_argument("data_size must be positive.");
         }
     double sum_x = 0;
@@ -367,7 +367,7 @@ void OptAlg::linear_fit(int data_size, double *x, double *y, double *slope, doub
     }
 
 double OptAlg::error_interval(double *x, double *y, double mean_x, int data_size, double *SSres, double slope, double intercept) {
-    if(data_size < 0) {
+    if(data_size <= 0) {
         throw invalid_argument("data_size must be positive.");
         }
     double SSx = 0;
@@ -379,7 +379,7 @@ double OptAlg::error_interval(double *x, double *y, double mean_x, int data_size
     }
 
 double OptAlg::error_update(int old_size, double *SSres, double *mean_x, double slope, double intercept, double *y, double *x) {
-    if(old_size < 0) {
+    if(old_size <= 0) {
         throw invalid_argument("data_size must be positive.");
         }
     double SSx = 0;
@@ -396,6 +396,13 @@ double OptAlg::error_update(int old_size, double *SSres, double *mean_x, double 
 
 /*###########################Calculating Quantile############################*/
 double OptAlg::quantile(double p) { //p is percentile
+    double result;
+    try {
+        result = inv_erf(p);
+        }
+    catch(invalid_argument) {
+        p = 0.999999;
+        }
     return sqrt(2) * inv_erf(2 * p - 1);
     }
 
