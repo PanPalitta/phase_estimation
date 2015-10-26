@@ -18,6 +18,9 @@ VPATH          = @srcdir@
 all clean install uninstall lib phase_estimation:
 	$(MAKE) -C src $@
 
+test:
+	$(MAKE) -C tests $@
+
 dist: $(distdir).tar.gz
 
 $(distdir).tar.gz: FORCE $(distdir)
