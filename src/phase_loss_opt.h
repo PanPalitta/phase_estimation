@@ -12,7 +12,6 @@
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdexcept>
 
 #define DEV_N 0.0 //level of noise in operator
 #define THETA_DEV 0.0 //M_PI;//phase noise level
@@ -29,15 +28,15 @@ class Phase: public Problem {
 
         //double fitness(double *soln);
         void avg_fitness(double *soln, const int K, double *fitarray);
-        void boundary(double *can1);
+		void boundary(double *can1);
 
-    private:
+//    private:
         double lower;
         double upper;
         //array to avoid calculation of expensive sqrt calls for integers
         double *sqrt_cache;
         Rng *rng;
-
+        
         //variables for WK state generation
         dcmplx *input_state;
         double *sqrtfac_mat; //matrix to keep values of square roots of factorials

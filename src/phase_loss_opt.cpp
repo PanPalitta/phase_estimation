@@ -8,6 +8,9 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
+#include <stdexcept>
+
+using namespace std;
 
 #include "phase_loss_opt.h"
 
