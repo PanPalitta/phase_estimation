@@ -41,6 +41,7 @@ class Candidate {
             return best_times;
             }
 
+
     private:
 
         int num, num_fit;
