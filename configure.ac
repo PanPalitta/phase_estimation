@@ -117,7 +117,7 @@ if test x"$with_vsl" != x"no" ; then
 fi
 AM_CONDITIONAL([HAVE_VSL], [test x"$vsl_enabled" = x"yes"])
 
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
 AC_OUTPUT
 echo \
 "-------------------------------------------------
