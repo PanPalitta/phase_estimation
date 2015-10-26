@@ -1,6 +1,6 @@
 #ifndef MPIOPTALG_H
 #define MPIOPTALG_H
-//#include <mpi.h>
+#include <mpi.h>
 #include <cstdlib>
 #include <stdexcept>
 #include <cmath>
@@ -63,7 +63,7 @@ class OptAlg {
         bool success, policy_type;
         int num, num_fit;
 
-//    protected:
+    protected:
         int pop_size, T, t;
         Candidate<double> *pop;
         bool goal;
@@ -87,11 +87,35 @@ class DE : public OptAlg {
         void write_param(double *param_array);
         void read_param(double *param_array);
 
-        //private:
+    private:
         double F, Cr;
 
         void family_gen(int* fam, int p, int fam_size, int total_pop);
 
+    };
+
+class PSO : public OptAlg {
+    public:
+        PSO() {};
+        PSO(Problem *problem_ptr): w(0.8), phi1(0.6), phi2(1.0), v_max(0.2) {
+            this->prob = problem_ptr;
+            this->num = this->prob->num;
+            this->num_fit = prob->num_fit;
+            }
+        ~PSO() {};
+
+        void put_to_best(int my_rank, int total_pop, int nb_proc);
+        void combination(int my_rank, int total_pop, int nb_proc);
+        void selection(int my_rank, int total_pop, int nb_proc);
+        void write_param(double *param_array);
+        void read_param(double *param_array);
+        void fit_to_global() {};
+        void find_global(int my_rank, int total_pop, int nb_proc);
+
+    private:
+        inline void find_index(int *prev, int *forw, int p, int total_pop);
+        inline int find_fitness(int prev, double prev_fit, int forw, double forw_fit, int p, double fit);
+        double w, phi1, phi2, v_max;
     };
 
 #endif // OPTALG_H

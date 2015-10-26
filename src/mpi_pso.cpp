@@ -15,7 +15,7 @@ void PSO::write_param(double *param_array) {
     }
 
 void PSO::find_global(int my_rank, int total_pop, int nb_proc) {
-//    MPI_Status status;
+    MPI_Status status;
     int tag = 1;
     int ptr, prev, forw;
     double prev_fit, forw_fit, fit;
@@ -30,23 +30,23 @@ void PSO::find_global(int my_rank, int total_pop, int nb_proc) {
         //neighbor send fitness to the processor that contains candidate p
         if(my_rank == prev % nb_proc) {
             prev_fit = this->pop[prev / nb_proc].read_bestfit(0);
-            //MPI_Send(&prev_fit, 1, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
+            MPI_Send(&prev_fit, 1, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
             }
         else if(my_rank == p % nb_proc) {
-            //MPI_Recv(&prev_fit, 1, MPI_DOUBLE, prev % nb_proc, tag, MPI_COMM_WORLD, &status);
+            MPI_Recv(&prev_fit, 1, MPI_DOUBLE, prev % nb_proc, tag, MPI_COMM_WORLD, &status);
             }
         else {}
 
         if(my_rank == forw % nb_proc) {
             forw_fit = this->pop[forw / nb_proc].read_bestfit(0);
-            //MPI_Send(&forw_fit, 1, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
+            MPI_Send(&forw_fit, 1, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
             }
         else if(my_rank == p % nb_proc) {
-            //MPI_Recv(&forw_fit, 1, MPI_DOUBLE, forw % nb_proc, tag, MPI_COMM_WORLD, &status);
+            MPI_Recv(&forw_fit, 1, MPI_DOUBLE, forw % nb_proc, tag, MPI_COMM_WORLD, &status);
             }
         else {}
 
-        //MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
 
         //compare fitness at the processor and store the candidate with best fitness in ptr
         if(my_rank == p % nb_proc) {
@@ -54,22 +54,22 @@ void PSO::find_global(int my_rank, int total_pop, int nb_proc) {
             ptr = find_fitness(prev, prev_fit, forw, forw_fit, p, fit);
             //send ptr to prev and forw
             if(my_rank == p % nb_proc) {
-                //MPI_Send(&ptr, 1, MPI_INT, prev % nb_proc, tag, MPI_COMM_WORLD);
+                MPI_Send(&ptr, 1, MPI_INT, prev % nb_proc, tag, MPI_COMM_WORLD);
                 }
             else if(my_rank == prev % nb_proc) {
-                //MPI_Recv(&ptr, 1, MPI_INT, p % nb_proc, tag, MPI_COMM_WORLD, &status);
+                MPI_Recv(&ptr, 1, MPI_INT, p % nb_proc, tag, MPI_COMM_WORLD, &status);
                 }
             else {}
 
             if(my_rank == p % nb_proc) {
-                //MPI_Send(&ptr, 1, MPI_INT, forw % nb_proc, tag, MPI_COMM_WORLD);
+                MPI_Send(&ptr, 1, MPI_INT, forw % nb_proc, tag, MPI_COMM_WORLD);
                 }
             else if(my_rank == forw % nb_proc) {
-                //MPI_Recv(&ptr, 1, MPI_INT, p % nb_proc, tag, MPI_COMM_WORLD, &status);
+                MPI_Recv(&ptr, 1, MPI_INT, p % nb_proc, tag, MPI_COMM_WORLD, &status);
                 }
             else {}
 
-            //MPI_Barrier(MPI_COMM_WORLD);
+            MPI_Barrier(MPI_COMM_WORLD);
 
             //updating global best
             if(ptr == p) { //global best already in processor's memory. No need for MPI
@@ -81,10 +81,10 @@ void PSO::find_global(int my_rank, int total_pop, int nb_proc) {
             else if(ptr == prev || ptr == forw) {
                 if(my_rank == ptr % nb_proc) {
                     this->pop[ptr / nb_proc].read_best(array);
-                    //MPI_Send(&array[0], this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
+                    MPI_Send(&array[0], this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
                     }
                 else if(my_rank == p % nb_proc) {
-                    //MPI_Recv(&array[0], this->num, MPI_DOUBLE, ptr % nb_proc, tag, MPI_COMM_WORLD, &status);
+                    MPI_Recv(&array[0], this->num, MPI_DOUBLE, ptr % nb_proc, tag, MPI_COMM_WORLD, &status);
                     this->pop[p / nb_proc].update_global(array);
                     }
                 //sending the fitarray
@@ -92,10 +92,10 @@ void PSO::find_global(int my_rank, int total_pop, int nb_proc) {
                     for(int i = 0; i < this->num_fit; ++i) {
                         fitarray[i] = this->pop[ptr / nb_proc].read_globalfit(i);
                         }
-                    //MPI_Send(&fitarray[0], this->num_fit, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
+                    MPI_Send(&fitarray[0], this->num_fit, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
                     }
                 else if(my_rank == p % nb_proc) {
-                    //MPI_Recv(&fitarray[0], this->num_fit, MPI_DOUBLE, ptr % nb_proc, tag, MPI_COMM_WORLD, &status);
+                    MPI_Recv(&fitarray[0], this->num_fit, MPI_DOUBLE, ptr % nb_proc, tag, MPI_COMM_WORLD, &status);
                     this->pop[p / nb_proc].write_globalfit(fitarray);
                     }
                 else {}

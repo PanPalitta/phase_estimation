@@ -31,7 +31,7 @@ void DE::selection(int my_rank, int total_pop, int nb_proc) {
     }
 
 void DE::combination(int my_rank, int total_pop, int nb_proc) {
-//    MPI_Status status;
+    MPI_Status status;
     int tag = 1;
     double coin;
     int fam_size = 3;
@@ -47,10 +47,10 @@ void DE::combination(int my_rank, int total_pop, int nb_proc) {
         if(p % nb_proc != 0) { //if candidate is not in root, send the solution to root.
             if(my_rank == p % nb_proc) {
                 this->pop[int(p / nb_proc)].read_best(input);
-                //MPI_Send(&input, this->num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
+                MPI_Send(&input, this->num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
                 }
             else if(my_rank == 0) {
-                //MPI_Recv(&input, this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD, &status);
+                MPI_Recv(&input, this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD, &status);
                 for(int i = 0; i < this->num; ++i) {
                     all_soln[p][i] = input[i];
                     }
@@ -66,7 +66,7 @@ void DE::combination(int my_rank, int total_pop, int nb_proc) {
             }
         }// p loop
 
-//    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     //generate the family
     for(int p = 0; p < total_pop; ++p) {
@@ -94,10 +94,10 @@ void DE::combination(int my_rank, int total_pop, int nb_proc) {
             }
         else { // if p candidate is not on root, send the new candidate from root to processor
             if(my_rank == 0) {
-                //MPI_Send(&can, this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
+                MPI_Send(&can, this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
                 }
             else if(my_rank == p % nb_proc) { //processor that contains p candidate updates the candidate
-                //MPI_Recv(&can, this->num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
+                MPI_Recv(&can, this->num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
                 this->pop[int(p / nb_proc)].update_cont(can);
                 }
             else {}
@@ -105,14 +105,14 @@ void DE::combination(int my_rank, int total_pop, int nb_proc) {
 
         }//p loop
 
-//    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     //all candidate calculate fitness of contender
     for(int p = 0; p < this->pop_size; ++p) {
         this->Cont_fitness(p);   //compute the fitness
         }
 
-//    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
     }
 
 void DE::family_gen(int* fam, int p, int fam_size, int total_pop) {

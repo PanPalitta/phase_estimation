@@ -19,7 +19,7 @@ void OptAlg::Init_population(int psize) {
             }
 
         //store it in candidate object
-        pop[p].init_can(num, prob->num_fit);
+        pop[p].init_can(num, num_fit);
         pop[p].update_cont(input);
         Cont_fitness(p);
         }
@@ -29,7 +29,6 @@ void OptAlg::Init_previous(double prev_dev, double new_dev, int psize, double *p
     if(psize <= 0) {
         throw invalid_argument("Population size must be positive");
         }
-    int i, p;
     int dev_cut_off = num - 1;
     double input[num];
     double dev[num];
@@ -40,14 +39,14 @@ void OptAlg::Init_previous(double prev_dev, double new_dev, int psize, double *p
     prev_soln[num - 1] = prev_soln[num - 2];
     dev_gen(dev, prev_dev, new_dev, dev_cut_off);
 
-    for(p = 0; p < pop_size; ++p) {
+    for(int p = 0; p < pop_size; ++p) {
         //generate candidate
-        for(i = 0; i < num; ++i) {
+        for(int i = 0; i < num; ++i) {
             input[i] = fabs(rand_Gaussian(prev_soln[i], dev[i]));
             }
         prob->boundary(input);
         //store it in candidate object
-        pop[p].init_can(num, prob->num_fit);
+        pop[p].init_can(num, num_fit);
         pop[p].update_cont(input);
         Cont_fitness(p);
         }
@@ -57,21 +56,21 @@ void OptAlg::Init_previous(double prev_dev, double new_dev, int psize, double *p
 /*##############################Function for calculating fitnesses##############################*/
 
 void OptAlg::Cont_fitness(int p) {
-    double fit1[prob->num_fit];
-    double fit2[prob->num_fit];
+    double fit1[num_fit];
+    double fit2[num_fit];
     double soln[num];
 
     pop[p].read_cont(soln);
     prob->avg_fitness(soln, prob->num_repeat, fit1);
     prob->avg_fitness(soln, prob->num_repeat, fit2);
-    for(int i = 0; i < prob->num_fit; i++) {
+    for(int i = 0; i < num_fit; i++) {
         fit1[i] += fit2[i];
         }
     pop[p].write_contfit(fit1, 2);
     }
 
 void OptAlg::Best_fitness(int p) {
-    double fit[prob->num_fit];
+    double fit[num_fit];
     double soln[num];
 
     pop[p].read_best(soln);
@@ -88,7 +87,7 @@ void OptAlg::update_popfit() {
 /*##############################Final Selections#################################*/
 double OptAlg::Final_select(int my_rank, int total_pop, int nb_proc, double *fit, double *solution, double *fitarray) {
     int indx;
-//    MPI_Status status;
+    MPI_Status status;
     int tag = 1;
     double global_fit;
 
@@ -105,52 +104,52 @@ double OptAlg::Final_select(int my_rank, int total_pop, int nb_proc, double *fit
         else { //if p is not on the root, then read the fitness and send it to central table in root
             if(my_rank == p % nb_proc) { //send the fitness from non-root
                 global_fit = pop[int(p / nb_proc)].read_globalfit(0);
-//                MPI_Send(&global_fit, 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
+                MPI_Send(&global_fit, 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
                 }
             else if(my_rank == 0) { //root receive and store fitness value
-//                MPI_Recv(&fit[p], 1, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD, &status);
+                MPI_Recv(&fit[p], 1, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD, &status);
                 }
             else {}
             }
         }
 
-//    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     //find the candidate that with highest fitness and send the index to all processors.
     if(my_rank == 0) {
         indx = find_max(fit, total_pop);
         //root send the index to all processors.
         for(int p = 1; p < nb_proc; ++p) {
-//            MPI_Send(&indx, 1, MPI_INT, p, tag, MPI_COMM_WORLD);
+            MPI_Send(&indx, 1, MPI_INT, p, tag, MPI_COMM_WORLD);
             }
         }
     //processors other than root receive the index
     else if(my_rank != 0) {
-//        MPI_Recv(&indx, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&indx, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
         }
     else {}
 
-//    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     //read the fitarray and send it to all processor for checking success criteria
     if(my_rank == indx % nb_proc) {
 
-        for(int i = 0; i < prob->num_fit; ++i) {
+        for(int i = 0; i < num_fit; ++i) {
             fitarray[i] = pop[indx / nb_proc].read_globalfit(i);
             }
 
         for(int p = 0; p < nb_proc; ++p) {
             if(p != my_rank) {
-//                MPI_Send(&fitarray[0], prob->num_fit, MPI_DOUBLE, p, tag, MPI_COMM_WORLD);
+                MPI_Send(&fitarray[0], num_fit, MPI_DOUBLE, p, tag, MPI_COMM_WORLD);
                 }
             }
         }
     else if(my_rank != indx % nb_proc) {
-//        MPI_Recv(&fitarray[0], prob->num_fit, MPI_DOUBLE, indx % nb_proc, tag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&fitarray[0], num_fit, MPI_DOUBLE, indx % nb_proc, tag, MPI_COMM_WORLD, &status);
         }
     else {}
 
-//    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     //sending the solution back to root //need to check data type
     if(indx % nb_proc == 0) { //if solution is in root, then read it out.
@@ -162,28 +161,27 @@ double OptAlg::Final_select(int my_rank, int total_pop, int nb_proc, double *fit
     else { //if solution is not in root, send to root
         if(my_rank == indx % nb_proc) {
             pop[int(indx / nb_proc)].read_global(solution);
-//            MPI_Send(&solution[0], num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
+            MPI_Send(&solution[0], num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
             }
         else if(my_rank == 0) {
-//            MPI_Recv(&solution[0], num, MPI_DOUBLE, indx % nb_proc, tag, MPI_COMM_WORLD, &status);
+            MPI_Recv(&solution[0], num, MPI_DOUBLE, indx % nb_proc, tag, MPI_COMM_WORLD, &status);
             }
         else {}
         }
 
-
-//    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     return global_fit;
     }
 
 double OptAlg::avg_Final_select(double* solution, int repeat, int my_rank, int total_pop, int nb_proc, double *soln_fit) {
-//    MPI_Status status;
+    MPI_Status status;
     int tag = 1;
     double final_fit;
     int indx;
     double array[num];
     double fit[pop_size];
-    double fitarray[prob->num_fit];
+    double fitarray[num_fit];
 
     fit_to_global();//move solution to global_best array in case we're using DE.
 
@@ -205,54 +203,54 @@ double OptAlg::avg_Final_select(double* solution, int repeat, int my_rank, int t
             }
         else {
             if(my_rank == p % nb_proc) {
-//                MPI_Send(&fit[p / nb_proc], 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
+                MPI_Send(&fit[p / nb_proc], 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
                 }
             else if(my_rank == 0) {
-//                MPI_Recv(&soln_fit[p], 1, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD, &status);
+                MPI_Recv(&soln_fit[p], 1, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD, &status);
                 }
             else {}
             }
         }
 
-//    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
 // find the maximum fitness and send out the fitness for success criteria testing
     if(my_rank == 0) {
         indx = find_max(soln_fit, total_pop);
         final_fit = soln_fit[indx];
         for(int p = 1; p < nb_proc; ++p) {
-//            MPI_Send(&final_fit, 1, MPI_DOUBLE, p, tag, MPI_COMM_WORLD);
+            MPI_Send(&final_fit, 1, MPI_DOUBLE, p, tag, MPI_COMM_WORLD);
             }
         }
     else {
-//        MPI_Recv(&final_fit, 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&final_fit, 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
         }
 
-//    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
 // send index of solution to processors
     if(my_rank == 0) {
         for(int p = 1; p < nb_proc; ++p) {
-//            MPI_Send(&indx, 1, MPI_INT, p, tag, MPI_COMM_WORLD);
+            MPI_Send(&indx, 1, MPI_INT, p, tag, MPI_COMM_WORLD);
             }
         }
     else {
-//        MPI_Recv(&indx, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&indx, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
         }
 
-//    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     //get solution from the processor
     if(my_rank == indx % nb_proc) {
         pop[indx / nb_proc].read_global(array);
-//        MPI_Send(&array[0], num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
+        MPI_Send(&array[0], num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
         }
     else if(my_rank == 0) {
-//        MPI_Recv(&solution[0], num, MPI_DOUBLE, indx % nb_proc, tag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&solution[0], num, MPI_DOUBLE, indx % nb_proc, tag, MPI_COMM_WORLD, &status);
         }
     else {}
 
-//    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     return final_fit;
     }
@@ -384,7 +382,6 @@ double OptAlg::error_update(int old_size, double *SSres, double *mean_x, double 
     if(old_size <= 0) {
         throw invalid_argument("data_size must be positive.");
         }
-    //old_size = current_data_size-1
     double SSx = 0;
 
     *mean_x = (*mean_x * old_size + x[old_size]) / double(old_size + 1);
@@ -401,7 +398,7 @@ double OptAlg::error_update(int old_size, double *SSres, double *mean_x, double 
 double OptAlg::quantile(double p) { //p is percentile
     double result;
     try {
-        result = sqrt(2) * inv_erf(2 * p - 1);
+        result = inv_erf(p);
         }
     catch(invalid_argument) {
         p = 0.999999;
