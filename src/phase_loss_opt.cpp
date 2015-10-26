@@ -187,9 +187,8 @@ inline double Phase::cal_spart(const int n, const int k, const int N) {
     }
 
 inline void Phase::one_over_fac(double *over_mat) { //calculate one over factorial matrix
-    int i;
     over_mat[0] = 1;
-    for (i = 1; i <= num; ++i) {
+    for (int i = 1; i <= num; ++i) {
         over_mat[i] = over_mat[i - 1] / i;
         }//end i
     }
