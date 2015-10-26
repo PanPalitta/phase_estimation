@@ -1,93 +1,13 @@
-#include <C:\UnitTest++-1.3\src\UnitTest++.h>
+#include <C:\UnitTest++-1.3\src\UnitTest++.h> //change to directory for UnitTest++
 #include <stdexcept>
 #include "rng.h"
 #include "problem.h"
 #include "phase_loss_opt.h"
 #include "mpi_optalg.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// To add a test, simply put the following code in the a .cpp file of your choice:
-//
-// =================================
-// Simple Test
-// =================================
-//
-//  TEST(YourTestName)
-//  {
-//  }
-//
-// The TEST macro contains enough machinery to turn this slightly odd-looking syntax into legal C++, and automatically register the test in a global list.
-// This test list forms the basis of what is executed by RunAllTests().
-//
-// If you want to re-use a set of test data for more than one test, or provide setup/teardown for tests,
-// you can use the TEST_FIXTURE macro instead. The macro requires that you pass it a class name that it will instantiate, so any setup and teardown code should be in its constructor and destructor.
-//
-//  struct SomeFixture
-//  {
-//    SomeFixture() { /* some setup */ }
-//    ~SomeFixture() { /* some teardown */ }
-//
-//    int testData;
-//  };
-//
-//  TEST_FIXTURE(SomeFixture, YourTestName)
-//  {
-//    int temp = testData;
-//  }
-//
-// =================================
-// Test Suites
-// =================================
-//
-// Tests can be grouped into suites, using the SUITE macro. A suite serves as a namespace for test names, so that the same test name can be used in two difference contexts.
-//
-//  SUITE(YourSuiteName)
-//  {
-//    TEST(YourTestName)
-//    {
-//    }
-//
-//    TEST(YourOtherTestName)
-//    {
-//    }
-//  }
-//
-// This will place the tests into a C++ namespace called YourSuiteName, and make the suite name available to UnitTest++.
-// RunAllTests() can be called for a specific suite name, so you can use this to build named groups of tests to be run together.
-// Note how members of the fixture are used as if they are a part of the test, since the macro-generated test class derives from the provided fixture class.
-//
-//
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 // run all tests
 int main(int argc, char **argv) {
     return UnitTest::RunAllTests();
-    }
-
-SUITE(setting_up) {
-    TEST(check_num) {
-        int xn = 10;
-        int xu = 10;
-        int seed = 0;
-        int rank = 0;
-        Rng *rng = new Rng(xn, xu, seed, rank);
-        int numvar = 10;
-        Problem* problem = new Phase(numvar, rng);
-        OptAlg* alg = new OptAlg(problem);
-        CHECK(alg->num == numvar);
-        }
-    TEST(check_numfit) {
-        int xn = 10;
-        int xu = 10;
-        int seed = 0;
-        int rank = 0;
-        Rng *rng = new Rng(xn, xu, seed, rank);
-        int numvar = 10;
-        Problem* problem = new Phase(numvar, rng);
-        OptAlg* alg = new OptAlg(problem);
-        CHECK(alg->num_fit == problem->num_fit);
-        }
     }
 
 SUITE(Init_pop) {
@@ -103,20 +23,6 @@ SUITE(Init_pop) {
 
         int pop_size = -5;
         CHECK_THROW(alg->Init_population(pop_size), invalid_argument);
-        }
-    TEST(check_popsize) {
-        int xn = 10;
-        int xu = 10;
-        int seed = 0;
-        int rank = 0;
-        Rng *rng = new Rng(xn, xu, seed, rank);
-        int numvar = 10;
-        Problem* problem = new Phase(numvar, rng);
-        OptAlg* alg = new OptAlg(problem);
-
-        int pop_size = 10;
-        alg->Init_population(pop_size);
-        CHECK(alg->pop_size == pop_size);
         }
     TEST(check_previnit) {
         int xn = 10;
@@ -136,85 +42,6 @@ SUITE(Init_pop) {
             soln[i] = 0;
             }
         CHECK_THROW(alg->Init_previous(prev_dev, new_dev, pop_size, soln), invalid_argument);
-        }
-    TEST(check_canprev) {
-        int xn = 10;
-        int xu = 10;
-        int seed = 0;
-        int rank = 0;
-        Rng *rng = new Rng(xn, xu, seed, rank);
-        int numvar = 5;
-        Problem* problem = new Phase(numvar, rng);
-        OptAlg* alg = new OptAlg(problem);
-
-        double total = 0.0;
-
-        double prev_dev = 0.05;
-        double new_dev = 0.05;
-        int pop_size = 5;
-        double soln[numvar - 1];
-        for(int i = 0; i < numvar - 1; ++i) {
-            soln[i] = 0;
-            }
-        alg->Init_previous(prev_dev, new_dev, pop_size, soln);
-        for(int p = 0; p < pop_size; ++p) {
-            for(int i = 0; i <= numvar; ++i) {
-                total += alg->pop[p].contender[i];
-                }
-            }
-        total = total / (pop_size * numvar);
-        CHECK(fabs(total) <= (new_dev + prev_dev) / 2);
-        }
-    }
-
-SUITE(Calling_fitness) {
-    TEST(cont_fit) {
-        int xn = 10;
-        int xu = 10;
-        int seed = 0;
-        int rank = 0;
-        Rng *rng = new Rng(xn, xu, seed, rank);
-        int numvar = 4;
-        Problem* problem = new Phase(numvar, rng);
-        OptAlg* alg = new OptAlg(problem);
-        int pop_size = 5;
-        alg->Init_population(pop_size);
-        alg->Cont_fitness(1);
-        CHECK(alg->pop[1].times == 2);
-        }
-    TEST(best_fit) {
-        int xn = 10;
-        int xu = 10;
-        int seed = 0;
-        int rank = 0;
-        Rng *rng = new Rng(xn, xu, seed, rank);
-        int numvar = 4;
-        Problem* problem = new Phase(numvar, rng);
-        OptAlg* alg = new OptAlg(problem);
-        int pop_size = 5;
-        alg->Init_population(pop_size);
-        for(int p = 0; p < pop_size; ++p) {
-            alg->pop[p].update_best();
-            }
-        alg->Best_fitness(1);
-        CHECK(alg->pop[1].best_times == 3);
-        }
-    TEST(update_bestfit) {
-        int xn = 10;
-        int xu = 10;
-        int seed = 0;
-        int rank = 0;
-        Rng *rng = new Rng(xn, xu, seed, rank);
-        int numvar = 4;
-        Problem* problem = new Phase(numvar, rng);
-        OptAlg* alg = new OptAlg(problem);
-        int pop_size = 5;
-        alg->Init_population(pop_size);
-        for(int p = 0; p < pop_size; ++p) {
-            alg->pop[p].update_best();
-            }
-        alg->update_popfit();
-        CHECK(alg->pop[0].best_times == 3);
         }
     }
 
