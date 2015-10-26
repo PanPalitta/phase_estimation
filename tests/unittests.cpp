@@ -79,7 +79,7 @@ SUITE(phase_mainfunc) {
     }
 	
 //from candidate.h
-SUITE(initialize_memory) {
+SUITE(candidate_initialize_memory) {
     TEST(numvar_invalid) {
         int numvar = -5;
         int num_fit = 2;
@@ -93,7 +93,7 @@ SUITE(initialize_memory) {
         CHECK_THROW(can1.init_can(numvar, num_fit), invalid_argument);
         }
     }
-SUITE(reads) {
+SUITE(candidate_reads) {
     TEST(read_cont) {
         int numvar = 4;
         int num_fit = 2;
@@ -206,7 +206,7 @@ SUITE(Init_pop) {
         }
     }
 
-SUITE(success) {
+SUITE(success_criteria) {
     TEST(check_iter) {
         int xn = 10;
         int xu = 10;
@@ -265,7 +265,7 @@ SUITE(success) {
         }
     }
 
-SUITE(aux_functions) {
+SUITE(alg_aux_functions) {
     TEST(dev_gen) {
         int xn = 10;
         int xu = 10;
