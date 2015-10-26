@@ -41,8 +41,7 @@ class Candidate {
             return best_times;
             }
 
-
-//    private:
+    private:
 
         int num, num_fit;
         double *best_fit, *cont_fit, *global_fit;
@@ -59,14 +58,14 @@ class Candidate {
 template<typename typeT>
 Candidate<typeT>::~Candidate() {
     //delete[] must be commented out for unit testing in order for the framework to operate properly.
-    /*    delete[] can_best;
-        delete[] contender;
-        delete[] velocity;
-        delete[] global_best;
+    delete[] can_best;
+    delete[] contender;
+    delete[] velocity;
+    delete[] global_best;
 
-        delete[] best_fit;
-        delete[] cont_fit;
-        delete[] global_fit;*/
+    delete[] best_fit;
+    delete[] cont_fit;
+    delete[] global_fit;
     }
 
 template<typename typeT>
