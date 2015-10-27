@@ -1,0 +1,297 @@
+\hypertarget{class_phase}{}\section{Phase Class Reference}
+\label{class_phase}\index{Phase@{Phase}}
+
+
+{\ttfamily \#include $<$phase\+\_\+loss\+\_\+opt.\+h$>$}
+
+Inheritance diagram for Phase\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_phase}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_phase_a693a2d20b39fa8a91bf5f4c1afa3b2e2}{Phase} (const int numvar, \hyperlink{rng_8h_a0d95a1c4bd7f6516941df17732a09356}{Rng} $\ast$\hyperlink{class_phase_abcd241887b2113672f6dc94877b79079}{rng})
+\item 
+\hyperlink{class_phase_a9907413eb9a96148934d71864bb7e41b}{$\sim$\+Phase} ()
+\item 
+void \hyperlink{class_phase_a73864e5e5e43b6fb301cf507eeb118a4}{avg\+\_\+fitness} (double $\ast$soln, const int K, double $\ast$fitarray)
+\item 
+void \hyperlink{class_phase_a47d8ce9a16f64faa174dd69c3854e3e1}{boundary} (double $\ast$can1)
+\item 
+void \hyperlink{class_phase_a6100300c5e784c829375cceb5bf2de4c}{sqrtfac} (double $\ast$fac\+\_\+mat)
+\item 
+void \hyperlink{class_phase_a3e758e9903183f98b634c09ec033517f}{one\+\_\+over\+\_\+fac} (double $\ast$over\+\_\+mat)
+\item 
+double \hyperlink{class_phase_a386cfe3967d7b3cb11b66ded52237b85}{cal\+\_\+spart} (const int n, const int k, const int N)
+\item 
+void \hyperlink{class_phase_a58a0068df688f770ed388ad6bf63aa4f}{W\+K\+\_\+state} ()
+\item 
+bool \hyperlink{class_phase_a6e2d1dd46651a342f46893d93c30041c}{noise\+\_\+outcome} (const double phi, const double P\+H\+I, const int N)
+\item 
+void \hyperlink{class_phase_a51090ea3a1cd12e9afd73faa48d04627}{state\+\_\+loss} (const int N)
+\item 
+double \hyperlink{class_phase_a395efd15826aac4793a6c37bf027825b}{mod\+\_\+2\+P\+I} (double P\+H\+I)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+double \hyperlink{class_phase_a8b7dbdfafd0e3c84dba4138cace2e00b}{lower}
+\item 
+double \hyperlink{class_phase_abe5215ac7a99447da0f2075e87b6e1d1}{upper}
+\item 
+double $\ast$ \hyperlink{class_phase_a9508675d9cd23e96e4e5af0f3514d64e}{sqrt\+\_\+cache}
+\item 
+\hyperlink{rng_8h_a0d95a1c4bd7f6516941df17732a09356}{Rng} $\ast$ \hyperlink{class_phase_abcd241887b2113672f6dc94877b79079}{rng}
+\item 
+\hyperlink{phase__loss__opt_8h_a98ebca80a317b58c1386b356909f7dea}{dcmplx} $\ast$ \hyperlink{class_phase_a33f2132e12b166e3c7fe0059f67c71f9}{input\+\_\+state}
+\item 
+double $\ast$ \hyperlink{class_phase_a64295bfa90607498ff8c544122afc3f9}{sqrtfac\+\_\+mat}
+\item 
+double $\ast$ \hyperlink{class_phase_a76beec42b9bfdcd105edcb8505bab934}{overfac\+\_\+mat}
+\item 
+double \hyperlink{class_phase_a5ed12bc03ed5641e7d6486aefbc33ee3}{tan\+\_\+beta}
+\item 
+\hyperlink{phase__loss__opt_8h_a98ebca80a317b58c1386b356909f7dea}{dcmplx} $\ast$ \hyperlink{class_phase_ab563c75af841b7c481f805d8a026518e}{state}
+\item 
+\hyperlink{phase__loss__opt_8h_a98ebca80a317b58c1386b356909f7dea}{dcmplx} $\ast$ \hyperlink{class_phase_a29c2f7fd9df0afc222d810d037ea9ded}{update0}
+\item 
+\hyperlink{phase__loss__opt_8h_a98ebca80a317b58c1386b356909f7dea}{dcmplx} $\ast$ \hyperlink{class_phase_aef5f586464d8609c933b2c28afc1fbf1}{update1}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 24 of file phase\+\_\+loss\+\_\+opt.\+h.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_phase_a693a2d20b39fa8a91bf5f4c1afa3b2e2}{}\index{Phase@{Phase}!Phase@{Phase}}
+\index{Phase@{Phase}!Phase@{Phase}}
+\subsubsection[{Phase(const int numvar, Rng $\ast$rng)}]{\setlength{\rightskip}{0pt plus 5cm}Phase\+::\+Phase (
+\begin{DoxyParamCaption}
+\item[{const int}]{numvar, }
+\item[{{\bf Rng} $\ast$}]{rng}
+\end{DoxyParamCaption}
+)}\label{class_phase_a693a2d20b39fa8a91bf5f4c1afa3b2e2}
+
+
+Definition at line 17 of file phase\+\_\+loss\+\_\+opt.\+cpp.
+
+\hypertarget{class_phase_a9907413eb9a96148934d71864bb7e41b}{}\index{Phase@{Phase}!````~Phase@{$\sim$\+Phase}}
+\index{````~Phase@{$\sim$\+Phase}!Phase@{Phase}}
+\subsubsection[{$\sim$\+Phase()}]{\setlength{\rightskip}{0pt plus 5cm}Phase\+::$\sim$\+Phase (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_phase_a9907413eb9a96148934d71864bb7e41b}
+
+
+Definition at line 46 of file phase\+\_\+loss\+\_\+opt.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_phase_a73864e5e5e43b6fb301cf507eeb118a4}{}\index{Phase@{Phase}!avg\+\_\+fitness@{avg\+\_\+fitness}}
+\index{avg\+\_\+fitness@{avg\+\_\+fitness}!Phase@{Phase}}
+\subsubsection[{avg\+\_\+fitness(double $\ast$soln, const int K, double $\ast$fitarray)}]{\setlength{\rightskip}{0pt plus 5cm}void Phase\+::avg\+\_\+fitness (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{soln, }
+\item[{const int}]{K, }
+\item[{double $\ast$}]{fitarray}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\label{class_phase_a73864e5e5e43b6fb301cf507eeb118a4}
+
+
+Reimplemented from \hyperlink{class_problem_a5a889257574b59d70c30e77f96657633}{Problem}.
+
+
+
+Definition at line 55 of file phase\+\_\+loss\+\_\+opt.\+cpp.
+
+\hypertarget{class_phase_a47d8ce9a16f64faa174dd69c3854e3e1}{}\index{Phase@{Phase}!boundary@{boundary}}
+\index{boundary@{boundary}!Phase@{Phase}}
+\subsubsection[{boundary(double $\ast$can1)}]{\setlength{\rightskip}{0pt plus 5cm}void Phase\+::boundary (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{can1}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\label{class_phase_a47d8ce9a16f64faa174dd69c3854e3e1}
+
+
+Reimplemented from \hyperlink{class_problem_a866551d6c3a8c639eed39dd629459145}{Problem}.
+
+
+
+Definition at line 105 of file phase\+\_\+loss\+\_\+opt.\+cpp.
+
+\hypertarget{class_phase_a386cfe3967d7b3cb11b66ded52237b85}{}\index{Phase@{Phase}!cal\+\_\+spart@{cal\+\_\+spart}}
+\index{cal\+\_\+spart@{cal\+\_\+spart}!Phase@{Phase}}
+\subsubsection[{cal\+\_\+spart(const int n, const int k, const int N)}]{\setlength{\rightskip}{0pt plus 5cm}double Phase\+::cal\+\_\+spart (
+\begin{DoxyParamCaption}
+\item[{const int}]{n, }
+\item[{const int}]{k, }
+\item[{const int}]{N}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_phase_a386cfe3967d7b3cb11b66ded52237b85}
+
+
+Definition at line 158 of file phase\+\_\+loss\+\_\+opt.\+cpp.
+
+\hypertarget{class_phase_a395efd15826aac4793a6c37bf027825b}{}\index{Phase@{Phase}!mod\+\_\+2\+P\+I@{mod\+\_\+2\+P\+I}}
+\index{mod\+\_\+2\+P\+I@{mod\+\_\+2\+P\+I}!Phase@{Phase}}
+\subsubsection[{mod\+\_\+2\+P\+I(double P\+H\+I)}]{\setlength{\rightskip}{0pt plus 5cm}double Phase\+::mod\+\_\+2\+P\+I (
+\begin{DoxyParamCaption}
+\item[{double}]{P\+H\+I}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_phase_a395efd15826aac4793a6c37bf027825b}
+
+
+Definition at line 315 of file phase\+\_\+loss\+\_\+opt.\+cpp.
+
+\hypertarget{class_phase_a6e2d1dd46651a342f46893d93c30041c}{}\index{Phase@{Phase}!noise\+\_\+outcome@{noise\+\_\+outcome}}
+\index{noise\+\_\+outcome@{noise\+\_\+outcome}!Phase@{Phase}}
+\subsubsection[{noise\+\_\+outcome(const double phi, const double P\+H\+I, const int N)}]{\setlength{\rightskip}{0pt plus 5cm}bool Phase\+::noise\+\_\+outcome (
+\begin{DoxyParamCaption}
+\item[{const double}]{phi, }
+\item[{const double}]{P\+H\+I, }
+\item[{const int}]{N}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_phase_a6e2d1dd46651a342f46893d93c30041c}
+
+
+Definition at line 254 of file phase\+\_\+loss\+\_\+opt.\+cpp.
+
+\hypertarget{class_phase_a3e758e9903183f98b634c09ec033517f}{}\index{Phase@{Phase}!one\+\_\+over\+\_\+fac@{one\+\_\+over\+\_\+fac}}
+\index{one\+\_\+over\+\_\+fac@{one\+\_\+over\+\_\+fac}!Phase@{Phase}}
+\subsubsection[{one\+\_\+over\+\_\+fac(double $\ast$over\+\_\+mat)}]{\setlength{\rightskip}{0pt plus 5cm}void Phase\+::one\+\_\+over\+\_\+fac (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{over\+\_\+mat}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_phase_a3e758e9903183f98b634c09ec033517f}
+
+
+Definition at line 189 of file phase\+\_\+loss\+\_\+opt.\+cpp.
+
+\hypertarget{class_phase_a6100300c5e784c829375cceb5bf2de4c}{}\index{Phase@{Phase}!sqrtfac@{sqrtfac}}
+\index{sqrtfac@{sqrtfac}!Phase@{Phase}}
+\subsubsection[{sqrtfac(double $\ast$fac\+\_\+mat)}]{\setlength{\rightskip}{0pt plus 5cm}void Phase\+::sqrtfac (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{fac\+\_\+mat}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_phase_a6100300c5e784c829375cceb5bf2de4c}
+
+
+Definition at line 196 of file phase\+\_\+loss\+\_\+opt.\+cpp.
+
+\hypertarget{class_phase_a51090ea3a1cd12e9afd73faa48d04627}{}\index{Phase@{Phase}!state\+\_\+loss@{state\+\_\+loss}}
+\index{state\+\_\+loss@{state\+\_\+loss}!Phase@{Phase}}
+\subsubsection[{state\+\_\+loss(const int N)}]{\setlength{\rightskip}{0pt plus 5cm}void Phase\+::state\+\_\+loss (
+\begin{DoxyParamCaption}
+\item[{const int}]{N}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_phase_a51090ea3a1cd12e9afd73faa48d04627}
+
+
+Definition at line 300 of file phase\+\_\+loss\+\_\+opt.\+cpp.
+
+\hypertarget{class_phase_a58a0068df688f770ed388ad6bf63aa4f}{}\index{Phase@{Phase}!W\+K\+\_\+state@{W\+K\+\_\+state}}
+\index{W\+K\+\_\+state@{W\+K\+\_\+state}!Phase@{Phase}}
+\subsubsection[{W\+K\+\_\+state()}]{\setlength{\rightskip}{0pt plus 5cm}void Phase\+::\+W\+K\+\_\+state (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_phase_a58a0068df688f770ed388ad6bf63aa4f}
+
+
+Definition at line 119 of file phase\+\_\+loss\+\_\+opt.\+cpp.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_phase_a33f2132e12b166e3c7fe0059f67c71f9}{}\index{Phase@{Phase}!input\+\_\+state@{input\+\_\+state}}
+\index{input\+\_\+state@{input\+\_\+state}!Phase@{Phase}}
+\subsubsection[{input\+\_\+state}]{\setlength{\rightskip}{0pt plus 5cm}{\bf dcmplx}$\ast$ Phase\+::input\+\_\+state}\label{class_phase_a33f2132e12b166e3c7fe0059f67c71f9}
+
+
+Definition at line 41 of file phase\+\_\+loss\+\_\+opt.\+h.
+
+\hypertarget{class_phase_a8b7dbdfafd0e3c84dba4138cace2e00b}{}\index{Phase@{Phase}!lower@{lower}}
+\index{lower@{lower}!Phase@{Phase}}
+\subsubsection[{lower}]{\setlength{\rightskip}{0pt plus 5cm}double Phase\+::lower}\label{class_phase_a8b7dbdfafd0e3c84dba4138cace2e00b}
+
+
+Definition at line 34 of file phase\+\_\+loss\+\_\+opt.\+h.
+
+\hypertarget{class_phase_a76beec42b9bfdcd105edcb8505bab934}{}\index{Phase@{Phase}!overfac\+\_\+mat@{overfac\+\_\+mat}}
+\index{overfac\+\_\+mat@{overfac\+\_\+mat}!Phase@{Phase}}
+\subsubsection[{overfac\+\_\+mat}]{\setlength{\rightskip}{0pt plus 5cm}double$\ast$ Phase\+::overfac\+\_\+mat}\label{class_phase_a76beec42b9bfdcd105edcb8505bab934}
+
+
+Definition at line 43 of file phase\+\_\+loss\+\_\+opt.\+h.
+
+\hypertarget{class_phase_abcd241887b2113672f6dc94877b79079}{}\index{Phase@{Phase}!rng@{rng}}
+\index{rng@{rng}!Phase@{Phase}}
+\subsubsection[{rng}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Rng}$\ast$ Phase\+::rng}\label{class_phase_abcd241887b2113672f6dc94877b79079}
+
+
+Definition at line 38 of file phase\+\_\+loss\+\_\+opt.\+h.
+
+\hypertarget{class_phase_a9508675d9cd23e96e4e5af0f3514d64e}{}\index{Phase@{Phase}!sqrt\+\_\+cache@{sqrt\+\_\+cache}}
+\index{sqrt\+\_\+cache@{sqrt\+\_\+cache}!Phase@{Phase}}
+\subsubsection[{sqrt\+\_\+cache}]{\setlength{\rightskip}{0pt plus 5cm}double$\ast$ Phase\+::sqrt\+\_\+cache}\label{class_phase_a9508675d9cd23e96e4e5af0f3514d64e}
+
+
+Definition at line 37 of file phase\+\_\+loss\+\_\+opt.\+h.
+
+\hypertarget{class_phase_a64295bfa90607498ff8c544122afc3f9}{}\index{Phase@{Phase}!sqrtfac\+\_\+mat@{sqrtfac\+\_\+mat}}
+\index{sqrtfac\+\_\+mat@{sqrtfac\+\_\+mat}!Phase@{Phase}}
+\subsubsection[{sqrtfac\+\_\+mat}]{\setlength{\rightskip}{0pt plus 5cm}double$\ast$ Phase\+::sqrtfac\+\_\+mat}\label{class_phase_a64295bfa90607498ff8c544122afc3f9}
+
+
+Definition at line 42 of file phase\+\_\+loss\+\_\+opt.\+h.
+
+\hypertarget{class_phase_ab563c75af841b7c481f805d8a026518e}{}\index{Phase@{Phase}!state@{state}}
+\index{state@{state}!Phase@{Phase}}
+\subsubsection[{state}]{\setlength{\rightskip}{0pt plus 5cm}{\bf dcmplx}$\ast$ Phase\+::state}\label{class_phase_ab563c75af841b7c481f805d8a026518e}
+
+
+Definition at line 46 of file phase\+\_\+loss\+\_\+opt.\+h.
+
+\hypertarget{class_phase_a5ed12bc03ed5641e7d6486aefbc33ee3}{}\index{Phase@{Phase}!tan\+\_\+beta@{tan\+\_\+beta}}
+\index{tan\+\_\+beta@{tan\+\_\+beta}!Phase@{Phase}}
+\subsubsection[{tan\+\_\+beta}]{\setlength{\rightskip}{0pt plus 5cm}double Phase\+::tan\+\_\+beta}\label{class_phase_a5ed12bc03ed5641e7d6486aefbc33ee3}
+
+
+Definition at line 44 of file phase\+\_\+loss\+\_\+opt.\+h.
+
+\hypertarget{class_phase_a29c2f7fd9df0afc222d810d037ea9ded}{}\index{Phase@{Phase}!update0@{update0}}
+\index{update0@{update0}!Phase@{Phase}}
+\subsubsection[{update0}]{\setlength{\rightskip}{0pt plus 5cm}{\bf dcmplx}$\ast$ Phase\+::update0}\label{class_phase_a29c2f7fd9df0afc222d810d037ea9ded}
+
+
+Definition at line 48 of file phase\+\_\+loss\+\_\+opt.\+h.
+
+\hypertarget{class_phase_aef5f586464d8609c933b2c28afc1fbf1}{}\index{Phase@{Phase}!update1@{update1}}
+\index{update1@{update1}!Phase@{Phase}}
+\subsubsection[{update1}]{\setlength{\rightskip}{0pt plus 5cm}{\bf dcmplx}$\ast$ Phase\+::update1}\label{class_phase_aef5f586464d8609c933b2c28afc1fbf1}
+
+
+Definition at line 49 of file phase\+\_\+loss\+\_\+opt.\+h.
+
+\hypertarget{class_phase_abe5215ac7a99447da0f2075e87b6e1d1}{}\index{Phase@{Phase}!upper@{upper}}
+\index{upper@{upper}!Phase@{Phase}}
+\subsubsection[{upper}]{\setlength{\rightskip}{0pt plus 5cm}double Phase\+::upper}\label{class_phase_abe5215ac7a99447da0f2075e87b6e1d1}
+
+
+Definition at line 35 of file phase\+\_\+loss\+\_\+opt.\+h.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/\hyperlink{phase__loss__opt_8h}{phase\+\_\+loss\+\_\+opt.\+h}\item 
+src/\hyperlink{phase__loss__opt_8cpp}{phase\+\_\+loss\+\_\+opt.\+cpp}\end{DoxyCompactItemize}
