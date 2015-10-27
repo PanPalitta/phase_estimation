@@ -59,9 +59,13 @@ The meaning of the individual parameters:
   
   - `repeat`:
   
+  - `optimization`: choose the heuristic optimization algorithm: de (differential evolution) or pso (particle swarm optimization)
+  
   - `output_filename`: the name of the file to write the results to.
   
   - `time_filename`: the name of the file to write the time taken to run the program for each number of variables.
+
+  - `random_seed`: Fix a random seed. If it is not specified, the random number generator is initialized with the system time.
 
 Compilation
 -----------
@@ -104,7 +108,7 @@ The above flags allow the identification of the correct MPI library the user wis
 The configure script looks for CUDA in /usr/local/cuda. If your installation is not there, then specify the path with this parameter. If you do not want CUDA enabled, set the parameter to ```--without-cuda```.
 
 
-  --with-vsl=PATH    prefix where Intel MKL/VSL is installed
+    --with-vsl=PATH    prefix where Intel MKL/VSL is installed
 
 Specify the path to the VSL installation with this parameter.
 

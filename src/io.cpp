@@ -65,7 +65,7 @@ map<string, string> parse(ifstream & cfgfile)
 void read_config_file(char const *filename, int *pop_size, int *N_begin, 
                       int *N_cut, int *N_end, int *iter, int *iter_begin, 
                       int *repeat, int *seed, string *output_filename, 
-                      string *time_filename) {
+                      string *time_filename, string *optimization) {
     // Setting defaults
     *pop_size = 20;
     *N_begin = 4;
@@ -77,6 +77,7 @@ void read_config_file(char const *filename, int *pop_size, int *N_begin,
     *seed = time(NULL);
     *output_filename = "output.dat";
     *time_filename = "time.dat";
+    *optimization = "de";
     // Parsing config file if there is one
     if (filename == NULL) return;
     ifstream config_file(filename);
@@ -105,6 +106,11 @@ void read_config_file(char const *filename, int *pop_size, int *N_begin,
            *time_filename = it->second;
        } else if (it->first == "random_seed") {
            istringstream (it->second) >> *seed;
+       } else if (it->first == "optimization") {
+           *optimization = it->second;
+           if (*optimization != "de" && *optimization != "pso") {
+              throw runtime_error("Unknown optimization algorithm");
+           }
        } else {
            throw runtime_error("Unknown configuration option");
        }
