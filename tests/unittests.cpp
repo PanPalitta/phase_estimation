@@ -1,7 +1,10 @@
 #include "unittest++/UnitTest++.h"
+#include "phase_loss_opt.h"
+#include "mpi_optalg.h"
 #include "rng.h"
 #include "problem.h"
-#include "phase_loss_opt.h"
+#include "candidate.h"
+#include "io.h"
 
 #include <stdexcept>
 #include <cstdlib>
@@ -77,7 +80,6 @@ SUITE(phase_mainfunc) {
         }
 
     }
-	
 //from candidate.h
 SUITE(candidate_initialize_memory) {
     TEST(numvar_invalid) {
@@ -94,24 +96,6 @@ SUITE(candidate_initialize_memory) {
         }
     }
 SUITE(candidate_reads) {
-    TEST(read_cont) {
-        int numvar = 4;
-        int num_fit = 2;
-        Candidate<double> can1;
-        can1.init_can(numvar, num_fit);
-        double input[numvar];
-        double output[numvar];
-        double total = 0;
-        for(int i = 0; i < numvar; i++) {
-            input[i] = 1;
-            }
-        can1.update_cont(input);
-        can1.read_cont(output);
-        for(int i = 0; i < numvar; i++) {
-            total += output[i];
-            }
-        CHECK(total == numvar);
-        }
     TEST(read_vel) {
         int numvar = 4;
         int num_fit = 2;
@@ -150,25 +134,8 @@ SUITE(candidate_reads) {
             }
         CHECK(total == numvar);
         }
-    TEST(read_global) {
-        int numvar = 4;
-        int num_fit = 2;
-        Candidate<double> can1;
-        can1.init_can(numvar, num_fit);
-        double input[numvar];
-        double output[numvar];
-        double total = 0;
-        for(int i = 0; i < numvar; i++) {
-            input[i] = 1;
-            }
-        can1.update_global(input);
-        can1.read_global(output);
-        for(int i = 0; i < numvar; i++) {
-            total += output[i];
-            }
-        CHECK(total == numvar);
-        }
     }
+	
 
 //from mpi_optalg
 SUITE(Init_pop) {
@@ -338,20 +305,6 @@ SUITE(policy_criteria) {
     }
 
 SUITE(Linear_Regression) {
-    TEST(inverf_input) {
-        int xn = 10;
-        int xu = 10;
-        int seed = 0;
-        int rank = 0;
-        Rng *rng = new Rng(xn, xu, seed, rank);
-        int numvar = 4;
-        Problem* problem = new Phase(numvar, rng);
-        OptAlg* alg = new OptAlg(problem);
-
-        double input = 1.0;
-        CHECK_THROW(alg->inv_erf(input), invalid_argument);
-        }
-
     TEST(quantile) {
         int xn = 10;
         int xu = 10;
@@ -599,26 +552,6 @@ SUITE(check_catch) {
         Problem* problem = new Phase(numvar, rng);
         OptAlg* alg = new DE(problem);
         CHECK(alg->num == 4);
-        }
-    TEST(catch_inverf) {
-        int xn = 10;
-        int xu = 10;
-        int seed = 0;
-        int rank = 0;
-        Rng *rng = new Rng(xn, xu, seed, rank);
-        int numvar = 4;
-        Problem* problem = new Phase(numvar, rng);
-        OptAlg* alg = new DE(problem);
-
-        double p = 1.0;
-        double result;
-        try {
-            result = alg->inv_erf(p);
-            }
-        catch(invalid_argument) {
-            p = 0.999999;
-            }
-        CHECK(p == 0.999999);
         }
     TEST(catch_quantile) {
         int xn = 10;
