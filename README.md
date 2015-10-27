@@ -1,94 +1,117 @@
-##Reinforcement learning algorithm for adaptive phase estimation
+Reinforcement learning algorithm for adaptive phase estimation
+==============================================================
 
 This project aims to show the use of reinforcement learning algorithm in finding a feedback policy for adaptive quantum-enhanced measurement, which has the goal of achieving the scaling in precision that exceeds the conventional techniques. We use adaptive phase estimation that includes phase noise and loss as the test problem.
         
 The program is designed to streamline the implementation of population-based optimization algorithms on high-performance computing clusters and support parallel computing using MPI.
 
-**Features:** 
+Features
+--------
 
-- Easy selection of optimization algorithm and optimization problem
+  - Easy selection of optimization algorithm and optimization problem
 
-- Libraries for differential evolution and particle swarm optimization
+  - Libraries for differential evolution and particle swarm optimization
 
-- Both uniformly random and clustered initialization of population 
+  - Both uniformly random and clustered initialization of population 
 
-- Accept-reject criteria to ensure quantum-enhanced results
+  - Accept-reject criteria to ensure quantum-enhanced results
 
-- Support for VSL and GPU to provide fast random number generation
+  - Support for VSL and GPU to provide fast random number generation
+
+Usage
+=====
+
+The program is designed to work on HPC clusters and it requires MPI to run. The basic use is as follows:
+
+    $ [mpirun -np NPROC] phase_estimation [config_file]
+
+Arguments:
+
+    config_file              Configuration file name
+
+If it is run without a configuration file, some default values are taken for all parameters; the exact settings are identical to the one in the provided `default.cfg` file. The configuration file is a plain text file with the name of the parameter on the left, followed by an equation sign surrounded by a space on either side, and a value on the right-hand side. For example, the contents of `default.cfg` are as follows:
+
+    pop_size = 20
+    N_begin = 4
+    N_cut = 5
+    N_end = 10
+    iter = 100
+    iter_begin = 300
+    repeat = 10
+    output_filename = output.dat
+    time_filename = time.dat
+
+If you supply a configuration file, but do not set a specific value to every possible option, the default values are again the ones described in `default.cfg`.
+
+The meaning of the individual parameters:
+
+  - `pop_size`: population size.
+  
+  - `N_begin`: the starting number of particles.
+  
+  - `N_cut`: the number of particles where the program use cluster initialization around previous solution.
+  
+  - `N_end`: the final number of particles.
+
+  - `iter`: number of iterations.
+  
+  - `iter_begin`:
+  
+  - `repeat`:
+  
+  - `optimization`: choose the heuristic optimization algorithm: de (differential evolution) or pso (particle swarm optimization)
+  
+  - `output_filename`: the name of the file to write the results to.
+  
+  - `time_filename`: the name of the file to write the time taken to run the program for each number of variables.
+
+  - `random_seed`: Fix a random seed. If it is not specified, the random number generator is initialized with the system time.
+
+Compilation
+-----------
+
+The project contains the support for compilation using Autotools, and has been tested using GNU Compile Chain (GCC) and Intel Compilers. The Intel VSL library and CUDA are automatically detected. An MPI implementation is required to compile and run the code.
+
+If you cloned the Git repository, first run `autogen.sh` in order to create missing files and generate the executable configure from configure.ac. 
+
+Follow the standard POSIX procedure:
+
+    $ ./configure [options]
+    $ make
+    $ make install
+
+To use the Intel compilers, set the following environment variables:
+
+    export CC=/path/of/intel/compiler/icc
+    export CXX=/path/of/intel/compiler/icpc
+    export OMPI_CC=/path/of/intel/compiler/icc
+    export OMPI_CXX=/path/of/intel/compiler/icpc
+
+In order to use icc and icpc compilers, you have to set these variables
+so the mpic++ will invoke icpc instead of the default compiler.
+
+Options for configure
+
+    --prefix=PATH           Set directory prefix for installation
+    --with-mpi=MPIROOT      Use MPI root directory.
+    --with-mpi-compilers=DIR or --with-mpi-compilers=yes
+                              use MPI compiler (mpicxx) found in directory DIR, or
+                              in your PATH if =yes
+    --with-mpi-libs="LIBS"  MPI libraries [default "-lmpi"]
+    --with-mpi-incdir=DIR   MPI include directory [default MPIROOT/include]
+    --with-mpi-libdir=DIR   MPI library directory [default MPIROOT/lib]
+
+The above flags allow the identification of the correct MPI library the user wishes to use. The flags are especially useful if MPI is installed in a non-standard location, or when multiple MPI libraries are available.
+
+    --with-cuda=/path/to/cuda           Set path for CUDA
+
+The configure script looks for CUDA in /usr/local/cuda. If your installation is not there, then specify the path with this parameter. If you do not want CUDA enabled, set the parameter to ```--without-cuda```.
 
 
-**Limitation**
+    --with-vsl=PATH    prefix where Intel MKL/VSL is installed
 
--The adaptive phase estimation is only reliable to 100 photons [Other limitation?] 
+Specify the path to the VSL installation with this parameter.
 
-### Usage:
-
-As the program is designed to work on HPC clusters where interactive input from user might not be allowed, all the parameters are set within the code before compilation.
-
-#### Selecting problem and optimization algorithm 
-
-The library for the optimization algorithm and the problem must be included in the headers of main.cpp. The objects in the corresponding classes can be set in the main function as pointers.
-
-```
-		#include "mpi_de.h"
-		#include "mpi_pso.h"
-``` 
-
-The optimization algorithms are instantiated with default parameters which can be changed within the code. For example, for differential evolution:
-
-```
-        ...
-
-        DE(Problem<typeT> *problem_ptr): F(0.1), Cr(0.6) {
-
-        ...
-```
-
-The library also contain a function for changing the parameters during runtime:
-
-```
-		void DE<typeT>::write_param(double *param_array) {
-		...
-
-```
-
-#### Parameters setting 
-
-The beginning of the main function contains a set of parameters including
-
-- the smallest (N\_begin) and the largest number of variables (N\_end). 
-
-- number of variables where the program use cluster initialization around previous solution (N\_cut)
-
-- number of variables where accept-reject criteria starts (data\_end)
-
-- population size (pop\_size)
-
-- number of iterations (iter, iter\_begin)
-
-#### Compilation
-
-The project contains the support for compilation using Autotools, and has been tested using GNU Compile Chain (GCC) and Intel Compilers. Intel VSL library and GPU are automatically detected.
-
-In the first compilation, first run autogen.sh in order to create missing files and generate the executable configure from configure.ac. Then run the executable to generate Makefile from Makefile.in. The code can now be compiled. The sequence of the commands are
-
-```
-        ./autogen.sh
-
-        ./configure
-
-        make
-``` 
-
-Any job submission command should be directed to run src/phase\_estimation. The solution from the run are in the output file output.dat, and the time taken to run the program for each number of variables is in the file time.dat. 
-
-
-###Acknowledgement:
-
-The computational work was enabled in part by support provided by WestGrid (www.westgrid.ca) and Calcul Quebec (www.calculquebec.ca) through Compute Canada Calcul Canada (www.computecanada.ca).
-
-[Should we include the funding sources: NSERC, AITF]
-
-###References: 
-
-[To be include: manuscript on arxiv and manual -- what should be in the manual?]
+Acknowledgement
+---------------
+The computational work was enabled in part by support provided by [WestGrid](www.westgrid.ca) and [Calcul Quebec](www.calculquebec.ca) through [Compute Canada Calcul Canada](www.computecanada.ca).

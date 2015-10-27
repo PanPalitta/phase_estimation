@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
     /*parameter settings*/
     int pop_size, N_begin, N_cut, N_end, iter, iter_begin, repeat, seed;
-    string output_filename, time_filename;
+    string output_filename, time_filename, optimization;
     char const *config_filename;
     if (argc > 1) {
         config_filename = argv[1];
@@ -37,9 +37,8 @@ int main(int argc, char **argv) {
         }
     read_config_file(config_filename, &pop_size, &N_begin, &N_cut, &N_end, &iter,
                      &iter_begin, &repeat, &seed, &output_filename,
-                     &time_filename);
+                     &time_filename, &optimization);
 
-    int T_cut_off = N_cut;
     double prev_dev = 0.01 * M_PI;
     double new_dev = 0.25 * M_PI;
     int data_start = N_begin;
@@ -86,14 +85,22 @@ int main(int argc, char **argv) {
             }
         t = 0;
 
+        Problem* problem;
         try {
-            Problem* problem = new Phase(numvar, rng);
+            problem = new Phase(numvar, rng);
             }
         catch(invalid_argument) {
             numvar = 4;
+            problem = new Phase(numvar, rng);
             }
-        Problem* problem = new Phase(numvar, rng);
-        OptAlg* opt = new DE(problem);
+        OptAlg* opt;
+        if (optimization == "de") {
+            opt = new DE(problem);
+        } else if (optimization == "pso") {
+            opt = new PSO(problem);
+        } else {
+            throw runtime_error("Unknown optimization algorithm");
+        }
 
         fitarray = new double[problem->num_fit];
 
@@ -105,8 +112,8 @@ int main(int argc, char **argv) {
                 }
             catch(invalid_argument) {
                 can_per_proc[my_rank] = 1;
+                opt->Init_population(can_per_proc[my_rank]);
                 }
-            opt->Init_population(can_per_proc[my_rank]);
             }
         else {
             if (my_rank == 0) {
@@ -123,21 +130,21 @@ int main(int argc, char **argv) {
                 }
             catch(invalid_argument) {
                 can_per_proc[my_rank] = 1;
+                opt->Init_previous(prev_dev, new_dev, can_per_proc[my_rank], solution);
                 }
-            opt->Init_previous(prev_dev, new_dev, can_per_proc[my_rank], solution);
             }
 
         opt->put_to_best(my_rank, pop_size, nb_proc);
 
         //setting the success criterion
-        if (numvar < T_cut_off) {
+        if (numvar < N_cut) {
             try {
                 opt->set_success(iter_begin, 0);
                 }
             catch(out_of_range) {
                 iter_begin = 100;
+                opt->set_success(iter_begin, 0);
                 }
-            opt->set_success(iter_begin, 0);
             T = iter_begin;
             }
         else if (numvar >= data_end) {
@@ -149,8 +156,8 @@ int main(int argc, char **argv) {
                 }
             catch(out_of_range) {
                 iter = 100;
+                opt->set_success(iter, 0);
                 }
-            opt->set_success(iter, 0);
             T = iter;
             }
 
@@ -180,8 +187,8 @@ int main(int argc, char **argv) {
                         }
                     catch(invalid_argument) {
                         fitarray[0] = 0.999999;
+                        opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
                         }
-                    opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
                     if (my_rank == 0) {
                         cout << fitarray[1] << endl;
                         }
@@ -202,8 +209,8 @@ int main(int argc, char **argv) {
                         }
                     catch(invalid_argument) {
                         fitarray[0] = 0.999999;
+                        opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
                         }
-                    opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
                     if (my_rank == 0) {
                         cout << fitarray[1] << endl;
                         }
