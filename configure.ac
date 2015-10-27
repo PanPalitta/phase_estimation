@@ -133,4 +133,5 @@ Now type 'make @<:@<target>@:>@'
 where the optional <target> is:
 all - build all binaries
 install - install everything
+test - build tests
 --------------------------------------------------"
