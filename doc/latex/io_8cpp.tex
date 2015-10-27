@@ -1,0 +1,96 @@
+\hypertarget{io_8cpp}{}\section{src/io.cpp File Reference}
+\label{io_8cpp}\index{src/io.\+cpp@{src/io.\+cpp}}
+{\ttfamily \#include $<$fstream$>$}\\*
+{\ttfamily \#include $<$iostream$>$}\\*
+{\ttfamily \#include $<$sstream$>$}\\*
+{\ttfamily \#include $<$string$>$}\\*
+{\ttfamily \#include $<$stdexcept$>$}\\*
+{\ttfamily \#include $<$map$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{io_8cpp_a10583a8642f4535af8c6592fc6a8dc96}{output\+\_\+header} (char const $\ast$output\+\_\+filename, char const $\ast$time\+\_\+filename)
+\item 
+{\footnotesize template$<$typename type\+T $>$ }\\void \hyperlink{io_8cpp_a68fbe1f0ef15f5fdd6e2add34e5d5277}{output\+\_\+result} (int num, double final\+\_\+fit, type\+T $\ast$solution, time\+\_\+t start\+\_\+time, char const $\ast$output\+\_\+filename, char const $\ast$time\+\_\+filename)
+\item 
+template void \hyperlink{io_8cpp_a4f397915af0badcc3ef4c787dc8f1cc1}{output\+\_\+result$<$ double $>$} (int num, double final\+\_\+fit, double $\ast$solution, time\+\_\+t start\+\_\+time, char const $\ast$output\+\_\+filename, char const $\ast$time\+\_\+filename)
+\item 
+map$<$ string, string $>$ \hyperlink{io_8cpp_a2d60a187e46ba5641d20f16faae0e823}{parse} (ifstream \&cfgfile)
+\item 
+void \hyperlink{io_8cpp_ab932652747d17ad1b7805a19bac77dea}{read\+\_\+config\+\_\+file} (char const $\ast$filename, int $\ast$pop\+\_\+size, int $\ast$N\+\_\+begin, int $\ast$N\+\_\+cut, int $\ast$N\+\_\+end, int $\ast$iter, int $\ast$iter\+\_\+begin, int $\ast$repeat, int $\ast$seed, string $\ast$output\+\_\+filename, string $\ast$time\+\_\+filename)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{io_8cpp_a10583a8642f4535af8c6592fc6a8dc96}{}\index{io.\+cpp@{io.\+cpp}!output\+\_\+header@{output\+\_\+header}}
+\index{output\+\_\+header@{output\+\_\+header}!io.\+cpp@{io.\+cpp}}
+\subsubsection[{output\+\_\+header(char const $\ast$output\+\_\+filename, char const $\ast$time\+\_\+filename)}]{\setlength{\rightskip}{0pt plus 5cm}void output\+\_\+header (
+\begin{DoxyParamCaption}
+\item[{char const $\ast$}]{output\+\_\+filename, }
+\item[{char const $\ast$}]{time\+\_\+filename}
+\end{DoxyParamCaption}
+)}\label{io_8cpp_a10583a8642f4535af8c6592fc6a8dc96}
+
+
+Definition at line 10 of file io.\+cpp.
+
+\hypertarget{io_8cpp_a68fbe1f0ef15f5fdd6e2add34e5d5277}{}\index{io.\+cpp@{io.\+cpp}!output\+\_\+result@{output\+\_\+result}}
+\index{output\+\_\+result@{output\+\_\+result}!io.\+cpp@{io.\+cpp}}
+\subsubsection[{output\+\_\+result(int num, double final\+\_\+fit, type\+T $\ast$solution, time\+\_\+t start\+\_\+time, char const $\ast$output\+\_\+filename, char const $\ast$time\+\_\+filename)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename type\+T $>$ void output\+\_\+result (
+\begin{DoxyParamCaption}
+\item[{int}]{num, }
+\item[{double}]{final\+\_\+fit, }
+\item[{type\+T $\ast$}]{solution, }
+\item[{time\+\_\+t}]{start\+\_\+time, }
+\item[{char const $\ast$}]{output\+\_\+filename, }
+\item[{char const $\ast$}]{time\+\_\+filename}
+\end{DoxyParamCaption}
+)}\label{io_8cpp_a68fbe1f0ef15f5fdd6e2add34e5d5277}
+
+
+Definition at line 23 of file io.\+cpp.
+
+\hypertarget{io_8cpp_a4f397915af0badcc3ef4c787dc8f1cc1}{}\index{io.\+cpp@{io.\+cpp}!output\+\_\+result$<$ double $>$@{output\+\_\+result$<$ double $>$}}
+\index{output\+\_\+result$<$ double $>$@{output\+\_\+result$<$ double $>$}!io.\+cpp@{io.\+cpp}}
+\subsubsection[{output\+\_\+result$<$ double $>$(int num, double final\+\_\+fit, double $\ast$solution, time\+\_\+t start\+\_\+time, char const $\ast$output\+\_\+filename, char const $\ast$time\+\_\+filename)}]{\setlength{\rightskip}{0pt plus 5cm}template void {\bf output\+\_\+result}$<$ double $>$ (
+\begin{DoxyParamCaption}
+\item[{int}]{num, }
+\item[{double}]{final\+\_\+fit, }
+\item[{double $\ast$}]{solution, }
+\item[{time\+\_\+t}]{start\+\_\+time, }
+\item[{char const $\ast$}]{output\+\_\+filename, }
+\item[{char const $\ast$}]{time\+\_\+filename}
+\end{DoxyParamCaption}
+)}\label{io_8cpp_a4f397915af0badcc3ef4c787dc8f1cc1}
+\hypertarget{io_8cpp_a2d60a187e46ba5641d20f16faae0e823}{}\index{io.\+cpp@{io.\+cpp}!parse@{parse}}
+\index{parse@{parse}!io.\+cpp@{io.\+cpp}}
+\subsubsection[{parse(ifstream \&cfgfile)}]{\setlength{\rightskip}{0pt plus 5cm}map$<$string, string$>$ parse (
+\begin{DoxyParamCaption}
+\item[{ifstream \&}]{cfgfile}
+\end{DoxyParamCaption}
+)}\label{io_8cpp_a2d60a187e46ba5641d20f16faae0e823}
+
+
+Definition at line 49 of file io.\+cpp.
+
+\hypertarget{io_8cpp_ab932652747d17ad1b7805a19bac77dea}{}\index{io.\+cpp@{io.\+cpp}!read\+\_\+config\+\_\+file@{read\+\_\+config\+\_\+file}}
+\index{read\+\_\+config\+\_\+file@{read\+\_\+config\+\_\+file}!io.\+cpp@{io.\+cpp}}
+\subsubsection[{read\+\_\+config\+\_\+file(char const $\ast$filename, int $\ast$pop\+\_\+size, int $\ast$\+N\+\_\+begin, int $\ast$\+N\+\_\+cut, int $\ast$\+N\+\_\+end, int $\ast$iter, int $\ast$iter\+\_\+begin, int $\ast$repeat, int $\ast$seed, string $\ast$output\+\_\+filename, string $\ast$time\+\_\+filename)}]{\setlength{\rightskip}{0pt plus 5cm}void read\+\_\+config\+\_\+file (
+\begin{DoxyParamCaption}
+\item[{char const $\ast$}]{filename, }
+\item[{int $\ast$}]{pop\+\_\+size, }
+\item[{int $\ast$}]{N\+\_\+begin, }
+\item[{int $\ast$}]{N\+\_\+cut, }
+\item[{int $\ast$}]{N\+\_\+end, }
+\item[{int $\ast$}]{iter, }
+\item[{int $\ast$}]{iter\+\_\+begin, }
+\item[{int $\ast$}]{repeat, }
+\item[{int $\ast$}]{seed, }
+\item[{string $\ast$}]{output\+\_\+filename, }
+\item[{string $\ast$}]{time\+\_\+filename}
+\end{DoxyParamCaption}
+)}\label{io_8cpp_ab932652747d17ad1b7805a19bac77dea}
+
+
+Definition at line 65 of file io.\+cpp.
+
