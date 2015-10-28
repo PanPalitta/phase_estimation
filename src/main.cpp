@@ -104,8 +104,8 @@ int main(int argc, char **argv) {
                 opt->Init_population(can_per_proc[my_rank]);
                 }
             catch(invalid_argument) {
-                can_per_proc[my_rank] = 0;
-                opt->Init_population(can_per_proc[my_rank]);
+                cout << "Population size at processor" << my_rank << "is <=0." << endl;
+                terminate();
                 }
             }
         else {
@@ -122,8 +122,8 @@ int main(int argc, char **argv) {
                 //each processor initialize the candidates.
                 }
             catch(invalid_argument) {
-                can_per_proc[my_rank] = 1;
-                opt->Init_previous(prev_dev, new_dev, can_per_proc[my_rank], solution);
+                cout << "Population size at processor" << my_rank << "is <=0." << endl;
+                terminate();
                 }
             }
 
