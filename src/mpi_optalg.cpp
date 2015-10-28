@@ -10,7 +10,7 @@ void OptAlg::Init_population(int psize) {
     double input[num];
     //store the variables
     pop_size = psize;
-    pop = new Candidate<double>[pop_size];
+    pop = new Candidate[pop_size];
 
     for(int p = 0; p < pop_size; ++p) {
         //generate candidate
@@ -34,7 +34,7 @@ void OptAlg::Init_previous(double prev_dev, double new_dev, int psize, double *p
     double dev[num];
     //store the variables
     pop_size = psize;
-    pop = new Candidate<double>[pop_size];
+    pop = new Candidate[pop_size];
 
     prev_soln[num - 1] = prev_soln[num - 2];
     dev_gen(dev, prev_dev, new_dev, dev_cut_off);
