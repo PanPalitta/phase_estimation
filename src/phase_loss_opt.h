@@ -23,7 +23,7 @@ typedef complex<double> dcmplx;
 
 class Phase: public Problem {
     public:
-        Phase(const int numvar, Rng *rng);
+        Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng);
         ~Phase();
 
         //double fitness(double *soln);
@@ -35,7 +35,7 @@ class Phase: public Problem {
         double upper;
         //array to avoid calculation of expensive sqrt calls for integers
         double *sqrt_cache;
-        Rng *rng;
+        Rng *gaussian_rng, *uniform_rng;
         
         //variables for WK state generation
         dcmplx *input_state;

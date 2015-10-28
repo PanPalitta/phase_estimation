@@ -87,68 +87,53 @@ void setDevice(int commRank, int commSize) {
     cout <<  device << " " << devProp.name << " Compute Capability: " << devProp.major << "." << devProp.minor << "\n";
 }
 
-RngGpu::RngGpu(int _n_urandom_numbers, int _n_grandom_numbers, int seed, int rank):
-    n_urandom_numbers(_n_urandom_numbers),
-    n_grandom_numbers(_n_grandom_numbers) {
+RngGpu::RngGpu(bool _gaussian, int _n_random_numbers, int seed, int rank):
+    n_random_numbers(_n_random_numbers), RngVectorized(_gaussian) {
     int nb_proc;
     MPI_Comm_size(MPI_COMM_WORLD, &nb_proc);
     setDevice(rank, nb_proc);
-    CUDA_CALL(cudaMallocHost((void **)&urandom_numbers,
-                             n_urandom_numbers * sizeof(double)));
-    CUDA_CALL(cudaMallocHost((void **)&grandom_numbers,
-                             n_grandom_numbers * sizeof(double)));
-    index_urandom_numbers = n_urandom_numbers;
-    index_grandom_numbers = n_grandom_numbers;
-    CUDA_CALL(cudaMalloc((void **)&dev_urandom_numbers,
-                         n_urandom_numbers * sizeof(double)));
-    CUDA_CALL(cudaMalloc((void **)&dev_grandom_numbers,
-                         n_grandom_numbers * sizeof(double)));
+    CUDA_CALL(cudaMallocHost((void **)&random_numbers,
+                             n_random_numbers * sizeof(double)));
+    index_random_numbers = n_random_numbers;
+    CUDA_CALL(cudaMalloc((void **)&dev_random_numbers,
+                         n_random_numbers * sizeof(double)));
     /* Create pseudo-random number generator */
     CURAND_CALL(curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT));
     /* Set seed */
     CURAND_CALL(curandSetPseudoRandomGeneratorSeed(gen, seed));
-    CURAND_CALL(curandGenerateUniformDouble(gen, dev_urandom_numbers,
-                                            n_urandom_numbers));
-    CURAND_CALL(curandGenerateNormalDouble(gen, dev_grandom_numbers,
-                                           n_grandom_numbers, 0.0, 1.0));
-    CUDA_CALL(cudaMemcpyAsync(urandom_numbers, dev_urandom_numbers,
-                              n_urandom_numbers * sizeof(double),
-                              cudaMemcpyDeviceToHost));
-    CUDA_CALL(cudaMemcpyAsync(grandom_numbers, dev_grandom_numbers,
-                              n_grandom_numbers * sizeof(double),
+    if (gaussian) {
+        CURAND_CALL(curandGenerateNormalDouble(gen, dev_random_numbers,
+                                               n_random_numbers, 0.0, 1.0));
+    } else {
+        CURAND_CALL(curandGenerateUniformDouble(gen, dev_random_numbers,
+                                                n_random_numbers));
+    }
+    CUDA_CALL(cudaMemcpyAsync(random_numbers, dev_random_numbers,
+                              n_random_numbers * sizeof(double),
                               cudaMemcpyDeviceToHost));
     }
 
-double RngGpu::next_urand() {
-    if (index_urandom_numbers >= n_urandom_numbers) {
-        index_urandom_numbers = 0;
-        cudaDeviceSynchronize();
-        CURAND_CALL(curandGenerateUniformDouble(gen, dev_urandom_numbers,
-                                                n_urandom_numbers));
-        CUDA_CALL(cudaMemcpyAsync(urandom_numbers, dev_urandom_numbers,
-                                  n_urandom_numbers * sizeof(double),
-                                  cudaMemcpyDeviceToHost));
-        }
-    return urandom_numbers[index_urandom_numbers++];
-    }
 
-double RngGpu::next_grand(const double mean, const double dev) {
-    if (index_grandom_numbers >= n_grandom_numbers) {
-        index_grandom_numbers = 0;
+double RngGpu::next_rand(const double mean, const double dev) {
+    if (index_random_numbers >= n_random_numbers) {
+        index_random_numbers = 0;
         cudaDeviceSynchronize();
-        CURAND_CALL(curandGenerateNormalDouble(gen, dev_grandom_numbers,
-                                               n_grandom_numbers, 0.0, 1.0));
-        CUDA_CALL(cudaMemcpyAsync(grandom_numbers, dev_grandom_numbers,
-                                  n_grandom_numbers * sizeof(double),
+        if (gaussian) {
+            CURAND_CALL(curandGenerateNormalDouble(gen, dev_random_numbers,
+                                                   n_random_numbers, 0.0, 1.0));
+        } else {
+            CURAND_CALL(curandGenerateUniformDouble(gen, dev_random_numbers,
+                                                    n_random_numbers));
+        }
+        CUDA_CALL(cudaMemcpyAsync(random_numbers, dev_random_numbers,
+                                  n_random_numbers * sizeof(double),
                                   cudaMemcpyDeviceToHost));
         }
-    return grandom_numbers[index_grandom_numbers++] * dev + mean;
+    return random_numbers[index_random_numbers++] * dev + mean;
     }
 
 RngGpu::~RngGpu() {
     CURAND_CALL(curandDestroyGenerator(gen));
-    CUDA_CALL(cudaFree(dev_urandom_numbers));
-    CUDA_CALL(cudaFree(dev_grandom_numbers));
-    CUDA_CALL(cudaFreeHost(grandom_numbers));
-    CUDA_CALL(cudaFreeHost(urandom_numbers));
+    CUDA_CALL(cudaFree(dev_random_numbers));
+    CUDA_CALL(cudaFreeHost(random_numbers));
     }
