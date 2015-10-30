@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
     /*parameter settings*/
     int pop_size, N_begin, N_cut, N_end, iter, iter_begin, repeat, seed;
-    string output_filename, time_filename, optimization;
+    string output_filename, time_filename;
     char const *config_filename;
     if (argc > 1) {
         config_filename = argv[1];
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
         }
     read_config_file(config_filename, &pop_size, &N_begin, &N_cut, &N_end, &iter,
                      &iter_begin, &repeat, &seed, &output_filename,
-                     &time_filename, &optimization);
+                     &time_filename);
 
     double prev_dev = 0.01 * M_PI;
     double new_dev = 0.25 * M_PI;
@@ -94,14 +94,7 @@ int main(int argc, char **argv) {
             numvar = 4;
             problem = new Phase(numvar, gaussian_rng, uniform_rng);
             }
-        OptAlg* opt;
-        if (optimization == "de") {
-            opt = new DE(problem);
-        } else if (optimization == "pso") {
-            opt = new PSO(problem);
-        } else {
-            throw runtime_error("Unknown optimization algorithm");
-        }
+        OptAlg* opt = new DE(problem);
 
         fitarray = new double[problem->num_fit];
 
@@ -112,8 +105,8 @@ int main(int argc, char **argv) {
                 opt->Init_population(can_per_proc[my_rank]);
                 }
             catch(invalid_argument) {
-                can_per_proc[my_rank] = 1;
-                opt->Init_population(can_per_proc[my_rank]);
+                cout << "Population size at processor" << my_rank << "is <=0." << endl;
+                terminate();
                 }
             }
         else {
@@ -130,8 +123,8 @@ int main(int argc, char **argv) {
                 //each processor initialize the candidates.
                 }
             catch(invalid_argument) {
-                can_per_proc[my_rank] = 1;
-                opt->Init_previous(prev_dev, new_dev, can_per_proc[my_rank], solution);
+                cout << "Population size at processor" << my_rank << "is <=0." << endl;
+                terminate();
                 }
             }
 
