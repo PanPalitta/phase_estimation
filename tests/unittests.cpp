@@ -151,7 +151,7 @@ SUITE(Init_pop) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 10;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         int pop_size = -5;
         CHECK_THROW(alg->Init_population(pop_size), invalid_argument);
@@ -165,7 +165,7 @@ SUITE(Init_pop) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 5;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         double prev_dev = 0.1;
         double new_dev = 0.5;
@@ -188,7 +188,7 @@ SUITE(success_criteria) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         int iter = 0;
         double goal_in = 0.1;
@@ -203,7 +203,7 @@ SUITE(success_criteria) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         int iter = 10;
         double goal_in = 0.1;
@@ -225,7 +225,7 @@ SUITE(success_criteria) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         int iter = 10;
         double goal_in = 0.1;
@@ -250,7 +250,7 @@ SUITE(alg_aux_functions) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         int dev_cut_off = numvar - 1;
         double dev[numvar];
@@ -271,7 +271,7 @@ SUITE(policy_criteria) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         double error = 4.0;
         double sharp = 1.0;
@@ -288,7 +288,7 @@ SUITE(policy_criteria) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         double error = 4.0;
         double sharp = 0.9;
@@ -305,7 +305,7 @@ SUITE(policy_criteria) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         double error = 2.5;
         double sharp = 0.9;
@@ -326,7 +326,7 @@ SUITE(Linear_Regression) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         double input = 0.975;
         double result;
@@ -342,7 +342,7 @@ SUITE(Linear_Regression) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 8;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         double slope, intercept, mean_x;
         double x[numvar];
@@ -365,7 +365,7 @@ SUITE(Linear_Regression) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 8;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         double slope, intercept, mean_x;
         double x[numvar];
@@ -388,7 +388,7 @@ SUITE(Linear_Regression) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 8;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         double slope, intercept, mean_x, SSres;
         double interval;
@@ -413,7 +413,7 @@ SUITE(Linear_Regression) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 8;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         double slope, intercept, mean_x, SSres;
         double interval;
@@ -438,7 +438,7 @@ SUITE(Linear_Regression) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 8;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         double slope, intercept, mean_x, SSres;
         double interval;
@@ -465,7 +465,7 @@ SUITE(Linear_Regression) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 8;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         double slope, intercept, mean_x, SSres;
         double interval;
@@ -493,7 +493,7 @@ SUITE(Selections) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 8;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new OptAlg(problem);
+        OptAlg* alg = new OptAlg(problem, gaussian_rng);
 
         double fit[numvar];
         int indx;
@@ -518,7 +518,7 @@ SUITE(de_constructor) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 8;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new DE(problem);
+        OptAlg* alg = new DE(problem, gaussian_rng);
         CHECK(alg->num == numvar);
         }
     }
@@ -532,7 +532,7 @@ SUITE(de_functions) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 8;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new DE(problem);
+        OptAlg* alg = new DE(problem, gaussian_rng);
 
         double out_param[2];
         alg->read_param(out_param);
@@ -547,7 +547,7 @@ SUITE(de_functions) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 8;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new DE(problem);
+        OptAlg* alg = new DE(problem, gaussian_rng);
 
         double in_param[2] = {1.3, 2.1};
         double out_param[2];
@@ -568,13 +568,13 @@ SUITE(check_catch) {
         int numvar = -10;
         try {
             Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-            OptAlg* alg = new DE(problem);
+            OptAlg* alg = new DE(problem, gaussian_rng);
             }
         catch(invalid_argument) {
             numvar = 4;
             }
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new DE(problem);
+        OptAlg* alg = new DE(problem, gaussian_rng);
         CHECK(alg->num == 4);
         }
     TEST(catch_quantile) {
@@ -586,7 +586,7 @@ SUITE(check_catch) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new DE(problem);
+        OptAlg* alg = new DE(problem, gaussian_rng);
 
         double p = 1.0;
         double result = 0;
@@ -602,7 +602,7 @@ SUITE(check_catch) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new DE(problem);
+        OptAlg* alg = new DE(problem, gaussian_rng);
 
         double error = 0.1;
         double sharp = 1.0;
@@ -625,7 +625,7 @@ SUITE(check_catch) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new DE(problem);
+        OptAlg* alg = new DE(problem, gaussian_rng);
 
         int data_size = 0;
         double x[numvar];
@@ -648,7 +648,7 @@ SUITE(check_catch) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new DE(problem);
+        OptAlg* alg = new DE(problem, gaussian_rng);
 
         int data_size = 0;
         double x[numvar];
@@ -671,7 +671,7 @@ SUITE(check_catch) {
         Rng *uniform_rng = new Rng(false, xu, seed, rank);
         int numvar = 4;
         Problem* problem = new Phase(numvar, gaussian_rng, uniform_rng);
-        OptAlg* alg = new DE(problem);
+        OptAlg* alg = new DE(problem, gaussian_rng);
 
         int data_size = -10;
         double x[numvar];
