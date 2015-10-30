@@ -7,11 +7,12 @@
 
 #include "problem.h"
 #include "candidate.h"
+#include "rng.h"
 
 class OptAlg {
     public:
         OptAlg() {};
-        OptAlg(Problem *problem_ptr) {
+        OptAlg(Problem *problem_ptr, Rng *gaussian_rng): gaussian_rng(gaussian_rng) {
             prob = problem_ptr;
             num = prob->num;
             num_fit = prob->num_fit;
@@ -40,7 +41,6 @@ class OptAlg {
         void set_success(int iter, bool goal);
         bool check_success(int t, int D, double fit, double slope, double intercept);
 
-        double rand_Gaussian(double mean, double dev);
         void dev_gen(double *dev_array, double prev_dev, double new_dev, int cut_off);
 
         //Selecting solution
@@ -64,19 +64,16 @@ class OptAlg {
         int num, num_fit;
 
     protected:
+        Rng *gaussian_rng;
         int pop_size, T, t;
-        Candidate<double> *pop;
+        Candidate *pop;
         bool goal;
     };
 
 class DE : public OptAlg {
     public:
         DE() {};
-        DE(Problem *problem_ptr): F(0.1), Cr(0.6) {
-            this->prob = problem_ptr;
-            this->num = this->prob->num;
-            this->num_fit = prob->num_fit;
-            }
+        DE(Problem *problem_ptr, Rng *gaussian_rng): OptAlg(problem_ptr, gaussian_rng), F(0.1), Cr(0.6) {};
         ~DE() {};
 
         void put_to_best(int my_rank, int total_pop, int nb_proc);
@@ -97,11 +94,7 @@ class DE : public OptAlg {
 class PSO : public OptAlg {
     public:
         PSO() {};
-        PSO(Problem *problem_ptr): w(0.8), phi1(0.6), phi2(1.0), v_max(0.2) {
-            this->prob = problem_ptr;
-            this->num = this->prob->num;
-            this->num_fit = prob->num_fit;
-            }
+        PSO(Problem *problem_ptr, Rng *gaussian_rng): OptAlg(problem_ptr, gaussian_rng), w(0.8), phi1(0.6), phi2(1.0), v_max(0.2) {};
         ~PSO() {};
 
         void put_to_best(int my_rank, int total_pop, int nb_proc);
