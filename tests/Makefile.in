@@ -36,7 +36,7 @@ NVCC       	   = @NVCC@
 # VPATH-related substitution variables
 srcdir	 = ./../src
 
-MAINOBJS=$(srcdir)/phase_loss_opt.o $(srcdir)/io.o $(srcdir)/problem.o $(srcdir)/mpi_optalg.o $(srcdir)/mpi_pso.o $(srcdir)/mpi_de.o $(srcdir)/rng.o
+MAINOBJS=$(srcdir)/candidate.o $(srcdir)/phase_loss_opt.o $(srcdir)/io.o $(srcdir)/problem.o $(srcdir)/mpi_optalg.o $(srcdir)/mpi_pso.o $(srcdir)/mpi_de.o $(srcdir)/rng.o
 
 ifdef CUDA_LIBS
 	MAINOBJS+=rng_gpu.cu.co
@@ -48,10 +48,10 @@ endif
 TEST_OBJS=$(MAINOBJS) unittests.o
 
 test check: $(TEST_OBJS)
-	$(CXX) $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -I.. -o unittest $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS} $(TEST_LIBS) -lunittest++
+	$(CXX) $(DEFS) $(CXXFLAGS) -g $(CUDA_LDFLAGS) ${MPI_LIBDIR} -I.. -o unittest $^ $(LIBS) $(CUDA_LIBS) ${MPI_LIBS} $(TEST_LIBS) -lunittest++
 
 %.o: %.cpp
-	$(CXX) $(DEFS) $(CXXFLAGS) $(CUDA_LDFLAGS) ${MPI_LIBDIR} -I.. -I$(srcdir) -o $@ -c $^ 
+	$(CXX) $(DEFS) $(CXXFLAGS) -g $(CUDA_LDFLAGS) ${MPI_LIBDIR} -I.. -I$(srcdir) -o $@ -c $^ 
 
 $(srcdir)/%.o: $(srcdir)/%.cpp
 	$(MAKE) -C $(srcdir) $@
@@ -60,7 +60,7 @@ $(srcdir)/%.cu.co: $(srcdir)/%.cu
 	$(MAKE) -C $(srcdir) $@
 	
 clean:
-	-rm -f $(OBJS) 1>/dev/null
+	-rm -f $(TEST_OBJS) unittest $(OBJS) 1>/dev/null
 
 Makefile: Makefile.in ../config.status
 	cd .. && ./config.status $@

@@ -15,9 +15,13 @@ bindir	 = @bindir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@
 
-all clean install uninstall lib phase_estimation:
+all install uninstall lib phase_estimation:
 	$(MAKE) -C src $@
 
+clean:
+	$(MAKE) -C src $@
+	$(MAKE) -C tests $@
+		
 test:
 	$(MAKE) -C tests $@
 

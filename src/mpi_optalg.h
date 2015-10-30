@@ -65,7 +65,7 @@ class OptAlg {
 
     protected:
         int pop_size, T, t;
-        Candidate<double> *pop;
+        Candidate *pop;
         bool goal;
     };
 
