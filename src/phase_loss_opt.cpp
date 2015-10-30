@@ -14,7 +14,8 @@ using namespace std;
 
 #include "phase_loss_opt.h"
 
-Phase::Phase(const int numvar, Rng *rng): rng(rng) {
+Phase::Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng): 
+      gaussian_rng(gaussian_rng), uniform_rng(uniform_rng) {
     if(numvar <= 0) {
         throw invalid_argument("numvar<=0. Instantiating Phase fails.");
         }
@@ -62,7 +63,7 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
 
     WK_state();
     for(k = 0; k < K; ++k) {
-        phi = rng->next_urand() * (upper - lower) + lower;
+        phi = uniform_rng->next_rand(0.0, 1.0) * (upper - lower) + lower;
         PHI = 0;
         //copy input state: the optimal solution across all compilers is memcpy:
         //nadeausoftware.com/articles/2012/05/c_c_tip_how_copy_memory_quickly
@@ -75,13 +76,13 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
             // optimization should focus on this loop.
 
             //randomly decide whether loss occurs
-            coin = rng->next_urand();
+            coin = uniform_rng->next_rand(0.0, 1.0);
 
             if(coin <= loss) {
                 state_loss(num - m); //update only the state using loss function
                 }
             else {
-                PHI_in = rng->next_grand(PHI, THETA_DEV);
+                PHI_in = gaussian_rng->next_rand(PHI, THETA_DEV);
                 PHI_in = mod_2PI(PHI_in);//noisy PHI
                 dect_result = noise_outcome(phi, PHI_in, num - m);
                 if (dect_result == 0) {
@@ -257,8 +258,8 @@ inline bool Phase::noise_outcome(const double phi, const double PHI, const int N
     const double cos_theta = cos(theta) / sqrt_cache[N];
     const double sin_theta = sin(theta) / sqrt_cache[N];
     //noise in operator: currently not in use
-    const double oper_n0 = rng->next_grand(0.0, DEV_N);//n_x
-    const double oper_n2 = rng->next_grand(0.0, DEV_N);//n_z
+    const double oper_n0 = gaussian_rng->next_rand(0.0, DEV_N);//n_x
+    const double oper_n2 = gaussian_rng->next_rand(0.0, DEV_N);//n_z
     const double oper_n1 = sqrt(1.0 - (oper_n0 * oper_n0 + oper_n2 * oper_n2));
     const dcmplx U00(sin_theta * oper_n1, -oper_n0 * sin_theta);
     const dcmplx U01(cos_theta, oper_n2 * sin_theta);
@@ -272,7 +273,7 @@ inline bool Phase::noise_outcome(const double phi, const double PHI, const int N
         prob += abs(update0[n] * conj(update0[n]));
         }
 
-    if (rng->next_urand() <= prob) {
+    if (uniform_rng->next_rand(0.0, 1.0) <= prob) {
         //measurement outcome is 0
         state[N] = 0;
         prob = 1.0 / sqrt(prob);

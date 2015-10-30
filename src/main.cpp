@@ -59,7 +59,8 @@ int main(int argc, char **argv) {
     int n_urandom_numbers = num_repeat + 2 * num_repeat * N_end;
     //Maximum number of Gaussian random numbers we will use in one go
     int n_grandom_numbers = 3 * num_repeat * N_end;
-    Rng *rng = new Rng(n_urandom_numbers, n_grandom_numbers, seed, my_rank);
+    Rng *gaussian_rng = new Rng(true, n_grandom_numbers, seed, my_rank);
+    Rng *uniform_rng = new Rng(false, n_urandom_numbers, seed, my_rank);
     soln_fit = new double[pop_size]; //create an array to store global fitness from each candidate.
     solution = new double[N_end];
 
@@ -87,11 +88,11 @@ int main(int argc, char **argv) {
 
         Problem* problem;
         try {
-            problem = new Phase(numvar, rng);
+            problem = new Phase(numvar, gaussian_rng, uniform_rng);
             }
         catch(invalid_argument) {
             numvar = 4;
-            problem = new Phase(numvar, rng);
+            problem = new Phase(numvar, gaussian_rng, uniform_rng);
             }
         OptAlg* opt;
         if (optimization == "de") {
@@ -285,7 +286,8 @@ int main(int argc, char **argv) {
         delete opt;
         delete problem;
         }
-    delete rng;
+    delete gaussian_rng;        
+    delete uniform_rng;
     delete [] solution;
     delete [] soln_fit;
     delete [] x;
