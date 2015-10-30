@@ -36,7 +36,7 @@ NVCC       	   = @NVCC@
 # VPATH-related substitution variables
 srcdir	 = ./../src
 
-MAINOBJS=$(srcdir)/phase_loss_opt.o $(srcdir)/io.o $(srcdir)/problem.o $(srcdir)/mpi_optalg.o $(srcdir)/mpi_pso.o $(srcdir)/mpi_de.o $(srcdir)/rng.o
+MAINOBJS=$(srcdir)/candidate.o $(srcdir)/phase_loss_opt.o $(srcdir)/io.o $(srcdir)/problem.o $(srcdir)/mpi_optalg.o $(srcdir)/mpi_pso.o $(srcdir)/mpi_de.o $(srcdir)/rng.o
 
 ifdef CUDA_LIBS
 	MAINOBJS+=rng_gpu.cu.co
