@@ -66,8 +66,13 @@ class RngVsl: public RngVectorized {
         int n_random_numbers;
         int index_random_numbers;
 
+<<<<<<< HEAD
     };
 #define Rng RngVsl
+=======
+    }
+#define Rng RngGpu
+>>>>>>> refs/remotes/origin/master
 
 #else
 
