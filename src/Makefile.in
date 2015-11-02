@@ -37,7 +37,11 @@ NVCC       	   = @NVCC@
 srcdir	 = @srcdir@
 VPATH	  = @srcdir@
 
+<<<<<<< HEAD
+OBJS=main.o candidate.o phase_loss_opt.o io.o problem.o mpi_optalg.o mpi_pso.o mpi_de.o candidate.o rng.o
+=======
 OBJS=main.o candidate.o phase_loss_opt.o io.o problem.o mpi_optalg.o mpi_pso.o mpi_de.o rng.o
+>>>>>>> refs/remotes/origin/master
 
 ifdef CUDA_LIBS
 	OBJS+=rng_gpu.cu.co
