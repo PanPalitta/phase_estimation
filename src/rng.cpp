@@ -4,18 +4,18 @@
 
 #include "rng.h"
 
-RngSimple::RngSimple(int n_urandom_numbers, int n_grandom_numbers, int seed, 
-                     int rank) {
+RngSimple::RngSimple(bool _gaussian, int n_random_numbers, int seed, int rank):
+                     RngBase(_gaussian) {
     srand(seed + rank);
     }
 
 RngSimple::~RngSimple() {
     }
 
-double RngSimple::next_grand(const double mean, const double dev) {
-    return (double(rand()) / RAND_MAX - 0.5) * 2 * dev + mean;
+double RngSimple::next_rand(const double mean, const double dev) {
+    if (gaussian) {
+        return (double(rand()) / RAND_MAX - 0.5) * 2 * dev + mean;
+    } else {
+        return double(rand()) / RAND_MAX;  
     }
-
-double RngSimple::next_urand() {
-    return double(rand()) / RAND_MAX;
-    }
+}

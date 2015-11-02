@@ -12,37 +12,31 @@ VSLStreamStatePtr stream;
 
 using namespace std;
 
-RngVsl::RngVsl(int _n_urandom_numbers, int _n_grandom_numbers, int seed, 
-               int rank):
-    n_urandom_numbers(_n_urandom_numbers),
-    n_grandom_numbers(_n_urandom_numbers) {
+RngVsl::RngVsl(bool _gaussian, int _n_random_numbers, int seed, int rank):
+    n_random_numbers(_n_random_numbers), RngVectorized(_gaussian) {
     vslNewStream(&stream, BRNG, seed + rank);
-    urandom_numbers = new double[n_urandom_numbers];
-    index_urandom_numbers = 0;
-    grandom_numbers = new double[n_grandom_numbers];
-    index_grandom_numbers = 0;
-    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, n_urandom_numbers, urandom_numbers, 0.0, 1.0);
-    vdRngGaussian(METHOD, stream, n_grandom_numbers, grandom_numbers, 0.0, 1.0);
+    random_numbers = new double[n_random_numbers];
+    index_random_numbers = 0;
+    if (gaussian) {
+        vdRngGaussian(METHOD, stream, n_random_numbers, random_numbers, 0.0, 1.0);
+    } else {
+        vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, n_random_numbers, random_numbers, 0.0, 1.0);
     }
+}
 
-double RngVsl::next_grand(const double mean, const double dev) {
-    if (index_grandom_numbers >= n_grandom_numbers) {
-        index_grandom_numbers = 0;
-        vdRngGaussian(METHOD, stream, n_grandom_numbers, grandom_numbers, 0.0, 1.0);
+double RngVsl::next_rand(const double mean, const double dev) {
+    if (index_random_numbers >= n_random_numbers) {
+        index_random_numbers = 0;
+        if (gaussian) {
+            vdRngGaussian(METHOD, stream, n_random_numbers, random_numbers, 0.0, 1.0);
+        } else {
+            vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, n_random_numbers, random_numbers, 0.0, 1.0);  
         }
-    return grandom_numbers[index_grandom_numbers++] * dev + mean;
     }
-
-double RngVsl::next_urand() {
-    if (index_urandom_numbers >= n_urandom_numbers) {
-        index_urandom_numbers = 0;
-        vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, n_urandom_numbers, urandom_numbers, 0.0, 1.0);
-        }
-    return urandom_numbers[index_urandom_numbers++];
-    }
+    return random_numbers[index_random_numbers++] * dev + mean;
+}
 
 RngVsl::~RngVsl() {
-    delete[] grandom_numbers;
-    delete[] urandom_numbers;
-    vslDeleteStream(&stream);
+    delete[] random_numbers;
+     vslDeleteStream(&stream);
     }

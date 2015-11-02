@@ -42,7 +42,7 @@ void OptAlg::Init_previous(double prev_dev, double new_dev, int psize, double *p
     for(int p = 0; p < pop_size; ++p) {
         //generate candidate
         for(int i = 0; i < num; ++i) {
-            input[i] = fabs(rand_Gaussian(prev_soln[i], dev[i]));
+            input[i] = fabs(gaussian_rng->next_rand(prev_soln[i], dev[i]));
             }
         prob->boundary(input);
         //store it in candidate object
@@ -311,12 +311,6 @@ bool OptAlg::check_success(int t, int D, double fit, double slope, double interc
         }
     }
 
-
-/*##############################Auxiliiary functions##############################*/
-double OptAlg::rand_Gaussian(double mean, double dev) {
-    //Approximating the Gaussian distribution with uniform distribution
-    return (double(rand()) / RAND_MAX - 0.5) * 2 * dev + mean;
-    }/*end of rand_Gaussian*/
 
 void OptAlg::dev_gen(double *dev_array, double prev_dev, double new_dev, int cut_off) {
     for(int i = 0; i < num; ++i) {
