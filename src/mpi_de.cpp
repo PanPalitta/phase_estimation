@@ -40,8 +40,6 @@ void DE::combination(int my_rank, int total_pop, int nb_proc) {
     double input[this->num];
     double can[this->num];
 
-    srand(0 + my_rank);
-
     //get the solution from all processor to root ***POTENTIAL BOTTLENECK***
     for(int p = 0; p < total_pop; ++p) {
         if(p % nb_proc != 0) { //if candidate is not in root, send the solution to root.
@@ -90,15 +88,17 @@ void DE::combination(int my_rank, int total_pop, int nb_proc) {
 
         //update of candidate
         if(p % nb_proc == 0) { // if p candidate is in root, update the candidate
-            this->pop[int(p / nb_proc)].update_cont(can);
+	    if(my_rank==0){
+               this->pop[int(p / nb_proc)].update_cont(&can[0]);
+		}
             }
         else { // if p candidate is not on root, send the new candidate from root to processor
             if(my_rank == 0) {
-                MPI_Send(&can, this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
+                MPI_Send(&can[0], this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
                 }
             else if(my_rank == p % nb_proc) { //processor that contains p candidate updates the candidate
-                MPI_Recv(&can, this->num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
-                this->pop[int(p / nb_proc)].update_cont(can);
+                MPI_Recv(&can[0], this->num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
+                this->pop[int(p / nb_proc)].update_cont(&can[0]);
                 }
             else {}
             }
