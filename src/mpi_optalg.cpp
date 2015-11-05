@@ -70,9 +70,7 @@ void OptAlg::Cont_fitness(int p) {
 
 void OptAlg::Best_fitness(int p) {
     double fit[num_fit];
-    double soln[num];
 
-    //pop[p].read_best(soln);
     prob->avg_fitness(pop[p].can_best, prob->num_repeat, fit);
     pop[p].write_bestfit(fit);
     }
