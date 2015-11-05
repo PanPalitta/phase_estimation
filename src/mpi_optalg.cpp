@@ -184,10 +184,10 @@ double OptAlg::avg_Final_select(double* solution, int repeat, int my_rank, int t
 
     //Need to calculate fitness again for 'repeat' times, independently on each
     for(int p = 0; p < pop_size; ++p) {
-        pop[p].read_global(array);
+        //pop[p].read_global(array);
         fit[p] = 0;
         for(int i = 0; i < repeat; ++i) {
-            prob->avg_fitness(array, prob->num_repeat, fitarray);
+            prob->avg_fitness(pop[p].global_best, prob->num_repeat, fitarray);
             fit[p] += fitarray[0];
             }
         fit[p] = fit[p] / repeat;
@@ -239,8 +239,8 @@ double OptAlg::avg_Final_select(double* solution, int repeat, int my_rank, int t
 
     //get solution from the processor
     if(my_rank == indx % nb_proc) {
-        pop[indx / nb_proc].read_global(array);
-        MPI_Send(&array[0], num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
+        //pop[indx / nb_proc].read_global(array);
+        MPI_Send(pop[indx / nb_proc].global_best, num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
         }
     else if(my_rank == 0) {
         MPI_Recv(&solution[0], num, MPI_DOUBLE, indx % nb_proc, tag, MPI_COMM_WORLD, &status);
