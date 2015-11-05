@@ -81,9 +81,7 @@ void Candidate::read_global(double *output) {
     }
 
 void Candidate::write_contfit(double *fit, int tt) {
-    for(int i = 0; i < num_fit; i++) {
-        cont_fit[i] = fit[i] / double(tt);
-        }
+    memcpy(cont_fit, fit, num_fit * sizeof(double));
     times = tt;
     }
 

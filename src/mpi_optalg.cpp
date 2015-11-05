@@ -58,13 +58,12 @@ void OptAlg::Init_previous(double prev_dev, double new_dev, int psize, double *p
 void OptAlg::Cont_fitness(int p) {
     double fit1[num_fit];
     double fit2[num_fit];
-    double soln[num];
 
-    pop[p].read_cont(soln);
-    prob->avg_fitness(soln, prob->num_repeat, fit1);
-    prob->avg_fitness(soln, prob->num_repeat, fit2);
+    prob->avg_fitness(pop[p].contender, prob->num_repeat, fit1);
+    prob->avg_fitness(pop[p].contender, prob->num_repeat, fit2);
     for(int i = 0; i < num_fit; i++) {
         fit1[i] += fit2[i];
+	fit1[i] = fit1[i]/2.0;
         }
     pop[p].write_contfit(fit1, 2);
     }
@@ -73,8 +72,8 @@ void OptAlg::Best_fitness(int p) {
     double fit[num_fit];
     double soln[num];
 
-    pop[p].read_best(soln);
-    prob->avg_fitness(soln, prob->num_repeat, fit);
+    //pop[p].read_best(soln);
+    prob->avg_fitness(pop[p].can_best, prob->num_repeat, fit);
     pop[p].write_bestfit(fit);
     }
 
