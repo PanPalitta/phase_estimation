@@ -10,7 +10,10 @@ class Candidate {
         friend class OptAlg;
 
     public:
-        Candidate() {is_velocity_initialized = false; is_candidate_initialized = false;};
+        Candidate() {
+            is_velocity_initialized = false;
+            is_candidate_initialized = false;
+            };
         ~Candidate();
 
         void init_can(int numvar, int fit_size);
@@ -50,7 +53,7 @@ class Candidate {
         int num, num_fit;
         double *best_fit, *cont_fit, *global_fit;
         int times, best_times, global_times;//number of samples used to calculate average best_fit
-        bool is_velocity_initialized, is_candidate_initialized;        
+        bool is_velocity_initialized, is_candidate_initialized;
 
         //memory arrays
         double *can_best;

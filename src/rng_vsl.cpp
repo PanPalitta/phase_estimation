@@ -19,24 +19,26 @@ RngVsl::RngVsl(bool _gaussian, int _n_random_numbers, int seed, int rank):
     index_random_numbers = 0;
     if (gaussian) {
         vdRngGaussian(METHOD, stream, n_random_numbers, random_numbers, 0.0, 1.0);
-    } else {
+        }
+    else {
         vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, n_random_numbers, random_numbers, 0.0, 1.0);
+        }
     }
-}
 
 double RngVsl::next_rand(const double mean, const double dev) {
     if (index_random_numbers >= n_random_numbers) {
         index_random_numbers = 0;
         if (gaussian) {
             vdRngGaussian(METHOD, stream, n_random_numbers, random_numbers, 0.0, 1.0);
-        } else {
-            vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, n_random_numbers, random_numbers, 0.0, 1.0);  
+            }
+        else {
+            vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, n_random_numbers, random_numbers, 0.0, 1.0);
+            }
         }
-    }
     return random_numbers[index_random_numbers++] * dev + mean;
-}
+    }
 
 RngVsl::~RngVsl() {
     delete[] random_numbers;
-     vslDeleteStream(&stream);
+    vslDeleteStream(&stream);
     }

@@ -14,8 +14,8 @@ using namespace std;
 
 #include "phase_loss_opt.h"
 
-Phase::Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng): 
-      gaussian_rng(gaussian_rng), uniform_rng(uniform_rng) {
+Phase::Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng):
+    gaussian_rng(gaussian_rng), uniform_rng(uniform_rng) {
     if(numvar <= 0) {
         throw invalid_argument("numvar<=0. Instantiating Phase fails.");
         }

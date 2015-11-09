@@ -96,12 +96,14 @@ int main(int argc, char **argv) {
             }
         OptAlg* opt;
         if (optimization == "de") {
-             opt = new DE(problem, gaussian_rng);
-        } else if (optimization == "pso") {
-             opt = new PSO(problem, gaussian_rng);
-        } else {
-             throw runtime_error("Unknown optimization algorithm");
-        }
+            opt = new DE(problem, gaussian_rng);
+            }
+        else if (optimization == "pso") {
+            opt = new PSO(problem, gaussian_rng);
+            }
+        else {
+            throw runtime_error("Unknown optimization algorithm");
+            }
 
         fitarray = new double[problem->num_fit];
 
@@ -286,7 +288,7 @@ int main(int argc, char **argv) {
         delete opt;
         delete problem;
         }
-    delete gaussian_rng;        
+    delete gaussian_rng;
     delete uniform_rng;
     delete [] solution;
     delete [] soln_fit;
