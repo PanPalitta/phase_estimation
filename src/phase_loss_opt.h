@@ -28,7 +28,7 @@ class Phase: public Problem {
 
         //double fitness(double *soln);
         void avg_fitness(double *soln, const int K, double *fitarray);
-		void boundary(double *can1);
+        void boundary(double *can1);
 
 //    private:
         double lower;
@@ -36,7 +36,7 @@ class Phase: public Problem {
         //array to avoid calculation of expensive sqrt calls for integers
         double *sqrt_cache;
         Rng *gaussian_rng, *uniform_rng;
-        
+
         //variables for WK state generation
         dcmplx *input_state;
         double *sqrtfac_mat; //matrix to keep values of square roots of factorials

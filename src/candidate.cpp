@@ -5,16 +5,16 @@ Candidate::~Candidate() {
         delete[] can_best;
         delete[] contender;
         delete[] global_best;
-       
+
         delete[] best_fit;
         delete[] cont_fit;
         delete[] global_fit;
-    }
-  
+        }
+
     if (is_velocity_initialized) {
         delete[] velocity;
+        }
     }
-}
 
 void Candidate::init_can(int numvar, int fit_size) {
     if(numvar <= 0) {
@@ -33,7 +33,7 @@ void Candidate::init_can(int numvar, int fit_size) {
     cont_fit = new double[num_fit];
     global_fit = new double[num_fit];
     is_candidate_initialized = true;
-}
+    }
 
 void Candidate::init_velocity() { //This function can only be called after init_can. What can we do make sure it is safe to use?
     velocity = new double[num];

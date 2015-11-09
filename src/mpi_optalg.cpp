@@ -63,7 +63,7 @@ void OptAlg::Cont_fitness(int p) {
     prob->avg_fitness(pop[p].contender, prob->num_repeat, fit2);
     for(int i = 0; i < num_fit; i++) {
         fit1[i] += fit2[i];
-	fit1[i] = fit1[i]/2.0;
+        fit1[i] = fit1[i] / 2.0;
         }
     pop[p].write_contfit(fit1, 2);
     }

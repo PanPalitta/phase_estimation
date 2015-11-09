@@ -38,7 +38,6 @@ void DE::combination(int my_rank, int total_pop, int nb_proc) {
     double all_soln[total_pop][this->num];
     int fam[fam_size];
     double input[this->num];
-    double can[this->num];
 
     //get the solution from all processor to root ***POTENTIAL BOTTLENECK***
     for(int p = 0; p < total_pop; ++p) {
@@ -66,39 +65,38 @@ void DE::combination(int my_rank, int total_pop, int nb_proc) {
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    //generate the family
+    //generate the new candidate
     for(int p = 0; p < total_pop; ++p) {
         if(my_rank == 0) {
             family_gen(fam, p, fam_size, total_pop);
             //create donor
             for(int i = 0; i < this->num; ++i) {
                 //create donor
-                input[i] = all_soln[fam[0]][i] + F * (all_soln[fam[1]][i] - all_soln[fam[2]][i]);
-                //cross-over
                 coin = double(rand()) / RAND_MAX;
                 if(coin <= Cr || i == rand() % this->num) {
-                    can[i] = input[i];
+                    input[i] = all_soln[fam[0]][i] + F * (all_soln[fam[1]][i] - all_soln[fam[2]][i]);
                     }
                 else {
-                    can[i] = all_soln[p][i];
+                    input[i] = all_soln[p][i];
                     }
                 }
-            this->prob->boundary(can);
+            this->prob->boundary(input);
+
             }//my_rank==0
 
         //update of candidate
         if(p % nb_proc == 0) { // if p candidate is in root, update the candidate
-	    if(my_rank==0){
-               this->pop[int(p / nb_proc)].update_cont(&can[0]);
-		}
+            if(my_rank == 0) {
+                this->pop[int(p / nb_proc)].update_cont(&input[0]);
+                }
             }
         else { // if p candidate is not on root, send the new candidate from root to processor
             if(my_rank == 0) {
-                MPI_Send(&can[0], this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
+                MPI_Send(&input[0], this->num, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD);
                 }
             else if(my_rank == p % nb_proc) { //processor that contains p candidate updates the candidate
-                MPI_Recv(&can[0], this->num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
-                this->pop[int(p / nb_proc)].update_cont(&can[0]);
+                MPI_Recv(&input[0], this->num, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
+                this->pop[int(p / nb_proc)].update_cont(&input[0]);
                 }
             else {}
             }

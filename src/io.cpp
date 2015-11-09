@@ -20,7 +20,7 @@ void output_header(char const *output_filename, char const *time_filename) {
     }
 
 template<typename typeT>
-void output_result(int num, double final_fit, typeT *solution, 
+void output_result(int num, double final_fit, typeT *solution,
                    time_t start_time, char const *output_filename,
                    char const *time_filename) {
     int i;
@@ -41,30 +41,28 @@ void output_result(int num, double final_fit, typeT *solution,
 
     }
 
-template void output_result<double>(int num, double final_fit, double *solution, 
-                                    time_t start_time, 
+template void output_result<double>(int num, double final_fit, double *solution,
+                                    time_t start_time,
                                     char const *output_filename,
                                     char const *time_filename);
 
-map<string, string> parse(ifstream & cfgfile)
-{
+map<string, string> parse(ifstream & cfgfile) {
     map<string, string> options;
     string id, eq, val;
 
-    while(cfgfile >> id >> eq >> val)
-    {
-      if (id[0] == '#') continue;  // skip comments
-      //cout << id << " " << eq << " " << val << endl;
-      if (eq != "=") throw runtime_error("Parse error");
+    while(cfgfile >> id >> eq >> val) {
+        if (id[0] == '#') continue;  // skip comments
+        //cout << id << " " << eq << " " << val << endl;
+        if (eq != "=") throw runtime_error("Parse error");
 
-      options[id] = val;
-    }
+        options[id] = val;
+        }
     return options;
-}
+    }
 
-void read_config_file(char const *filename, int *pop_size, int *N_begin, 
-                      int *N_cut, int *N_end, int *iter, int *iter_begin, 
-                      int *repeat, int *seed, string *output_filename, 
+void read_config_file(char const *filename, int *pop_size, int *N_begin,
+                      int *N_cut, int *N_end, int *iter, int *iter_begin,
+                      int *repeat, int *seed, string *output_filename,
                       string *time_filename, string *optimization) {
     // Setting defaults
     *pop_size = 20;
@@ -86,36 +84,47 @@ void read_config_file(char const *filename, int *pop_size, int *N_begin,
     config_file.close();
     map<string, string>::iterator it;
     for (it = options.begin(); it != options.end(); ++it) {
-       if (it->first == "pop_size") {
-           istringstream (it->second) >> *pop_size;
-       } else if (it->first == "N_begin") {
-           istringstream (it->second) >> *N_begin;
-       } else if (it->first == "N_cut") {
-           istringstream (it->second) >> *N_cut;
-       } else if (it->first == "N_end") {
-           istringstream (it->second) >> *N_end;
-       } else if (it->first == "iter") {
-           istringstream (it->second) >> *iter;
-       } else if (it->first == "iter_begin") {
-           istringstream (it->second) >> *iter_begin;
-       } else if (it->first == "repeat") {
-           istringstream (it->second) >> *repeat;
-       } else if (it->first == "output_filename") {
-           *output_filename = it->second;
-       } else if (it->first == "time_filename") {
-           *time_filename = it->second;
-       } else if (it->first == "random_seed") {
-           istringstream (it->second) >> *seed;
-       } else if (it->first == "optimization") {
-           *optimization = it->second;
-           if (*optimization != "de" && *optimization != "pso") {
-              throw runtime_error("Unknown optimization algorithm");
-           }
-       } else {
-           throw runtime_error("Unknown configuration option");
-       }
-    }
+        if (it->first == "pop_size") {
+            istringstream (it->second) >> *pop_size;
+            }
+        else if (it->first == "N_begin") {
+            istringstream (it->second) >> *N_begin;
+            }
+        else if (it->first == "N_cut") {
+            istringstream (it->second) >> *N_cut;
+            }
+        else if (it->first == "N_end") {
+            istringstream (it->second) >> *N_end;
+            }
+        else if (it->first == "iter") {
+            istringstream (it->second) >> *iter;
+            }
+        else if (it->first == "iter_begin") {
+            istringstream (it->second) >> *iter_begin;
+            }
+        else if (it->first == "repeat") {
+            istringstream (it->second) >> *repeat;
+            }
+        else if (it->first == "output_filename") {
+            *output_filename = it->second;
+            }
+        else if (it->first == "time_filename") {
+            *time_filename = it->second;
+            }
+        else if (it->first == "random_seed") {
+            istringstream (it->second) >> *seed;
+            }
+        else if (it->first == "optimization") {
+            *optimization = it->second;
+            if (*optimization != "de" && *optimization != "pso") {
+                throw runtime_error("Unknown optimization algorithm");
+                }
+            }
+        else {
+            throw runtime_error("Unknown configuration option");
+            }
+        }
     if (*N_cut < *N_begin) {
         throw runtime_error("Select new N_cut");
+        }
     }
-}

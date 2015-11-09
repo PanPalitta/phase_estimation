@@ -16,7 +16,7 @@ class RngBase {
         double next_rand(const double mean, const double dev) {
             return 0.0;
             };
-    
+
     protected:
         bool gaussian;
     };
