@@ -17,7 +17,9 @@ class OptAlg {
             num = prob->num;
             num_fit = prob->num_fit;
             }
-        virtual ~OptAlg() {};
+        virtual ~OptAlg() {
+            delete[] pop;
+            };
 
         virtual void put_to_best(int my_rank, int total_pop, int nb_proc) {};
         virtual void combination(int my_rank, int total_pop, int nb_proc) {};

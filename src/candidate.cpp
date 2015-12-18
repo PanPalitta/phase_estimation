@@ -49,8 +49,18 @@ void Candidate::update_vel(double *input) {
     }
 
 void Candidate::update_best() {
-    memcpy(can_best, contender, num * sizeof(double));
-    memcpy(best_fit, cont_fit, num_fit * sizeof(double));
+    double *temp_pnt;
+
+    temp_pnt = can_best;
+    can_best = contender;
+    contender = temp_pnt;
+
+    temp_pnt = best_fit;
+    best_fit = cont_fit;
+    cont_fit = temp_pnt;
+
+//    memcpy(can_best, contender, num * sizeof(double));
+//    memcpy(best_fit, cont_fit, num_fit * sizeof(double));
     best_times = times;
     }
 
@@ -59,6 +69,7 @@ void Candidate::update_global(double *input) {
     }
 
 void Candidate::put_to_global() {
+    //swapping pointer does not work here
     memcpy(global_best, can_best, num * sizeof(double));
     memcpy(global_fit, best_fit, num_fit * sizeof(double));
     global_times = best_times;
