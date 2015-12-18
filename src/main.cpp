@@ -1,6 +1,7 @@
 #include "phase_loss_opt.h"
 #include "mpi_optalg.h"
 #include "io.h"
+#include "aux_functions.h"
 
 using namespace std;
 
@@ -186,11 +187,11 @@ int main(int argc, char **argv) {
             if(numvar == N_cut - 1) {
                 if(t == T - 1) {
                     try {
-                        opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
+                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
                         }
                     catch(invalid_argument) {
                         fitarray[0] = 0.999999;
-                        opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
+                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
                         }
                     if (my_rank == 0) {
                         cout << fitarray[1] << endl;
@@ -208,11 +209,11 @@ int main(int argc, char **argv) {
             else if(numvar == N_cut) {
                 if(t == T / 3) {
                     try {
-                        opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
+                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
                         }
                     catch(invalid_argument) {
                         fitarray[0] = 0.999999;
-                        opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
+                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
                         }
                     if (my_rank == 0) {
                         cout << fitarray[1] << endl;
@@ -258,12 +259,12 @@ int main(int argc, char **argv) {
             }
 
         if (numvar == data_end - 1) {
-            opt->linear_fit(data_size, x, y, &slope, &intercept, &mean_x);
+            linear_fit(data_size, x, y, &slope, &intercept, &mean_x);
             //There should be a catch for the exception here for linear_fit and error_interval,
             //but there is no easy way to keep the program running correctly if the exception is thrown.
             t_goal = (t_goal + 1) / 2;
-            t_goal = opt->quantile(t_goal);
-            error = opt->error_interval(x, y, mean_x, data_size, &SSres, slope, intercept);
+            t_goal = quantile(t_goal);
+            error = error_interval(x, y, mean_x, data_size, &SSres, slope, intercept);
             error = error * t_goal;
             if (my_rank == 0) {
                 cout << slope << "," << intercept << endl;

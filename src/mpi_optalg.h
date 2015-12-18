@@ -8,6 +8,7 @@
 #include "problem.h"
 #include "candidate.h"
 #include "rng.h"
+//#include "aux_functions.h"
 
 class OptAlg {
     public:
@@ -43,24 +44,12 @@ class OptAlg {
         void set_success(int iter, bool goal);
         bool check_success(int t, int D, double fit, double slope, double intercept);
 
-        void dev_gen(double *dev_array, double prev_dev, double new_dev, int cut_off);
-
         //Selecting solution
         double Final_select(int my_rank, int total_pop, int nb_proc, double *fit, double *solution, double *fitarray);
         double avg_Final_select(double* solution, int repeat, int my_rank, int total_pop, int nb_proc, double *soln_fit);
 
+        void dev_gen(double *dev_array, double prev_dev, double new_dev, int cut_off);
         int find_max(double *fit, int total_pop);
-
-        //function for accept-reject criteria: should be moved to problem class at some point
-        bool check_policy(double error, double sharp);//specific to phase estimation
-        //calculating linear regression
-        void linear_fit(int data_size, double *x, double *y, double *slope, double *intercept, double *mean_x);
-        double error_interval(double *x, double *y, double mean_x, int data_size, double *SSres, double slope, double intercept);
-        double error_update(int old_size, double *SSres, double *mean_x, double slope, double intercept, double *y, double *x);
-        //calculating quantile
-        double quantile(double p);
-        inline double inv_erf(double x);
-        inline int sgn(double x);
 
         bool success, policy_type;
         int num, num_fit;
