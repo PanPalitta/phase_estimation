@@ -1,6 +1,7 @@
 #include "phase_loss_opt.h"
 #include "mpi_optalg.h"
 #include "io.h"
+#include "aux_functions.h"
 
 using namespace std;
 
@@ -96,10 +97,10 @@ int main(int argc, char **argv) {
             }
         OptAlg* opt;
         if (optimization == "de") {
-            opt = new DE(problem, gaussian_rng);
+            opt = new DE(problem, gaussian_rng, pop_size);
             }
         else if (optimization == "pso") {
-            opt = new PSO(problem, gaussian_rng);
+            opt = new PSO(problem, gaussian_rng, pop_size);
             }
         else {
             throw runtime_error("Unknown optimization algorithm");
@@ -137,7 +138,7 @@ int main(int argc, char **argv) {
                 }
             }
 
-        opt->put_to_best(my_rank, pop_size, nb_proc);
+        opt->put_to_best();
 
         //setting the success criterion
         if (numvar < N_cut) {
@@ -167,12 +168,12 @@ int main(int argc, char **argv) {
         do {
             ++t;
             opt->update_popfit();
-            opt->combination(my_rank, pop_size, nb_proc); //this is where a lot of comm goes on between processors
-            opt->selection(my_rank, pop_size, nb_proc);
+            opt->combination(); //this is where a lot of comm goes on between processors
+            opt->selection();
 
             //root check for success
 
-            final_fit = opt->Final_select(my_rank, pop_size, nb_proc, soln_fit, solution, fitarray); //again, communicate to find the best solution that exist so far
+            final_fit = opt->Final_select(soln_fit, solution, fitarray); //again, communicate to find the best solution that exist so far
 
             if(numvar >= data_end) {
                 y[numvar - data_start] = log10(pow(final_fit, -2) - 1);
@@ -186,11 +187,11 @@ int main(int argc, char **argv) {
             if(numvar == N_cut - 1) {
                 if(t == T - 1) {
                     try {
-                        opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
+                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
                         }
                     catch(invalid_argument) {
                         fitarray[0] = 0.999999;
-                        opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
+                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
                         }
                     if (my_rank == 0) {
                         cout << fitarray[1] << endl;
@@ -208,11 +209,11 @@ int main(int argc, char **argv) {
             else if(numvar == N_cut) {
                 if(t == T / 3) {
                     try {
-                        opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
+                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
                         }
                     catch(invalid_argument) {
                         fitarray[0] = 0.999999;
-                        opt->policy_type = opt->check_policy(fitarray[1], fitarray[0]);
+                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
                         }
                     if (my_rank == 0) {
                         cout << fitarray[1] << endl;
@@ -242,7 +243,7 @@ int main(int argc, char **argv) {
             }
         while (opt->success == 0);
 
-        final_fit = opt->avg_Final_select(solution, repeat, my_rank, pop_size, nb_proc, soln_fit);
+        final_fit = opt->avg_Final_select(solution, repeat, soln_fit);
 
         if (my_rank == 0) {
             if ((numvar == 4) || (!mem_ptype[0] && !mem_ptype[1])) {
@@ -258,12 +259,12 @@ int main(int argc, char **argv) {
             }
 
         if (numvar == data_end - 1) {
-            opt->linear_fit(data_size, x, y, &slope, &intercept, &mean_x);
+            linear_fit(data_size, x, y, &slope, &intercept, &mean_x);
             //There should be a catch for the exception here for linear_fit and error_interval,
             //but there is no easy way to keep the program running correctly if the exception is thrown.
             t_goal = (t_goal + 1) / 2;
-            t_goal = opt->quantile(t_goal);
-            error = opt->error_interval(x, y, mean_x, data_size, &SSres, slope, intercept);
+            t_goal = quantile(t_goal);
+            error = error_interval(x, y, mean_x, data_size, &SSres, slope, intercept);
             error = error * t_goal;
             if (my_rank == 0) {
                 cout << slope << "," << intercept << endl;

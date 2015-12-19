@@ -1,6 +1,6 @@
 #include "mpi_optalg.h"
 
-void DE::put_to_best(int my_rank, int total_pop, int nb_proc) {
+void DE::put_to_best() {
     for(int p = 0; p < this->pop_size; ++p) { //pop_size here is the number of candidates assigned for a processor from the initialization.
         this->pop[p].update_best();
         }
@@ -22,7 +22,7 @@ void DE::fit_to_global() {
         }
     }
 
-void DE::selection(int my_rank, int total_pop, int nb_proc) {
+void DE::selection() {
     for(int p = 0; p < this->pop_size; ++p) {
         if(this->pop[p].read_bestfit(0) < this->pop[p].read_contfit(0)) {
             this->pop[p].update_best();
@@ -30,7 +30,7 @@ void DE::selection(int my_rank, int total_pop, int nb_proc) {
         }
     }
 
-void DE::combination(int my_rank, int total_pop, int nb_proc) {
+void DE::combination() {
     MPI_Status status;
     int tag = 1;
     double coin;
@@ -68,7 +68,7 @@ void DE::combination(int my_rank, int total_pop, int nb_proc) {
     //generate the new candidate
     for(int p = 0; p < total_pop; ++p) {
         if(my_rank == 0) {
-            family_gen(fam, p, fam_size, total_pop);
+            family_gen(fam, p, fam_size);
             //create donor
             for(int i = 0; i < this->num; ++i) {
                 //create donor
@@ -113,7 +113,7 @@ void DE::combination(int my_rank, int total_pop, int nb_proc) {
     MPI_Barrier(MPI_COMM_WORLD);
     }
 
-void DE::family_gen(int* fam, int p, int fam_size, int total_pop) {
+void DE::family_gen(int* fam, int p, int fam_size) {
     if(total_pop <= fam_size + 1) {
         for(int f = 0; f < fam_size; ++f) {
             fam[f] = rand() % total_pop;

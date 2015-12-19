@@ -1,41 +1,41 @@
-# @configure_input@
+# src/Makefile.  Generated from Makefile.in by configure.
 
 # Package-related substitution variables
-package	= @PACKAGE_NAME@
-version	= @PACKAGE_VERSION@
-tarname	= @PACKAGE_TARNAME@
+package	= phase_estimation
+version	= 0.1
+tarname	= phase_estimation
 distdir	= $(tarname)-$(version)
 
 # Prefix-related substitution variables
-prefix	 = @prefix@
-exec_prefix    = @exec_prefix@
-bindir	 = @bindir@
-libdir	 = @libdir@
+prefix	 = /usr/local
+exec_prefix    = ${prefix}
+bindir	 = ${exec_prefix}/bin
+libdir	 = ${exec_prefix}/lib
 
 # Tool-related substitution variables
-CXX		         = @CXX@
-CXXFLAGS       = @CXXFLAGS@
-LIBS	         = @LIBS@
-DEFS           = @DEFS@
-INSTALL	       = @INSTALL@
-INSTALL_DATA   = @INSTALL_DATA@
-INSTALL_PROGRAM= @INSTALL_PROGRAM@
-INSTALL_SCRIPT = @INSTALL_SCRIPT@
-MPI_INC        = @MPI_INC@
-MPI_LIBDIR     = @MPI_LIBDIR@
-MPI_LIBS       = @MPI_LIBS@
-VSL_INC        = @VSL_INC@
-VSL_LIBDIR     = @VSL_LIBDIR@
-VSL_LIBS       = @VSL_LIBS@
-CUDA_INC       = @CUDA_INC@
-CUDA_CFLAGS    = @CUDA_CFLAGS@
-CUDA_LIBS      = @CUDA_LIBS@
-CUDA_LDFLAGS   = @CUDA_LDFLAGS@
-NVCC       	   = @NVCC@
+CXX		         = mpic++
+CXXFLAGS       =  -Ofast -march=native -Wall
+LIBS	         = 
+DEFS           = -DHAVE_CONFIG_H
+INSTALL	       = /usr/bin/install -c
+INSTALL_DATA   = ${INSTALL} -m 644
+INSTALL_PROGRAM= ${INSTALL}
+INSTALL_SCRIPT = ${INSTALL}
+MPI_INC        = -I/global/software/openmpi/openmpi-1.6.5-intel/include
+MPI_LIBDIR     = -L/global/software/openmpi/openmpi-1.6.5-intel/lib
+MPI_LIBS       = -lmpi
+VSL_INC        = 
+VSL_LIBDIR     = 
+VSL_LIBS       = 
+CUDA_INC       = 
+CUDA_CFLAGS    = 
+CUDA_LIBS      = 
+CUDA_LDFLAGS   = 
+NVCC       	   = 
 
 # VPATH-related substitution variables
-srcdir	 = @srcdir@
-VPATH	  = @srcdir@
+srcdir	 = .
+
 
 OBJS=main.o candidate.o phase_loss_opt.o io.o problem.o mpi_optalg.o mpi_pso.o mpi_de.o candidate.o rng.o aux_functions.o
 

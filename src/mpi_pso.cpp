@@ -14,7 +14,7 @@ void PSO::write_param(double *param_array) {
     v_max = param_array[3];
     }
 
-void PSO::find_global(int my_rank, int total_pop, int nb_proc) {
+void PSO::find_global() {
     MPI_Status status;
     int tag = 1;
     int ptr, prev, forw;
@@ -25,7 +25,7 @@ void PSO::find_global(int my_rank, int total_pop, int nb_proc) {
     for(int p = 0; p < total_pop; ++p) {
 
         //find index of the candidate in the neighborhood
-        find_index(&prev, &forw, p, total_pop);
+        find_index(&prev, &forw, p);
 
         //neighbor send fitness to the processor that contains candidate p
         if(my_rank == prev % nb_proc) {
@@ -104,7 +104,7 @@ void PSO::find_global(int my_rank, int total_pop, int nb_proc) {
 
         }//p loop
     }
-inline void PSO::find_index(int * prev, int * forw, int p, int total_pop) {
+inline void PSO::find_index(int * prev, int * forw, int p) {
     if(p == 0) {
         *prev = total_pop - 1;
         }
@@ -133,7 +133,7 @@ inline int PSO::find_fitness(int prev, double prev_fit, int forw, double forw_fi
     return ptr;
     }
 
-void PSO::put_to_best(int my_rank, int total_pop, int nb_proc) {
+void PSO::put_to_best() {
     double array[this->num];
 
     for(int p = 0; p < this->pop_size; ++p) {
@@ -146,21 +146,21 @@ void PSO::put_to_best(int my_rank, int total_pop, int nb_proc) {
         this->pop[p].update_vel(array);
         }
 
-    find_global(my_rank, total_pop, nb_proc);
+    find_global();
 
     }
 
-void PSO::selection(int my_rank, int total_pop, int nb_proc) {
+void PSO::selection() {
     for(int p = 0; p < this->pop_size; ++p) {
         if(this->pop[p].read_bestfit(0) < this->pop[p].read_contfit(0)) {
             this->pop[p].update_best();
             }
         else {}
         }
-    find_global(my_rank, total_pop, nb_proc);
+    find_global();
     }
 
-void PSO::combination(int my_rank, int total_pop, int nb_proc) {
+void PSO::combination() {
     double global_pos[this->num];
     double personal_pos[this->num];
     double pos[this->num];
