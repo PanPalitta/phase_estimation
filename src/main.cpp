@@ -97,10 +97,10 @@ int main(int argc, char **argv) {
             }
         OptAlg* opt;
         if (optimization == "de") {
-            opt = new DE(problem, gaussian_rng);
+            opt = new DE(problem, gaussian_rng, pop_size);
             }
         else if (optimization == "pso") {
-            opt = new PSO(problem, gaussian_rng);
+            opt = new PSO(problem, gaussian_rng, pop_size);
             }
         else {
             throw runtime_error("Unknown optimization algorithm");
@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
                 }
             }
 
-        opt->put_to_best(my_rank, pop_size, nb_proc);
+        opt->put_to_best();
 
         //setting the success criterion
         if (numvar < N_cut) {
@@ -168,12 +168,12 @@ int main(int argc, char **argv) {
         do {
             ++t;
             opt->update_popfit();
-            opt->combination(my_rank, pop_size, nb_proc); //this is where a lot of comm goes on between processors
-            opt->selection(my_rank, pop_size, nb_proc);
+            opt->combination(); //this is where a lot of comm goes on between processors
+            opt->selection();
 
             //root check for success
 
-            final_fit = opt->Final_select(my_rank, pop_size, nb_proc, soln_fit, solution, fitarray); //again, communicate to find the best solution that exist so far
+            final_fit = opt->Final_select(soln_fit, solution, fitarray); //again, communicate to find the best solution that exist so far
 
             if(numvar >= data_end) {
                 y[numvar - data_start] = log10(pow(final_fit, -2) - 1);
@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
             }
         while (opt->success == 0);
 
-        final_fit = opt->avg_Final_select(solution, repeat, my_rank, pop_size, nb_proc, soln_fit);
+        final_fit = opt->avg_Final_select(solution, repeat, soln_fit);
 
         if (my_rank == 0) {
             if ((numvar == 4) || (!mem_ptype[0] && !mem_ptype[1])) {

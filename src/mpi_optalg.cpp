@@ -82,7 +82,7 @@ void OptAlg::update_popfit() {
     }
 
 /*##############################Final Selections#################################*/
-double OptAlg::Final_select(int my_rank, int total_pop, int nb_proc, double *fit, double *solution, double *fitarray) {
+double OptAlg::Final_select(double *fit, double *solution, double *fitarray) {
     int indx;
     MPI_Status status;
     int tag = 1;
@@ -114,7 +114,7 @@ double OptAlg::Final_select(int my_rank, int total_pop, int nb_proc, double *fit
 
     //find the candidate that with highest fitness and send the index to all processors.
     if(my_rank == 0) {
-        indx = find_max(fit, total_pop);
+        indx = find_max(fit);
         //root send the index to all processors.
         for(int p = 1; p < nb_proc; ++p) {
             MPI_Send(&indx, 1, MPI_INT, p, tag, MPI_COMM_WORLD);
@@ -171,7 +171,7 @@ double OptAlg::Final_select(int my_rank, int total_pop, int nb_proc, double *fit
     return global_fit;
     }
 
-double OptAlg::avg_Final_select(double* solution, int repeat, int my_rank, int total_pop, int nb_proc, double *soln_fit) {
+double OptAlg::avg_Final_select(double* solution, int repeat, double *soln_fit) {
     MPI_Status status;
     int tag = 1;
     double final_fit;
@@ -213,7 +213,7 @@ double OptAlg::avg_Final_select(double* solution, int repeat, int my_rank, int t
 
 // find the maximum fitness and send out the fitness for success criteria testing
     if(my_rank == 0) {
-        indx = find_max(soln_fit, total_pop);
+        indx = find_max(soln_fit);
         final_fit = soln_fit[indx];
         for(int p = 1; p < nb_proc; ++p) {
             MPI_Send(&final_fit, 1, MPI_DOUBLE, p, tag, MPI_COMM_WORLD);
@@ -253,7 +253,7 @@ double OptAlg::avg_Final_select(double* solution, int repeat, int my_rank, int t
     }
 
 
-int OptAlg::find_max(double *fit, int total_pop) {
+int OptAlg::find_max(double *fit) {
     double* soln;
     int indx;
 
