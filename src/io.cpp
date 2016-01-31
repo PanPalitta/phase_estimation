@@ -65,10 +65,10 @@ void read_config_file(char const *filename, int *pop_size, int *N_begin,
                       int *repeat, int *seed, string *output_filename,
                       string *time_filename, string *optimization) {
     // Setting defaults
-    *pop_size = 20;
+    *pop_size = 36;
     *N_begin = 4;
     *N_cut = 5;
-    *N_end = 10;
+    *N_end = 100;
     *iter = 100;
     *iter_begin = 300;
     *repeat = 10;

@@ -168,7 +168,7 @@ double OptAlg::Final_select(double *fit, double *solution, double *fitarray) {
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    return global_fit;
+    return fitarray[0];
     }
 
 double OptAlg::avg_Final_select(double* solution, int repeat, double *soln_fit) {
@@ -281,6 +281,7 @@ void OptAlg::set_success(int iter, bool goal_in) {
     goal = goal_in;
     }
 
+/*
 bool OptAlg::check_success(int t, int D, double fit, double slope, double intercept) {
     double fit_goal;
 
@@ -307,6 +308,29 @@ bool OptAlg::check_success(int t, int D, double fit, double slope, double interc
             }
         }
     }
+*/
+
+bool OptAlg::check_success(int t, double error, double error_goal) {
+
+    if(goal == 0) {
+        if(t >= T) {
+            return 1;
+            }
+        else {
+            return 0;
+            }
+        }
+    else {
+        if(error <= error_goal) {
+            return 1;
+            }
+        else {
+            return 0;
+            }
+        }
+
+    }
+
 
 void OptAlg::dev_gen(double *dev_array, double prev_dev, double new_dev, int cut_off) {
     for(int i = 0; i < num; ++i) {

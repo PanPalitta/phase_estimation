@@ -1,4 +1,7 @@
 #include "aux_functions.h"
+#include <iostream>
+
+using namespace std;
 
 /*##############################Policy Type#################################*/
 bool check_policy(double error, double sharp) {
@@ -54,14 +57,13 @@ double error_update(int old_size, double *SSres, double *mean_x, double slope, d
         throw invalid_argument("data_size must be positive.");
         }
     double SSx = 0;
-
+	
     *mean_x = (*mean_x * old_size + x[old_size]) / double(old_size + 1);
     *SSres = *SSres + pow(y[old_size] - slope * x[old_size] - intercept, 2);
-
+	
     for(int i = 0; i < old_size + 1; ++i) {
         SSx = SSx + (x[i] - *mean_x) * (x[i] - *mean_x);
         }
-
     return sqrt(*SSres / double(old_size - 1) * (1 / old_size + (pow(x[old_size] - *mean_x, 2) / SSx)));
     }
 

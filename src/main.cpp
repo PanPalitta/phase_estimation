@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     double slope = 0.0, intercept = 0.0;
     double mean_x = 0.0, SSres = 0.0;
     double TSSres, Tmean_x;
-    double error;
+    double error, tn2;
 
     /*start mpi*/
     MPI_Init(&argc, &argv);
@@ -167,21 +167,16 @@ int main(int argc, char **argv) {
 
         do {
             ++t;
+
             opt->update_popfit();
+
             opt->combination(); //this is where a lot of comm goes on between processors
+
             opt->selection();
 
             //root check for success
 
             final_fit = opt->Final_select(soln_fit, solution, fitarray); //again, communicate to find the best solution that exist so far
-
-            if(numvar >= data_end) {
-                y[numvar - data_start] = log10(pow(final_fit, -2) - 1);
-                TSSres = SSres;
-                Tmean_x = mean_x;
-                //error=opt->error_update(data_size,&TSSres,&Tmean_x,slope,intercept,y,x);
-                //cout<<numvar<<":error="<<error<<","<<abs(y[numvar-data_start]-slope*x[numvar-data_start]-intercept)<<endl;
-                }
 
             //checking policy type
             if(numvar == N_cut - 1) {
@@ -237,8 +232,18 @@ int main(int argc, char **argv) {
                     }
                 }
 
+			if(numvar>=data_end){
+				x[numvar-data_start]=log10(numvar);
+		                y[numvar-data_start]=log10(pow(final_fit,-2)-1);
+				Tmean_x=mean_x;
+				TSSres=SSres;
+				error=error_update(data_size,&TSSres,&Tmean_x,slope,intercept,y,x);
+				error=error*tn2;
+				
+				//cout<<numvar<<":error_goal="<<error<<", error"<<y[numvar-data_start]-x[numvar-data_start]*slope-intercept<<endl;
+			}
 
-            opt->success = opt->check_success(t, numvar, final_fit, slope, intercept);
+            opt->success = opt->check_success(t,y[numvar-data_start]-x[numvar-data_start]*slope-intercept,error);
 
             }
         while (opt->success == 0);
@@ -253,30 +258,24 @@ int main(int argc, char **argv) {
             }
 
         //collect data for linear fit
-        x[numvar - data_start] = log10(numvar); //collect x data
-        if (numvar >= data_start && numvar < data_end) {
-            y[numvar - data_start] = log10(pow(final_fit, -2) - 1);
-            }
+        if(numvar>=data_start&&numvar<data_end) {
+            x[numvar-data_start]=log10(numvar);
+            y[numvar-data_start]=log10(pow(final_fit,-2)-1);
+        }
+        else {}
 
-        if (numvar == data_end - 1) {
-            linear_fit(data_size, x, y, &slope, &intercept, &mean_x);
-            //There should be a catch for the exception here for linear_fit and error_interval,
-            //but there is no easy way to keep the program running correctly if the exception is thrown.
-            t_goal = (t_goal + 1) / 2;
-            t_goal = quantile(t_goal);
-            error = error_interval(x, y, mean_x, data_size, &SSres, slope, intercept);
-            error = error * t_goal;
-            if (my_rank == 0) {
-                cout << slope << "," << intercept << endl;
-                }
-            //cout<<numvar<<":error="<<error<<endl;
-            }
-        else if (numvar >= data_end) {
-            SSres = TSSres;
-            mean_x = Tmean_x;
-            ++data_size;
-            }
-
+        if(numvar==data_end-1) {
+            		linear_fit(data_size,x,y,&slope,&intercept,&mean_x);
+			error=error_interval(x,y,mean_x,data_size,&SSres,slope,intercept);
+			t_goal=(t_goal+1)/2;
+			tn2=quantile(t_goal);
+			error=error*tn2;
+        }
+        else if (numvar>=data_end){
+			SSres=TSSres;
+			mean_x=Tmean_x;
+			++data_size;
+		}
         //testing loss
         if (my_rank == 0) {
             problem->fitness(solution, fitarray);
