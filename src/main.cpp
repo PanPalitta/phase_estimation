@@ -179,58 +179,9 @@ int main(int argc, char **argv) {
             final_fit = opt->Final_select(soln_fit, solution, fitarray); //again, communicate to find the best solution that exist so far
 
             //checking policy type
-            if(numvar == N_cut - 1) {
-                if(t == T - 1) {
-                    try {
-                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
-                        }
-                    catch(invalid_argument) {
-                        fitarray[0] = 0.999999;
-                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
-                        }
-                    if (my_rank == 0) {
-                        cout << fitarray[1] << endl;
-                        }
-                    mem_ptype[0] = opt->policy_type;
-                    if (my_rank == 0) {
-                        cout << "type[0]=" << mem_ptype[0] << endl;
-                        }
-                    if(mem_ptype[0] == 1) {
-                        numvar = numvar - 1;
-                        break;
-                        }
-                    }
-                }
-            else if(numvar == N_cut) {
-                if(t == T / 3) {
-                    try {
-                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
-                        }
-                    catch(invalid_argument) {
-                        fitarray[0] = 0.999999;
-                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
-                        }
-                    if (my_rank == 0) {
-                        cout << fitarray[1] << endl;
-                        }
-                    mem_ptype[1] = opt->policy_type;
-                    if (my_rank == 0) {
-                        cout << "type[1]=" << mem_ptype[1] << endl;
-                        }
-                    if(mem_ptype[0] | mem_ptype[1]) {
-                        //the policy is bad
-                        //reset the policy found in numvar=N_cut-1
-                        if (my_rank == 0) {
-                            cout << "numvar=" << numvar << " is set to";
-                            }
-                        numvar = N_cut - 2;
-                        if (my_rank == 0) {
-                            cout << numvar << endl;
-                            }
-                        break;
-                        }
-                    }
-                }
+
+	    opt->policy_type=check_type(t,T,&numvar,N_cut,mem_ptype,fitarray);
+	    if(opt->policy_type==1){break;}
 
 			if(numvar>=data_end){
 				x[numvar-data_start]=log10(numvar);

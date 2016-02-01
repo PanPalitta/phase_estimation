@@ -281,35 +281,6 @@ void OptAlg::set_success(int iter, bool goal_in) {
     goal = goal_in;
     }
 
-/*
-bool OptAlg::check_success(int t, int D, double fit, double slope, double intercept) {
-    double fit_goal;
-
-    if(goal == 0) {
-        if(t >= T) {
-            return 1;
-            }
-        else {
-            return 0;
-            }
-        }
-    else {
-        fit_goal = 1 / sqrt(pow(10.0, intercept) * pow(double(D), slope) + 1);
-        if(t >= T) {
-            return 1;
-            }
-        else {
-            if(fit >= fit_goal) {
-                return 1;
-                }
-            else {
-                return 0;
-                }
-            }
-        }
-    }
-*/
-
 bool OptAlg::check_success(int t, double error, double error_goal) {
 
     if(goal == 0) {
@@ -330,6 +301,25 @@ bool OptAlg::check_success(int t, double error, double error_goal) {
         }
 
     }
+
+/*bool OptAlg::check_success(int *t, double curret_fitarray, double memory_fitarray){
+
+    if(goal == 0) {
+        if(*t >= T) {
+            return 1;
+            }
+        else {
+            return 0;
+            }
+        }
+    else {
+	//select the type of policy
+
+	//select using error
+
+        }
+
+}*/
 
 
 void OptAlg::dev_gen(double *dev_array, double prev_dev, double new_dev, int cut_off) {
