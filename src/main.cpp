@@ -22,8 +22,7 @@ int main(int argc, char **argv) {
     double final_fit;
     double *soln_fit;
     int *can_per_proc;
-    double *x;
-    double *y;
+//    double *memory_fitarray;
     bool mem_ptype[2] = {false, false};
 
     /*parameter settings*/
@@ -43,13 +42,13 @@ int main(int argc, char **argv) {
     double prev_dev = 0.01 * M_PI;
     double new_dev = 0.25 * M_PI;
     int data_start = N_begin;
-    int data_end = 94;
+    int data_end = 8;
     double t_goal = 0.98; //probability for calculating quantile
     int data_size = data_end - data_start;
-    double slope = 0.0, intercept = 0.0;
-    double mean_x = 0.0, SSres = 0.0;
-    double TSSres, Tmean_x;
-    double error, tn2;
+//    double slope = 0.0, intercept = 0.0;
+//    double mean_x = 0.0, SSres = 0.0;
+//    double TSSres, Tmean_x;
+//   double error, tn2;
 
     /*start mpi*/
     MPI_Init(&argc, &argv);
@@ -65,8 +64,8 @@ int main(int argc, char **argv) {
     soln_fit = new double[pop_size]; //create an array to store global fitness from each candidate.
     solution = new double[N_end];
 
-    x = new double[N_end - data_start];
-    y = new double[N_end - data_start];
+    double memory_fitarray[2][N_end - data_start + 1];
+
     //calculating number of candidate per processor and stores the number in an array.
     can_per_proc = new int[nb_proc];
     for (p = 0; p < nb_proc; ++p) {
@@ -180,21 +179,13 @@ int main(int argc, char **argv) {
 
             //checking policy type
 
-	    opt->policy_type=check_type(t,T,&numvar,N_cut,mem_ptype,fitarray);
-	    if(opt->policy_type==1){break;}
+            opt->policy_type = check_type(t, T, &numvar, N_cut, mem_ptype, fitarray);
+            if(opt->policy_type == 1) {
+                break;
+                }
 
-			if(numvar>=data_end){
-				x[numvar-data_start]=log10(numvar);
-		                y[numvar-data_start]=log10(pow(final_fit,-2)-1);
-				Tmean_x=mean_x;
-				TSSres=SSres;
-				error=error_update(data_size,&TSSres,&Tmean_x,slope,intercept,y,x);
-				error=error*tn2;
-				
-				//cout<<numvar<<":error_goal="<<error<<", error"<<y[numvar-data_start]-x[numvar-data_start]*slope-intercept<<endl;
-			}
-
-            opt->success = opt->check_success(t,y[numvar-data_start]-x[numvar-data_start]*slope-intercept,error);
+            opt->success = opt->check_success(t, fitarray, &memory_fitarray[0][0], data_size, t_goal);
+            //opt->success = opt->check_success(t,y[numvar-data_start]-x[numvar-data_start]*slope-intercept,error);
 
             }
         while (opt->success == 0);
@@ -209,24 +200,15 @@ int main(int argc, char **argv) {
             }
 
         //collect data for linear fit
-        if(numvar>=data_start&&numvar<data_end) {
-            x[numvar-data_start]=log10(numvar);
-            y[numvar-data_start]=log10(pow(final_fit,-2)-1);
-        }
+        if(numvar >= data_start && numvar < data_end) {
+            memory_fitarray[0][numvar - data_start] = log10(numvar);
+            memory_fitarray[1][numvar - data_start] = log10(pow(final_fit, -2) - 1);
+            }
+        else if(numvar >= data_end) {
+            ++data_size;
+            }
         else {}
 
-        if(numvar==data_end-1) {
-            		linear_fit(data_size,x,y,&slope,&intercept,&mean_x);
-			error=error_interval(x,y,mean_x,data_size,&SSres,slope,intercept);
-			t_goal=(t_goal+1)/2;
-			tn2=quantile(t_goal);
-			error=error*tn2;
-        }
-        else if (numvar>=data_end){
-			SSres=TSSres;
-			mean_x=Tmean_x;
-			++data_size;
-		}
         //testing loss
         if (my_rank == 0) {
             problem->fitness(solution, fitarray);
@@ -243,8 +225,7 @@ int main(int argc, char **argv) {
     delete uniform_rng;
     delete [] solution;
     delete [] soln_fit;
-    delete [] x;
-    delete [] y;
+    delete [] memory_fitarray;
     delete [] can_per_proc;
 
     MPI_Finalize();

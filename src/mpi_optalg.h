@@ -8,7 +8,7 @@
 #include "problem.h"
 #include "candidate.h"
 #include "rng.h"
-//#include "aux_functions.h"
+#include "aux_functions.h"
 
 class OptAlg {
     public:
@@ -20,7 +20,7 @@ class OptAlg {
 
             MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
             MPI_Comm_size(MPI_COMM_WORLD, &nb_proc);
-	    total_pop=pop_size;
+            total_pop = pop_size;
             }
         virtual ~OptAlg() {
             delete[] pop;
@@ -47,7 +47,8 @@ class OptAlg {
 
         void set_success(int iter, bool goal);
         //bool check_success(int t, int D, double fit, double slope, double intercept);
-	bool check_success(int t, double error, double error_goal);
+        //bool check_success(int t, double error, double error_goal);
+        bool check_success(int t, double *current_fitarray, double *memory_fitarray, int data_size, double t_goal);
 
         //Selecting solution
         double Final_select(double *fit, double *solution, double *fitarray);
@@ -65,7 +66,7 @@ class OptAlg {
         Candidate *pop;
         bool goal;
 
-	int my_rank, total_pop, nb_proc;
+        int my_rank, total_pop, nb_proc;
 
     };
 
