@@ -22,8 +22,7 @@ int main(int argc, char **argv) {
     double final_fit;
     double *soln_fit;
     int *can_per_proc;
-    double *x;
-    double *y;
+//    double *memory_fitarray;
     bool mem_ptype[2] = {false, false};
 
     /*parameter settings*/
@@ -43,13 +42,13 @@ int main(int argc, char **argv) {
     double prev_dev = 0.01 * M_PI;
     double new_dev = 0.25 * M_PI;
     int data_start = N_begin;
-    int data_end = 94;
+    int data_end = 8;
     double t_goal = 0.98; //probability for calculating quantile
     int data_size = data_end - data_start;
-    double slope = 0.0, intercept = 0.0;
-    double mean_x = 0.0, SSres = 0.0;
-    double TSSres, Tmean_x;
-    double error;
+//    double slope = 0.0, intercept = 0.0;
+//    double mean_x = 0.0, SSres = 0.0;
+//    double TSSres, Tmean_x;
+//   double error, tn2;
 
     /*start mpi*/
     MPI_Init(&argc, &argv);
@@ -65,8 +64,8 @@ int main(int argc, char **argv) {
     soln_fit = new double[pop_size]; //create an array to store global fitness from each candidate.
     solution = new double[N_end];
 
-    x = new double[N_end - data_start];
-    y = new double[N_end - data_start];
+    double memory_fitarray[2][N_end - data_start + 1];
+
     //calculating number of candidate per processor and stores the number in an array.
     can_per_proc = new int[nb_proc];
     for (p = 0; p < nb_proc; ++p) {
@@ -167,78 +166,26 @@ int main(int argc, char **argv) {
 
         do {
             ++t;
+
             opt->update_popfit();
+
             opt->combination(); //this is where a lot of comm goes on between processors
+
             opt->selection();
 
             //root check for success
 
             final_fit = opt->Final_select(soln_fit, solution, fitarray); //again, communicate to find the best solution that exist so far
 
-            if(numvar >= data_end) {
-                y[numvar - data_start] = log10(pow(final_fit, -2) - 1);
-                TSSres = SSres;
-                Tmean_x = mean_x;
-                //error=opt->error_update(data_size,&TSSres,&Tmean_x,slope,intercept,y,x);
-                //cout<<numvar<<":error="<<error<<","<<abs(y[numvar-data_start]-slope*x[numvar-data_start]-intercept)<<endl;
-                }
-
             //checking policy type
-            if(numvar == N_cut - 1) {
-                if(t == T - 1) {
-                    try {
-                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
-                        }
-                    catch(invalid_argument) {
-                        fitarray[0] = 0.999999;
-                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
-                        }
-                    if (my_rank == 0) {
-                        cout << fitarray[1] << endl;
-                        }
-                    mem_ptype[0] = opt->policy_type;
-                    if (my_rank == 0) {
-                        cout << "type[0]=" << mem_ptype[0] << endl;
-                        }
-                    if(mem_ptype[0] == 1) {
-                        numvar = numvar - 1;
-                        break;
-                        }
-                    }
-                }
-            else if(numvar == N_cut) {
-                if(t == T / 3) {
-                    try {
-                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
-                        }
-                    catch(invalid_argument) {
-                        fitarray[0] = 0.999999;
-                        opt->policy_type = check_policy(fitarray[1], fitarray[0]);
-                        }
-                    if (my_rank == 0) {
-                        cout << fitarray[1] << endl;
-                        }
-                    mem_ptype[1] = opt->policy_type;
-                    if (my_rank == 0) {
-                        cout << "type[1]=" << mem_ptype[1] << endl;
-                        }
-                    if(mem_ptype[0] | mem_ptype[1]) {
-                        //the policy is bad
-                        //reset the policy found in numvar=N_cut-1
-                        if (my_rank == 0) {
-                            cout << "numvar=" << numvar << " is set to";
-                            }
-                        numvar = N_cut - 2;
-                        if (my_rank == 0) {
-                            cout << numvar << endl;
-                            }
-                        break;
-                        }
-                    }
+
+            opt->policy_type = check_type(t, T, &numvar, N_cut, mem_ptype, fitarray);
+            if(opt->policy_type == 1) {
+                break;
                 }
 
-
-            opt->success = opt->check_success(t, numvar, final_fit, slope, intercept);
+            opt->success = opt->check_success(t, fitarray, &memory_fitarray[0][0], data_size, t_goal);
+            //opt->success = opt->check_success(t,y[numvar-data_start]-x[numvar-data_start]*slope-intercept,error);
 
             }
         while (opt->success == 0);
@@ -253,29 +200,14 @@ int main(int argc, char **argv) {
             }
 
         //collect data for linear fit
-        x[numvar - data_start] = log10(numvar); //collect x data
-        if (numvar >= data_start && numvar < data_end) {
-            y[numvar - data_start] = log10(pow(final_fit, -2) - 1);
+        if(numvar >= data_start && numvar < data_end) {
+            memory_fitarray[0][numvar - data_start] = log10(numvar);
+            memory_fitarray[1][numvar - data_start] = log10(pow(final_fit, -2) - 1);
             }
-
-        if (numvar == data_end - 1) {
-            linear_fit(data_size, x, y, &slope, &intercept, &mean_x);
-            //There should be a catch for the exception here for linear_fit and error_interval,
-            //but there is no easy way to keep the program running correctly if the exception is thrown.
-            t_goal = (t_goal + 1) / 2;
-            t_goal = quantile(t_goal);
-            error = error_interval(x, y, mean_x, data_size, &SSres, slope, intercept);
-            error = error * t_goal;
-            if (my_rank == 0) {
-                cout << slope << "," << intercept << endl;
-                }
-            //cout<<numvar<<":error="<<error<<endl;
-            }
-        else if (numvar >= data_end) {
-            SSres = TSSres;
-            mean_x = Tmean_x;
+        else if(numvar >= data_end) {
             ++data_size;
             }
+        else {}
 
         //testing loss
         if (my_rank == 0) {
@@ -293,8 +225,7 @@ int main(int argc, char **argv) {
     delete uniform_rng;
     delete [] solution;
     delete [] soln_fit;
-    delete [] x;
-    delete [] y;
+    delete [] memory_fitarray;
     delete [] can_per_proc;
 
     MPI_Finalize();
