@@ -85,7 +85,7 @@ void setDevice(int commRank, int commSize) {
     cudaDeviceProp devProp;
     cudaGetDeviceProperties(&devProp, device);
     cout <<  device << " " << devProp.name << " Compute Capability: " << devProp.major << "." << devProp.minor << "\n";
-    }
+}
 
 RngGpu::RngGpu(bool _gaussian, int _n_random_numbers, int seed, int rank):
     n_random_numbers(_n_random_numbers), RngVectorized(_gaussian) {
@@ -104,11 +104,10 @@ RngGpu::RngGpu(bool _gaussian, int _n_random_numbers, int seed, int rank):
     if (gaussian) {
         CURAND_CALL(curandGenerateNormalDouble(gen, dev_random_numbers,
                                                n_random_numbers, 0.0, 1.0));
-        }
-    else {
+    } else {
         CURAND_CALL(curandGenerateUniformDouble(gen, dev_random_numbers,
                                                 n_random_numbers));
-        }
+    }
     CUDA_CALL(cudaMemcpyAsync(random_numbers, dev_random_numbers,
                               n_random_numbers * sizeof(double),
                               cudaMemcpyDeviceToHost));
@@ -122,11 +121,10 @@ double RngGpu::next_rand(const double mean, const double dev) {
         if (gaussian) {
             CURAND_CALL(curandGenerateNormalDouble(gen, dev_random_numbers,
                                                    n_random_numbers, 0.0, 1.0));
-            }
-        else {
+        } else {
             CURAND_CALL(curandGenerateUniformDouble(gen, dev_random_numbers,
                                                     n_random_numbers));
-            }
+        }
         CUDA_CALL(cudaMemcpyAsync(random_numbers, dev_random_numbers,
                                   n_random_numbers * sizeof(double),
                                   cudaMemcpyDeviceToHost));

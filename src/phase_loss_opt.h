@@ -18,6 +18,7 @@
 
 #include "problem.h"
 #include "rng.h"
+#include "aux_functions.h"
 
 typedef complex<double> dcmplx;
 
@@ -28,6 +29,8 @@ class Phase: public Problem {
 
         //double fitness(double *soln);
         void avg_fitness(double *soln, const int K, double *fitarray);
+	void T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype);
+	bool error_condition(double *memory_fitarray, int data_size, double t_goal);
         void boundary(double *can1);
 
 //    private:
@@ -58,5 +61,6 @@ class Phase: public Problem {
         inline bool noise_outcome(const double phi, const double PHI, const int N);
         inline void state_loss(const int N);
         inline double mod_2PI(double PHI);
+	bool check_policy(double error, double sharp);
     };
 #endif // PHASE_H

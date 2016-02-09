@@ -280,11 +280,15 @@ void OptAlg::set_success(int iter, bool goal_in) {
     T = iter;
     goal = goal_in;
     }
-/*
-bool OptAlg::check_success(int t, double error, double error_goal) {
+
+bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitarray, int data_size, double t_goal, bool *mem_ptype, int *numvar,int N_cut){
+
+	bool type;
 
     if(goal == 0) {
+
         if(t >= T) {
+            prob->T_condition(current_fitarray,numvar,N_cut,mem_ptype);//This is wrong	     
             return 1;
             }
         else {
@@ -292,63 +296,13 @@ bool OptAlg::check_success(int t, double error, double error_goal) {
             }
         }
     else {
-        if(error <= error_goal) {
-            return 1;
-            }
-        else {
-            return 0;
-            }
+		memory_fitarray[2*(data_size+1)]=log10(num);
+		memory_fitarray[2*(data_size+1)+1]=log10(pow(current_fitarray[0],-2)-1);
+
+		return prob->error_condition(memory_fitarray, data_size, t_goal);
         }
 
-    }
-*/
-bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitarray, int data_size, double t_goal) {
-    double slope, intercept;
-    double mean_x, SSres;
-    double tn2;
-    double error, error_goal;
-    double x[data_size + 1];
-    double y[data_size + 1];
-
-    if(goal == 0) {
-        if(t >= T) {
-            return 1;
-            }
-        else {
-            return 0;
-            }
-        }
-    else {
-        memory_fitarray[2 * (data_size + 1)] = log10(num);
-        memory_fitarray[2 * (data_size + 1) + 1] = log10(pow(current_fitarray[0], -2) - 1);
-
-        //split into x-y arrays
-
-        for(int i = 0; i < data_size + 1; ++i) {
-            x[i] = memory_fitarray[2 * i];
-            y[i] = memory_fitarray[2 * i + 1];
-            }
-
-        linear_fit(data_size + 1, x, y, &slope, &intercept, &mean_x);
-
-        error_goal = error_interval(x, y, mean_x, data_size + 1, &SSres, slope, intercept);
-
-        t_goal = (t_goal + 1) / 2;
-        tn2 = quantile(t_goal);
-        error_goal = error_goal * tn2;
-        error = y[data_size + 1] - x[data_size + 1] * slope - intercept;
-
-        cout << data_size + 1 << ": error_goal=" << error_goal << ", error" << error << endl;
-
-        if(error <= error_goal) {
-            return 1;
-            }
-        else {
-            return 0;
-            }
-        }
-
-    }
+}
 
 
 void OptAlg::dev_gen(double *dev_array, double prev_dev, double new_dev, int cut_off) {

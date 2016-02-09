@@ -3,60 +3,6 @@
 
 using namespace std;
 
-/*##############################Policy Type#################################*/
-bool check_type(int t, int T, int *numvar, int N_cut, bool *mem_ptype, double *fitarray) {
-    bool type;
-
-    if(*numvar == N_cut - 1) {
-        if(t == T - 1) {
-            try {
-                type = check_policy(fitarray[1], fitarray[0]);
-                }
-            catch(invalid_argument) {
-                fitarray[0] = 0.999999;
-                type = check_policy(fitarray[1], fitarray[0]);
-                }
-            mem_ptype[0] = type;
-            if(mem_ptype[0] == 1) {
-                *numvar = *numvar - 1;
-                }
-            }
-        }
-    else if(*numvar == N_cut) {
-        if(t == T / 3) {
-            try {
-                type = check_policy(fitarray[1], fitarray[0]);
-                }
-            catch(invalid_argument) {
-                fitarray[0] = 0.999999;
-                type = check_policy(fitarray[1], fitarray[0]);
-                }
-            mem_ptype[1] = type;
-            if(mem_ptype[0] | mem_ptype[1]) {
-                //the policy is bad
-                //reset the policy found in numvar=N_cut-1
-                *numvar = N_cut - 2;
-                }
-            }
-        }
-
-    return type;
-    }
-
-
-bool check_policy(double error, double sharp) {
-    if (sharp == 1.0) {
-        throw invalid_argument("sharpness cannot be one.");
-        }
-    double sd = sqrt(1 / (sharp * sharp) - 1);
-    if(error >= M_PI - sd) {
-        return 1;
-        }
-    else {
-        return 0;
-        }
-    }
-
 /*############################Linear Regression############################*/
 void linear_fit(int data_size, double *x, double *y, double *slope, double *intercept, double *mean_x) {
     if(data_size <= 0) {
@@ -97,10 +43,10 @@ double error_update(int old_size, double *SSres, double *mean_x, double slope, d
         throw invalid_argument("data_size must be positive.");
         }
     double SSx = 0;
-
+	
     *mean_x = (*mean_x * old_size + x[old_size]) / double(old_size + 1);
     *SSres = *SSres + pow(y[old_size] - slope * x[old_size] - intercept, 2);
-
+	
     for(int i = 0; i < old_size + 1; ++i) {
         SSx = SSx + (x[i] - *mean_x) * (x[i] - *mean_x);
         }
