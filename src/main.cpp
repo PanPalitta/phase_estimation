@@ -79,10 +79,10 @@ int main(int argc, char **argv) {
         output_header(output_filename.c_str(), time_filename.c_str());
         }
 
-	numvar=N_begin;
+    numvar = N_begin;
 
-//    for (numvar = N_begin; numvar <= N_end; ++numvar) 
-	do{
+//    for (numvar = N_begin; numvar <= N_end; ++numvar)
+    do {
         if (my_rank == 0) {
             cout << numvar << endl;
             }
@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
             //root check for success
             final_fit = opt->Final_select(soln_fit, solution, fitarray); //again, communicate to find the best solution that exist so far
 
-	    opt->success = opt->check_success(t,fitarray,&memory_fitarray[0][0], data_size, t_goal,mem_ptype,&numvar,N_cut);
+            opt->success = opt->check_success(t, fitarray, &memory_fitarray[0][0], data_size, t_goal, mem_ptype, &numvar, N_cut);
             }
         while (opt->success == 0);
 
@@ -190,12 +190,14 @@ int main(int argc, char **argv) {
             }
 
         //collect data for linear fit
-        if(numvar>=data_start&&numvar<data_end) {
-            memory_fitarray[0][numvar-data_start]=log10(numvar);
-            memory_fitarray[1][numvar-data_start]=log10(pow(final_fit,-2)-1);
-        }
-        else if(numvar>=data_end) {++data_size;}
-	else{}
+        if(numvar >= data_start && numvar < data_end) {
+            memory_fitarray[0][numvar - data_start] = log10(numvar);
+            memory_fitarray[1][numvar - data_start] = log10(pow(final_fit, -2) - 1);
+            }
+        else if(numvar >= data_end) {
+            ++data_size;
+            }
+        else {}
 
         //testing loss
         if (my_rank == 0) {
@@ -209,8 +211,9 @@ int main(int argc, char **argv) {
         delete opt;
         delete problem;
 
-	++numvar;
-        }while(numvar<=N_end);
+        ++numvar;
+        }
+    while(numvar <= N_end);
 
     delete gaussian_rng;
     delete uniform_rng;

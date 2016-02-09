@@ -103,76 +103,76 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
 
     }
 
-void Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype){
-	bool type;
+void Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype) {
+    bool type;
 
-            if(*numvar == N_cut - 1) {
-                    try {
-                        type = check_policy(fitarray[1], fitarray[0]);
-                        }
-                    catch(invalid_argument) {
-                        fitarray[0] = 0.999999;
-                        type = check_policy(fitarray[1], fitarray[0]);
-                        }
-                    mem_ptype[0] = type;
-                    if(mem_ptype[0] == 1) {
-                        *numvar = *numvar-1;
-                        }
-                }
-            else if(*numvar == N_cut) {
-                    try {
-                        type = check_policy(fitarray[1], fitarray[0]);
-                        }
-                    catch(invalid_argument) {
-                        fitarray[0] = 0.999999;
-                        type = check_policy(fitarray[1], fitarray[0]);
-                        }
-                    mem_ptype[1] = type;
-                    if(mem_ptype[0] | mem_ptype[1]) {
-                        //the policy is bad
-                        //reset the policy found in numvar=N_cut-1
-                        *numvar = N_cut - 2;
-                        }
-                }
+    if(*numvar == N_cut - 1) {
+        try {
+            type = check_policy(fitarray[1], fitarray[0]);
+            }
+        catch(invalid_argument) {
+            fitarray[0] = 0.999999;
+            type = check_policy(fitarray[1], fitarray[0]);
+            }
+        mem_ptype[0] = type;
+        if(mem_ptype[0] == 1) {
+            *numvar = *numvar - 1;
+            }
+        }
+    else if(*numvar == N_cut) {
+        try {
+            type = check_policy(fitarray[1], fitarray[0]);
+            }
+        catch(invalid_argument) {
+            fitarray[0] = 0.999999;
+            type = check_policy(fitarray[1], fitarray[0]);
+            }
+        mem_ptype[1] = type;
+        if(mem_ptype[0] | mem_ptype[1]) {
+            //the policy is bad
+            //reset the policy found in numvar=N_cut-1
+            *numvar = N_cut - 2;
+            }
+        }
 
-}
+    }
 
-bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goal){
+bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goal) {
 
-	double slope, intercept;
-	double mean_x, SSres;
-	double tn2;
-	double error,error_goal;
-	double x[data_size+1];
-	double y[data_size+1];
+    double slope, intercept;
+    double mean_x, SSres;
+    double tn2;
+    double error, error_goal;
+    double x[data_size + 1];
+    double y[data_size + 1];
 
 
-		//split into x-y arrays
+    //split into x-y arrays
 
-		for(int i=0;i<data_size+1;++i){
-			x[i]=memory_fitarray[2*i];
-			y[i]=memory_fitarray[2*i+1];
-		}
+    for(int i = 0; i < data_size + 1; ++i) {
+        x[i] = memory_fitarray[2 * i];
+        y[i] = memory_fitarray[2 * i + 1];
+        }
 
-		linear_fit(data_size+1,x,y,&slope,&intercept,&mean_x);
+    linear_fit(data_size + 1, x, y, &slope, &intercept, &mean_x);
 
-		error_goal=error_interval(x,y,mean_x,data_size+1,&SSres,slope,intercept);
+    error_goal = error_interval(x, y, mean_x, data_size + 1, &SSres, slope, intercept);
 
-		t_goal=(t_goal+1)/2;
-		tn2=quantile(t_goal);
-		error_goal=error_goal*tn2;				
+    t_goal = (t_goal + 1) / 2;
+    tn2 = quantile(t_goal);
+    error_goal = error_goal * tn2;
 
-		error = y[data_size+1]-x[data_size+1]*slope-intercept;
-		
-		//cout<<data_size+1<<": error_goal="<<error_goal<<", error"<<error<<endl;
+    error = y[data_size + 1] - x[data_size + 1] * slope - intercept;
 
-        	if(error <= error_goal) {
-	            	return 1;
-        	    	}
-        	else {
-            		return 0;
-            		}
-}
+    //cout<<data_size+1<<": error_goal="<<error_goal<<", error"<<error<<endl;
+
+    if(error <= error_goal) {
+        return 1;
+        }
+    else {
+        return 0;
+        }
+    }
 
 
 
@@ -408,4 +408,3 @@ inline bool Phase::check_policy(double error, double sharp) {
         return 0;
         }
     }
-

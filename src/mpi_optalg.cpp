@@ -281,14 +281,14 @@ void OptAlg::set_success(int iter, bool goal_in) {
     goal = goal_in;
     }
 
-bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitarray, int data_size, double t_goal, bool *mem_ptype, int *numvar,int N_cut){
+bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitarray, int data_size, double t_goal, bool *mem_ptype, int *numvar, int N_cut) {
 
-	bool type;
+    bool type;
 
     if(goal == 0) {
 
         if(t >= T) {
-            prob->T_condition(current_fitarray,numvar,N_cut,mem_ptype);//This is wrong	     
+            prob->T_condition(current_fitarray, numvar, N_cut, mem_ptype); //This is wrong
             return 1;
             }
         else {
@@ -296,13 +296,13 @@ bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitar
             }
         }
     else {
-		memory_fitarray[2*(data_size+1)]=log10(num);
-		memory_fitarray[2*(data_size+1)+1]=log10(pow(current_fitarray[0],-2)-1);
+        memory_fitarray[2 * (data_size + 1)] = log10(num);
+        memory_fitarray[2 * (data_size + 1) + 1] = log10(pow(current_fitarray[0], -2) - 1);
 
-		return prob->error_condition(memory_fitarray, data_size, t_goal);
+        return prob->error_condition(memory_fitarray, data_size, t_goal);
         }
 
-}
+    }
 
 
 void OptAlg::dev_gen(double *dev_array, double prev_dev, double new_dev, int cut_off) {
