@@ -22,7 +22,6 @@ int main(int argc, char **argv) {
     double final_fit;
     double *soln_fit;
     int *can_per_proc;
-//    double *memory_fitarray;
     bool mem_ptype[2] = {false, false};
 
     /*parameter settings*/
@@ -80,7 +79,10 @@ int main(int argc, char **argv) {
         output_header(output_filename.c_str(), time_filename.c_str());
         }
 
-    for (numvar = N_begin; numvar <= N_end; ++numvar) {
+    numvar = N_begin;
+
+//    for (numvar = N_begin; numvar <= N_end; ++numvar)
+    do {
         if (my_rank == 0) {
             cout << numvar << endl;
             }
@@ -168,25 +170,13 @@ int main(int argc, char **argv) {
             ++t;
 
             opt->update_popfit();
-
             opt->combination(); //this is where a lot of comm goes on between processors
-
             opt->selection();
 
             //root check for success
-
             final_fit = opt->Final_select(soln_fit, solution, fitarray); //again, communicate to find the best solution that exist so far
 
-            //checking policy type
-
-            opt->policy_type = check_type(t, T, &numvar, N_cut, mem_ptype, fitarray);
-            if(opt->policy_type == 1) {
-                break;
-                }
-
-            opt->success = opt->check_success(t, fitarray, &memory_fitarray[0][0], data_size, t_goal);
-            //opt->success = opt->check_success(t,y[numvar-data_start]-x[numvar-data_start]*slope-intercept,error);
-
+            opt->success = opt->check_success(t, fitarray, &memory_fitarray[0][0], data_size, t_goal, mem_ptype, &numvar, N_cut);
             }
         while (opt->success == 0);
 
@@ -220,7 +210,11 @@ int main(int argc, char **argv) {
 
         delete opt;
         delete problem;
+
+        ++numvar;
         }
+    while(numvar <= N_end);
+
     delete gaussian_rng;
     delete uniform_rng;
     delete [] solution;

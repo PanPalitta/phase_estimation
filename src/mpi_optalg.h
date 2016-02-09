@@ -46,9 +46,7 @@ class OptAlg {
         void update_popfit();
 
         void set_success(int iter, bool goal);
-        //bool check_success(int t, int D, double fit, double slope, double intercept);
-        //bool check_success(int t, double error, double error_goal);
-        bool check_success(int t, double *current_fitarray, double *memory_fitarray, int data_size, double t_goal);
+        bool check_success(int t, double *current_fitarray, double *memory_fitarray, int data_size, double t_goal, bool *mem_ptype, int *numvar, int N_cut);
 
         //Selecting solution
         double Final_select(double *fit, double *solution, double *fitarray);
