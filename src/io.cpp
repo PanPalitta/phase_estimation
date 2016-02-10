@@ -63,7 +63,8 @@ map<string, string> parse(ifstream & cfgfile) {
 void read_config_file(char const *filename, int *pop_size, int *N_begin,
                       int *N_cut, int *N_end, int *iter, int *iter_begin,
                       int *repeat, int *seed, string *output_filename,
-                      string *time_filename, string *optimization) {
+                      string *time_filename, string *optimization,
+                      double *prev_dev, double *new_dev, double *t_goal, int *data_end) {
     // Setting defaults
     *pop_size = 12;
     *N_begin = 4;
@@ -76,6 +77,12 @@ void read_config_file(char const *filename, int *pop_size, int *N_begin,
     *output_filename = "output.dat";
     *time_filename = "time.dat";
     *optimization = "de";
+
+    *data_end = 8;
+    *prev_dev = 0.01;
+    *new_dev = 0.25;
+    *t_goal = 0.98; //probability for calculating quantile
+
     // Parsing config file if there is one
     if (filename == NULL) return;
     ifstream config_file(filename);
@@ -119,6 +126,18 @@ void read_config_file(char const *filename, int *pop_size, int *N_begin,
             if (*optimization != "de" && *optimization != "pso") {
                 throw runtime_error("Unknown optimization algorithm");
                 }
+            }
+        else if (it->first == "data_end") {
+            istringstream (it->second) >> *data_end;
+            }
+        else if (it->first == "prev_dev") {
+            istringstream (it->second) >> *prev_dev;
+            }
+        else if (it->first == "new_dev") {
+            istringstream (it->second) >> *new_dev;
+            }
+        else if (it->first == "t_goal") {
+            istringstream (it->second) >> *t_goal;
             }
         else {
             throw runtime_error("Unknown configuration option");

@@ -25,7 +25,8 @@ int main(int argc, char **argv) {
     bool mem_ptype[2] = {false, false};
 
     /*parameter settings*/
-    int pop_size, N_begin, N_cut, N_end, iter, iter_begin, repeat, seed;
+    int pop_size, N_begin, N_cut, N_end, iter, iter_begin, repeat, seed, data_end;
+    double prev_dev, new_dev, t_goal;
     string output_filename, time_filename, optimization;
     char const *config_filename;
     if (argc > 1) {
@@ -36,18 +37,13 @@ int main(int argc, char **argv) {
         }
     read_config_file(config_filename, &pop_size, &N_begin, &N_cut, &N_end, &iter,
                      &iter_begin, &repeat, &seed, &output_filename,
-                     &time_filename, &optimization);
+                     &time_filename, &optimization, &prev_dev, &new_dev, &t_goal, &data_end);
 
-    double prev_dev = 0.01 * M_PI;
-    double new_dev = 0.25 * M_PI;
+    prev_dev = prev_dev * M_PI;
+    new_dev = new_dev * M_PI;
+
     int data_start = N_begin;
-    int data_end = 8;
-    double t_goal = 0.98; //probability for calculating quantile
     int data_size = data_end - data_start;
-//    double slope = 0.0, intercept = 0.0;
-//    double mean_x = 0.0, SSres = 0.0;
-//    double TSSres, Tmean_x;
-//   double error, tn2;
 
     /*start mpi*/
     MPI_Init(&argc, &argv);
@@ -81,7 +77,6 @@ int main(int argc, char **argv) {
 
     numvar = N_begin;
 
-//    for (numvar = N_begin; numvar <= N_end; ++numvar)
     do {
         if (my_rank == 0) {
             cout << numvar << endl;
