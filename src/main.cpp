@@ -3,9 +3,8 @@
 */
 
 #include "phase_loss_opt.h" //The header file for the specific problem
-#include "mpi_optalg.h" //The header file for the optimization algorithms
+#include "mpi_optalg.h" //The header file for the optimization algorithms. The header 'mpi.h' is included in this header
 #include "io.h" //The header file for user-specified parameters
-#include "aux_functions.h" //The header file for auxiliary functions
 
 using namespace std;
 
@@ -191,7 +190,7 @@ int main(int argc, char **argv) {
 
             final_fit = opt->Final_select(soln_fit, solution, fitarray); //communicate to find the best solution that exist so far
 
-            //check if optimization is successful
+            //check if optimization is successful. This function include accept-reject criteria
             opt->success = opt->check_success(t, fitarray, &memory_fitarray[0][0], data_size, t_goal, mem_ptype, &numvar, N_cut);
             }
         while (opt->success == 0);
