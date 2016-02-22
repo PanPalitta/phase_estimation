@@ -27,7 +27,7 @@ class Candidate {
 
         void update_cont(double *input); /*!< A function for copying onto the contender array from input.*/
         void update_vel(double *input); /*!< A function for copying onto the velocity array from input.*/
-        void update_best(); /*!< A function for putting the contender array to the can_best array. This is done by swapping pointers.*/
+        void update_best(); /*!< A function for putting the contender array to the can_best array.*/
         void update_global(double *input);  /*!< A function for copying onto the global_best array from input.*/
         void put_to_global(); /*!< A function for copying can_best array to global_best array.*/
 
