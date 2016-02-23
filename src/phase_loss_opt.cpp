@@ -23,6 +23,7 @@ Phase::Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng):
     int i;
     lower = 0;
     upper = 2 * M_PI;
+    loss = 0.0;
     num = numvar;
     num_fit = 2;
     num_repeat = 10 * num * num;
@@ -53,8 +54,13 @@ Phase::~Phase() {
     delete[] overfac_mat;
     }
 
+void Phase::fitness(double *soln, double *fitarray){
+	loss = 0.2;
+	avg_fitness(soln,num_repeat,fitarray);
+	loss = 0.0;
+    }
+
 void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
-    const double loss = 0.0;//loss level
     dcmplx sharp(0.0, 0.0);
     bool dect_result;
     double PHI, phi, coin, PHI_in;

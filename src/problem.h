@@ -3,6 +3,9 @@
 
 using namespace std;
 
+/*! \brief Problem class contains the prototype of the functions in the optimization problem that OptAlg class needs to access.
+*/
+
 class Problem {
     public:
         Problem() {};
@@ -12,27 +15,29 @@ class Problem {
             }
 
         virtual void fitness(double *soln, double *fitarray) {
-            //return 0;//Do we still need this here?
+	    /*! A function intend to be a wrapper for changing conditions in which the fitness function is evaluated.*/
             }
         virtual void avg_fitness(double *soln, int K, double *fitarray) {
-            //return 0;   //K is the number of samples to calculate the average
+            /*! A function for calculating the fitness value.
+            It allows a number of sample K to be passed into the function in case the fitness function is a statistical 'quantity'(?)*/
             }
         virtual void T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype) {
-            //function for calculating additional conditions for when the t-loop exists from time steps.
+            /*! A function for calculating additional conditions for when the optimization algorithm is set to accept solution after time T.*/
             }
         virtual bool error_condition(double *memory_fitarray, int data_size, double t_goal) {
-            //function for calculating additional conditions for when the t-loop exists from error bound.
+            /*! A function for calculating additional conditions for when optimization algorithm is set to accept solution from error bound.*/
             return 0;
             }
         virtual void boundary(double *can1) {
+	    /*! This function is used to keep the solution candidate within the boundary of the search space.*/
             }
 
-        double *lower_bound;
-        double *upper_bound;
+        double *lower_bound;/*!< Pointer to array storing the lower bound of the variables*/
+        double *upper_bound;/*!< Pointer to array storing the upper bound of the variables*/
 
-        int num; //number of variables in the problem
-        int num_repeat; //number of repeats (calculated from num of var)
-        int num_fit; //number of fitness
+        int num; /*!<number of variables in the problem*/
+        int num_repeat; /*!<number of repeats*/
+        int num_fit; /*<number of fitnesses*/
     };
 
 #endif // PROBLEM_H

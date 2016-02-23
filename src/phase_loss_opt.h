@@ -27,15 +27,17 @@ class Phase: public Problem {
         Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng);
         ~Phase();
 
-        //double fitness(double *soln);
+        void fitness(double *soln, double *fitarray);
         void avg_fitness(double *soln, const int K, double *fitarray);
         void T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype);
         bool error_condition(double *memory_fitarray, int data_size, double t_goal);
         void boundary(double *can1);
 
-//    private:
+    private:
         double lower;
         double upper;
+	double loss;
+
         //array to avoid calculation of expensive sqrt calls for integers
         double *sqrt_cache;
         Rng *gaussian_rng, *uniform_rng;
@@ -57,7 +59,6 @@ class Phase: public Problem {
         inline double cal_spart(const int n, const int k, const int N);//N is is the same as total number of photon 'num', but I'll leave it like this.
         void WK_state();
         //Measurement function
-        //inline bool outcome(const double phi, const double PHI, const int N);//N is the number of photons currently available, not equal to 'num'
         inline bool noise_outcome(const double phi, const double PHI, const int N);
         inline void state_loss(const int N);
         inline double mod_2PI(double PHI);
