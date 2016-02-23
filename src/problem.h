@@ -15,7 +15,7 @@ class Problem {
             }
 
         virtual void fitness(double *soln, double *fitarray) {
-            //return 0;//Do we still need this here?
+	    /*! A function intend to be a wrapper for changing conditions in which the fitness function is evaluated.*/
             }
         virtual void avg_fitness(double *soln, int K, double *fitarray) {
             /*! A function for calculating the fitness value.
@@ -29,14 +29,15 @@ class Problem {
             return 0;
             }
         virtual void boundary(double *can1) {
+	    /*! This function is used to keep the solution candidate within the boundary of the search space.*/
             }
 
-        double *lower_bound;
-        double *upper_bound;
+        double *lower_bound;/*!< Pointer to array storing the lower bound of the variables*/
+        double *upper_bound;/*!< Pointer to array storing the upper bound of the variables*/
 
-        int num; //number of variables in the problem
-        int num_repeat; //number of repeats (calculated from num of var)
-        int num_fit; //number of fitness
+        int num; /*!<number of variables in the problem*/
+        int num_repeat; /*!<number of repeats*/
+        int num_fit; /*<number of fitnesses*/
     };
 
 #endif // PROBLEM_H
