@@ -16,7 +16,9 @@ Candidate::~Candidate() {
         }
     }
 
-void Candidate::init_can(int numvar, int fit_size) {
+void Candidate::init_can(int numvar, /*!<number of variables*/
+                         int fit_size /*!< the number of objective functions*/
+                        ) {
     if(numvar <= 0) {
         throw out_of_range("numvar must be positive.");
         }
@@ -35,7 +37,7 @@ void Candidate::init_can(int numvar, int fit_size) {
     is_candidate_initialized = true;
     }
 
-void Candidate::init_velocity() { //This function can only be called after init_can. What can we do make sure it is safe to use?
+void Candidate::init_velocity() {
     velocity = new double[num];
     is_velocity_initialized = true;
     }
@@ -59,8 +61,6 @@ void Candidate::update_best() {
     best_fit = cont_fit;
     cont_fit = temp_pnt;
 
-//    memcpy(can_best, contender, num * sizeof(double));
-//    memcpy(best_fit, cont_fit, num_fit * sizeof(double));
     best_times = times;
     }
 
