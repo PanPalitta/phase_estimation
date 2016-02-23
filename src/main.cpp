@@ -3,9 +3,8 @@
 */
 
 #include "phase_loss_opt.h" //The header file for the specific problem
-#include "mpi_optalg.h" //The header file for the optimization algorithms
+#include "mpi_optalg.h" //The header file for the optimization algorithms.'mpi.h' is included in this header.
 #include "io.h" //The header file for user-specified parameters
-#include "aux_functions.h" //The header file for auxiliary functions
 
 using namespace std;
 
@@ -58,19 +57,18 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &nb_proc);
 
-    /*Initializing the */
+    int num_repeat = 10 * N_end * N_end; //The size of the samples used in the the learning algorithm
+    soln_fit = new double[pop_size]; //an array to store global fitness from each candidate.
+    solution = new double[N_end]; //an array to store solution
+    double memory_fitarray[2][N_end - data_start + 1]; //memory for storing data from many numvar's to be used in accept/reject criteria
+
+    /*Initializing the RNG*/
     //Maximum number of uniform random numbers we will use in one go
     int n_urandom_numbers = num_repeat + 2 * num_repeat * N_end;
     //Maximum number of Gaussian random numbers we will use in one go
     int n_grandom_numbers = 3 * num_repeat * N_end;
     Rng *gaussian_rng = new Rng(true, n_grandom_numbers, seed, my_rank);
     Rng *uniform_rng = new Rng(false, n_urandom_numbers, seed, my_rank);
-
-    int num_repeat = 10 * N_end * N_end; //The size of the samples used in the the learning algorithm
-    soln_fit = new double[pop_size]; //an array to store global fitness from each candidate.
-    solution = new double[N_end]; //an array to store solution
-
-    double memory_fitarray[2][N_end - data_start + 1]; //memory for storing data from many numvar's to be used in accept/reject criteria
 
     //calculating number of candidate per processor and stores the number in an array.
     can_per_proc = new int[nb_proc];
@@ -191,7 +189,7 @@ int main(int argc, char **argv) {
 
             final_fit = opt->Final_select(soln_fit, solution, fitarray); //communicate to find the best solution that exist so far
 
-            //check if optimization is successful
+            //check if optimization is successful. This function includes accept-reject criteria.
             opt->success = opt->check_success(t, fitarray, &memory_fitarray[0][0], data_size, t_goal, mem_ptype, &numvar, N_cut);
             }
         while (opt->success == 0);
