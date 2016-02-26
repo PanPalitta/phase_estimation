@@ -1,10 +1,3 @@
-/*NOTES on using fitness functions for phase estimation problem with loss*/
-/* Both avg_fitness() and fitness() contain the same code.
- * The policies are learned with out loss (loss in avg_fitness() set to zero).
- * Then the policies are selected based on its average fitness value over
- * the lossy case (loss in fitness() set to other than zero) which is called
- * through avg_Final_select() in OptAlg class.
- * */
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -54,10 +47,10 @@ Phase::~Phase() {
     delete[] overfac_mat;
     }
 
-void Phase::fitness(double *soln, double *fitarray){
-	loss = 0.2;
-	avg_fitness(soln,num_repeat,fitarray);
-	loss = 0.0;
+void Phase::fitness(double *soln, double *fitarray) {
+    loss = 0.2;
+    avg_fitness(soln, num_repeat, fitarray);
+    loss = 0.0;
     }
 
 void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
@@ -281,55 +274,7 @@ inline void Phase::sqrtfac(double *fac_mat) { //calculate sqrt of factorial matr
         }//end i
     }
 
-/*########### Measurement Functions ###########*///Measurement function
-/*
-inline bool Phase::outcome(const double phi, const double PHI, const int N) {
-    //N is the number of photons currently available, not equal to 'num'
-    const double theta = (phi-PHI)/2;
-    const double cos_theta=cos(theta)/sqrt_cache[N];
-    const double sin_theta=sin(theta)/sqrt_cache[N];
-    int n;
-	double prob=0.0;
-    //double prob0 = 0.0, prob1 = 0.0;
-    for (n=0; n<N; ++n) {
-        //if C_0 is measured
-        update0[n] = state[n+1]*sin_theta*sqrt_cache[n+1]+state[n]*cos_theta*sqrt_cache[N-n];
-        prob += abs(update0[n]*conj(update0[n]));
-        //if C_1 is measured
-        //This is cache-optimized: we update state[n] in-place
-        //state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
-        //prob1 += abs(state[n]*conj(state[n]));
-    }
-    //FIXME: Why don't prob0+prob1 always sum to 1?
-    //The condition is set this way so that when the rounding error starts to kick in at num=82
-    //(the state is valid but the numerical value started to go off slightly)
-    //it does not effect the random selection of output path.
-    if ((double(rand())/RAND_MAX) <= prob) {
-        //measurement outcome is 0
-        state[N] = 0;
-        prob = 1.0/sqrt(prob);
-        for(n=0; n<N; ++n) {
-            state[n] = update0[n] * prob;
-        }
-        return 0;
-    } else {
-        //measurement outcome is 1
-        for(n=0; n<N; ++n) {
-            //FIXME: Why don't we multiply the RHS with (1.0-prob0) and save the
-            //second for loop here? Can't we get rid of prob1 completely?
-            //If not, rename prob0 to prob, and reuse it here. It saves a double
-            //in a critical region of the code.
-            state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
-            prob += abs(state[n]*conj(state[n]));
-        }
-        state[N] = 0;
-        prob = 1.0/sqrt(prob);
-        for(n=0; n<N; ++n) {
-            state[n] *= prob;
-        }
-        return 1;
-    }
-}*/
+/*########### Measurement Functions ###########*/
 
 inline bool Phase::noise_outcome(const double phi, const double PHI, const int N) {
     //N is the number of photons currently available, not equal to 'num'
