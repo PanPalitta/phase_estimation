@@ -9,23 +9,33 @@ using namespace std;
 
 Phase::Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng):
     gaussian_rng(gaussian_rng), uniform_rng(uniform_rng) {
+    /*! The instantiation function of the class initialize necessary variables that the optimization algorithm uses.
+    * Memories used by the problem is also allocated in this stage.
+    */
     if(numvar <= 0) {
         throw invalid_argument("numvar<=0. Instantiating Phase fails.");
         }
 
     int i;
+
+    //Initializing the conditions the simulation uses.
     lower = 0;
     upper = 2 * M_PI;
     loss = 0.0;
+
+    //Initializing the numbers used by the optimization algorithm.
     num = numvar;
     num_fit = 2;
     num_repeat = 10 * num * num;
+
+    //Initializing the lower bound and upper bound for the optimized variables.
     lower_bound = new double[num];
     upper_bound = new double[num];
     for(i = 0; i < num; ++i) {
         lower_bound[i] = lower;
         upper_bound[i] = upper;
         }
+    //Initializing memories used by the simulation.
     sqrt_cache = new double[num + 1];
     for(i = 0; i < num + 1; ++i) {
         sqrt_cache[i] = sqrt(i);
@@ -39,6 +49,10 @@ Phase::Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng):
     }
 
 Phase::~Phase() {
+    /*freeing the memory.
+    * This is a crucial step if the main function runs a loop with multiple instantiation of the phase problem
+    as the computer might run out of memory.
+    */
     delete[] state;
     delete[] update0;
     delete[] update1;
@@ -48,26 +62,33 @@ Phase::~Phase() {
     }
 
 void Phase::fitness(double *soln, double *fitarray) {
-    loss = 0.2;
+    /*In this particular problem, this function serves as a wrapper to change the loss rate,
+    * so that we can test the policy we found in lossless interferometry with a chosen level of loss.
+    */
+    loss = 0.2; //This loss rate can be changed by user.
     avg_fitness(soln, num_repeat, fitarray);
-    loss = 0.0;
+    loss = 0.0; //Change back in case the optimization process has to be redone.
     }
 
 void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
-    dcmplx sharp(0.0, 0.0);
-    bool dect_result;
+    /* A function calculates the fitness values (reported in fitarray) of a solution (soln) over a sample size of K.
+    * This function simulates the adaptive phase interferometry and so is the most computationally expensive part of the program.
+    */
+    dcmplx sharp(0.0, 0.0); //variable to store the sharpness function, which is the first fitness value in the array.
+    double error = 0.0; //variable to store the bias of the estimate, which is the second fitness value in the array.
+    bool dect_result; //variable to store which path a photon comes out at any step.
     double PHI, phi, coin, PHI_in;
     int m, k, d;
-    double error = 0.0;
 
-    WK_state();
+    WK_state(); //Generate the WK state.
+
     for(k = 0; k < K; ++k) {
         phi = uniform_rng->next_rand(0.0, 1.0) * (upper - lower) + lower;
         PHI = 0;
         //copy input state: the optimal solution across all compilers is memcpy:
         //nadeausoftware.com/articles/2012/05/c_c_tip_how_copy_memory_quickly
         memcpy(state, input_state, (num + 1)*sizeof(dcmplx));
-        //measurement
+        //Begining the measurement of one sample
         d = 0;
         for (m = 0; m < num; ++m) {
             // This loop is the most critical part of the entire program. It
@@ -93,18 +114,26 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
                 PHI = mod_2PI(PHI);
                 }
             }
+        //store fitness values
         sharp.real() = sharp.real() + cos(phi - PHI);
         sharp.imag() = sharp.imag() + sin(phi - PHI);
         error += abs(phi - PHI);
         }
+    //find the averages and return
     fitarray[0] = abs(sharp) / double(K);
     fitarray[1] = error / double(K);
 
     }
 
 void Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype) {
+    /*This function contains the conditions that has to be checked after a step T elapses
+    * before the algorithm decides to accept or reject the solution.
+    * In particular this function is called when time step is used as the main condition to end the optimization.
+    * For this particular problem, it resets the number of variables so the optimization starts over.
+    */
     bool type;
 
+    //The conditions are checked only if the algorithm is going to change the way it initializes the population.
     if(*numvar == N_cut - 1) {
         try {
             type = check_policy(fitarray[1], fitarray[0]);
