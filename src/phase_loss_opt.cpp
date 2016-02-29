@@ -134,6 +134,7 @@ void Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptyp
     bool type;
 
     //The conditions are checked only if the algorithm is going to change the way it initializes the population.
+    //Policy type 1 is the one with pi bias and is susceptible to loss. CThe algorithm will run until type 0 is found.
     if(*numvar == N_cut - 1) {
         try {
             type = check_policy(fitarray[1], fitarray[0]);
@@ -166,6 +167,11 @@ void Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptyp
     }
 
 bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goal) {
+    /*This function contains the function to compute error for when the algorithm is set to use error as the accept-reject condition.
+    *It allows for the information of previous optimization to be used to compute the condition as well as using the latest result.
+    *In this particular problem, we use the error that corresponds to the confidence interval of 0.98
+    * from the linear relation between logN and logV_H.
+    */
 
     double slope, intercept;
     double mean_x, SSres;
@@ -182,18 +188,19 @@ bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goa
         y[i] = memory_fitarray[2 * i + 1];
         }
 
+    //Computing the linear equation using previous data
     linear_fit(data_size + 1, x, y, &slope, &intercept, &mean_x);
-
+    //Compute the goal for error from confidence interval of 0.98
     error_goal = error_interval(x, y, mean_x, data_size + 1, &SSres, slope, intercept);
 
     t_goal = (t_goal + 1) / 2;
     tn2 = quantile(t_goal);
     error_goal = error_goal * tn2;
 
+    //Compute the distance between the data and the prediction from linear equation
     error = y[data_size + 1] - x[data_size + 1] * slope - intercept;
 
-    //cout<<data_size+1<<": error_goal="<<error_goal<<", error"<<error<<endl;
-
+    //Check if error is smaller than the goal
     if(error <= error_goal) {
         return 1;
         }
@@ -205,6 +212,9 @@ bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goa
 
 
 void Phase::boundary(double *can1) {
+    /*This function cuts the value of the variables so they are within the boundary of the problem.
+    *This can be replaced by one or more method, such as periodic boundary or normalization.
+    */
     for(int i = 0; i < num; ++i) {
         if(can1[i] < lower_bound[i]) {
             can1[i] = lower_bound[i];
@@ -215,10 +225,19 @@ void Phase::boundary(double *can1) {
         }
     }
 
-/*private functions*/
+/*private functions: specific to the simulation and not used by the optimization algorithm*/
+
 /*########### Generating Input State ###########*/
 /*Generation function*/
 void Phase::WK_state() {
+    /* This is the main function for generating the input state.
+    * We call it here the Wiseman-Killip state, but the more general term would be the sine state.
+    * This algorithm for generating WK state is the most precise one to date (measured by how much the normalization differs from zero),
+    * but the rounding error still appears as early as N=80 and is detrimental to the shape of the state for N>100.
+    * This is a limitation caused by the use of double precision float.
+    * For N>100, either switch to quadruple precision, which will cause a large overhead
+    * (about 15 for the simulation, but even more for this function), or another method has to be used to approximate the state.
+    */
     const double beta = M_PI / 2;
     const double cosN = pow(cos(beta / 2), num);
     tan_beta = tan(beta / 2);
@@ -229,8 +248,11 @@ void Phase::WK_state() {
     double s_part;
     double temp;
 
-    sqrtfac(sqrtfac_mat); //initializing
-    one_over_fac(overfac_mat); //initializing
+    //Preparing constant arrays to save time.
+
+    //initializing array of factorial numbers
+    sqrtfac(sqrtfac_mat);
+    one_over_fac(overfac_mat);
 
     /*factors in d_matrix calculated*/
     //calculating n_parts and k_parts in
@@ -241,6 +263,7 @@ void Phase::WK_state() {
         k_part[k] = 1 / pow(-1.0, k) * sqrtfac_mat[k] * sqrtfac_mat[num - k] * pow(1 / tan_beta, k);
         }
 
+    //Compute the state
     for (n = 0; n <= num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
         temp = 0;
         input_state[n].real() = 0;
@@ -251,14 +274,15 @@ void Phase::WK_state() {
             input_state[n].real() = input_state[n].real() + temp * cos(M_PI / 2.0 * (k - n));
             input_state[n].imag() = input_state[n].imag() + temp * sin(M_PI / 2.0 * (k - n));
             }//end k
-        // FIXED:This correction corrects the probability overshoot.
         input_state[n].real() = input_state[n].real() * n_part[n] / sqrt(num / 2.0 + 1);
         input_state[n].imag() = input_state[n].imag() * n_part[n] / sqrt(num / 2.0 + 1);
         }//end n
     }
 
 inline double Phase::cal_spart(const int n, const int k, const int N) {
-    //calculating the Wigner d-matrix element
+    /*This function calculates the sum in an element of a Wigner d-matrix
+    */
+
     int s;
     int s_min;
     int s_max;
@@ -288,14 +312,16 @@ inline double Phase::cal_spart(const int n, const int k, const int N) {
     return s_part;
     }
 
-inline void Phase::one_over_fac(double *over_mat) { //calculate one over factorial matrix
+inline void Phase::one_over_fac(double *over_mat) {
+    /*This function calculates one over factorial matrix.*/
     over_mat[0] = 1;
     for (int i = 1; i <= num; ++i) {
         over_mat[i] = over_mat[i - 1] / i;
         }//end i
     }
 
-inline void Phase::sqrtfac(double *fac_mat) { //calculate sqrt of factorial matrix
+inline void Phase::sqrtfac(double *fac_mat) {
+    /*This function calculates sqrare root of factorial matrix.*/
     //check array size
     fac_mat[0] = 1;
     for (int i = 1; i <= num; ++i) {
@@ -304,8 +330,13 @@ inline void Phase::sqrtfac(double *fac_mat) { //calculate sqrt of factorial matr
     }
 
 /*########### Measurement Functions ###########*/
+/*The following functions are involved in the simulation of the noisy interferometer.*/
 
 inline bool Phase::noise_outcome(const double phi, const double PHI, const int N) {
+    /*This function computes the output path of a photon from a noisy interferometer
+    by computing the probablity of photon coming out of either path.
+    This simulation allows for noise in the unitary operation, but we only consider the noise in the phase shift.
+    */
     //N is the number of photons currently available, not equal to 'num'
     const double theta = (phi - PHI) / 2.0;
     const double cos_theta = cos(theta) / sqrt_cache[N];
@@ -352,7 +383,7 @@ inline bool Phase::noise_outcome(const double phi, const double PHI, const int N
     }
 
 inline void Phase::state_loss(const int N) {
-    //state update if the photon is loss
+    /*This function updates the state when one of the photon is loss.*/
     double total = 0;
     double factor = 1 / sqrt(2 * N);
     for(int n = 0; n < N; ++n) {
@@ -367,6 +398,8 @@ inline void Phase::state_loss(const int N) {
     }
 
 inline double Phase::mod_2PI(double PHI) {
+    /*This function compute the modulo of the phase.
+    */
     while(PHI >= 2 * M_PI) {
         PHI = PHI - 2 * M_PI;
         }
@@ -377,6 +410,12 @@ inline double Phase::mod_2PI(double PHI) {
     }
 
 inline bool Phase::check_policy(double error, double sharp) {
+    /*This function takes the bias and output the policy type.
+    *A policy is considered to be type zero if its error falls within the uncertainty of the scheme.
+    *This is the desirable type as its estimate no bias and the policy can be used when loss is presence.
+    *In the error falls outside the uncertainty,
+    *it is very likely that the estimate has a pi bias and is the type of policy that fails when there is loss.
+    */
     if (sharp == 1.0) {
         throw invalid_argument("sharpness cannot be one.");
         }
