@@ -36,7 +36,7 @@ class Phase: public Problem {
 
         void fitness(double *soln, double *fitarray);
         void avg_fitness(double *soln, const int K, double *fitarray);
-        void T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype);
+        bool T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype);
         bool error_condition(double *memory_fitarray, int data_size, double t_goal);
         void boundary(double *can1);
 

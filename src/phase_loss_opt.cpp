@@ -125,7 +125,7 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
 
     }
 
-void Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype) {
+bool Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype) {
     /*This function contains the conditions that has to be checked after a step T elapses
     * before the algorithm decides to accept or reject the solution.
     * In particular this function is called when time step is used as the main condition to end the optimization.
@@ -163,7 +163,7 @@ void Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptyp
             *numvar = N_cut - 2;
             }
         }
-
+    return 1;
     }
 
 bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goal) {

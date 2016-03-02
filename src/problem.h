@@ -21,8 +21,9 @@ class Problem {
             /*! A function for calculating the fitness value.
             It allows a number of sample K to be passed into the function in case the fitness function is a statistical 'quantity'(?)*/
             }
-        virtual void T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype) {
+        virtual bool T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype) {
             /*! A function for calculating additional conditions for when the optimization algorithm is set to accept solution after time T.*/
+	    return 0;
             }
         virtual bool error_condition(double *memory_fitarray, int data_size, double t_goal) {
             /*! A function for calculating additional conditions for when optimization algorithm is set to accept solution from error bound.*/
