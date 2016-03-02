@@ -166,7 +166,7 @@ bool Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptyp
     return 1;
     }
 
-bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goal) {
+bool Phase::error_condition(double *current_fitarray, double *memory_fitarray, int data_size, double goal) {
     /*This function contains the function to compute error for when the algorithm is set to use error as the accept-reject condition.
     *It allows for the information of previous optimization to be used to compute the condition as well as using the latest result.
     *In this particular problem, we use the error that corresponds to the confidence interval of 0.98
@@ -180,6 +180,8 @@ bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goa
     double x[data_size + 1];
     double y[data_size + 1];
 
+    memory_fitarray[2 * (data_size + 1)] = log10(num);
+    memory_fitarray[2 * (data_size + 1) + 1] = log10(pow(current_fitarray[0], -2) - 1);
 
     //split into x-y arrays
 
@@ -193,8 +195,8 @@ bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goa
     //Compute the goal for error from confidence interval of 0.98
     error_goal = error_interval(x, y, mean_x, data_size + 1, &SSres, slope, intercept);
 
-    t_goal = (t_goal + 1) / 2;
-    tn2 = quantile(t_goal);
+    goal = (goal + 1) / 2;
+    tn2 = quantile(goal);
     error_goal = error_goal * tn2;
 
     //Compute the distance between the data and the prediction from linear equation

@@ -25,7 +25,7 @@ class Problem {
             /*! A function for calculating additional conditions for when the optimization algorithm is set to accept solution after time T.*/
 	    return 0;
             }
-        virtual bool error_condition(double *memory_fitarray, int data_size, double t_goal) {
+        virtual bool error_condition(double *current_fitarray, double *memory_fitarray, int data_size, double goal) {
             /*! A function for calculating additional conditions for when optimization algorithm is set to accept solution from error bound.*/
             return 0;
             }

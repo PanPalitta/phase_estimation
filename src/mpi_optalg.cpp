@@ -295,10 +295,7 @@ bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitar
             }
         }
     else {
-        memory_fitarray[2 * (data_size + 1)] = log10(num);
-        memory_fitarray[2 * (data_size + 1) + 1] = log10(pow(current_fitarray[0], -2) - 1);
-
-        return prob->error_condition(memory_fitarray, data_size, t_goal);
+        return prob->error_condition(current_fitarray,memory_fitarray, data_size, t_goal);
         }
 
     }
