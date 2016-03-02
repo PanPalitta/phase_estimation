@@ -1,10 +1,3 @@
-/*NOTES on using fitness functions for phase estimation problem with loss*/
-/* Both avg_fitness() and fitness() contain the same code.
- * The policies are learned with out loss (loss in avg_fitness() set to zero).
- * Then the policies are selected based on its average fitness value over
- * the lossy case (loss in fitness() set to other than zero) which is called
- * through avg_Final_select() in OptAlg class.
- * */
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -16,23 +9,33 @@ using namespace std;
 
 Phase::Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng):
     gaussian_rng(gaussian_rng), uniform_rng(uniform_rng) {
+    /*! The instantiation function of the class initialize necessary variables that the optimization algorithm uses.
+    * Memories used by the problem is also allocated in this stage.
+    */
     if(numvar <= 0) {
         throw invalid_argument("numvar<=0. Instantiating Phase fails.");
         }
 
     int i;
+
+    //Initializing the conditions the simulation uses.
     lower = 0;
     upper = 2 * M_PI;
     loss = 0.0;
+
+    //Initializing the numbers used by the optimization algorithm.
     num = numvar;
     num_fit = 2;
     num_repeat = 10 * num * num;
+
+    //Initializing the lower bound and upper bound for the optimized variables.
     lower_bound = new double[num];
     upper_bound = new double[num];
     for(i = 0; i < num; ++i) {
         lower_bound[i] = lower;
         upper_bound[i] = upper;
         }
+    //Initializing memories used by the simulation.
     sqrt_cache = new double[num + 1];
     for(i = 0; i < num + 1; ++i) {
         sqrt_cache[i] = sqrt(i);
@@ -46,6 +49,10 @@ Phase::Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng):
     }
 
 Phase::~Phase() {
+    /*freeing the memory.
+    * This is a crucial step if the main function runs a loop with multiple instantiation of the phase problem
+    as the computer might run out of memory.
+    */
     delete[] state;
     delete[] update0;
     delete[] update1;
@@ -54,27 +61,34 @@ Phase::~Phase() {
     delete[] overfac_mat;
     }
 
-void Phase::fitness(double *soln, double *fitarray){
-	loss = 0.2;
-	avg_fitness(soln,num_repeat,fitarray);
-	loss = 0.0;
+void Phase::fitness(double *soln, double *fitarray) {
+    /*In this particular problem, this function serves as a wrapper to change the loss rate,
+    * so that we can test the policy we found in lossless interferometry with a chosen level of loss.
+    */
+    loss = 0.2; //This loss rate can be changed by user.
+    avg_fitness(soln, num_repeat, fitarray);
+    loss = 0.0; //Change back in case the optimization process has to be redone.
     }
 
 void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
-    dcmplx sharp(0.0, 0.0);
-    bool dect_result;
+    /* A function calculates the fitness values (reported in fitarray) of a solution (soln) over a sample size of K.
+    * This function simulates the adaptive phase interferometry and so is the most computationally expensive part of the program.
+    */
+    dcmplx sharp(0.0, 0.0); //variable to store the sharpness function, which is the first fitness value in the array.
+    double error = 0.0; //variable to store the bias of the estimate, which is the second fitness value in the array.
+    bool dect_result; //variable to store which path a photon comes out at any step.
     double PHI, phi, coin, PHI_in;
     int m, k, d;
-    double error = 0.0;
 
-    WK_state();
+    WK_state(); //Generate the WK state.
+
     for(k = 0; k < K; ++k) {
         phi = uniform_rng->next_rand(0.0, 1.0) * (upper - lower) + lower;
         PHI = 0;
         //copy input state: the optimal solution across all compilers is memcpy:
         //nadeausoftware.com/articles/2012/05/c_c_tip_how_copy_memory_quickly
         memcpy(state, input_state, (num + 1)*sizeof(dcmplx));
-        //measurement
+        //Begining the measurement of one sample
         d = 0;
         for (m = 0; m < num; ++m) {
             // This loop is the most critical part of the entire program. It
@@ -100,18 +114,27 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
                 PHI = mod_2PI(PHI);
                 }
             }
+        //store fitness values
         sharp.real() = sharp.real() + cos(phi - PHI);
         sharp.imag() = sharp.imag() + sin(phi - PHI);
         error += abs(phi - PHI);
         }
+    //find the averages and return
     fitarray[0] = abs(sharp) / double(K);
     fitarray[1] = error / double(K);
 
     }
 
-void Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype) {
+bool Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype) {
+    /*This function contains the conditions that has to be checked after a step T elapses
+    * before the algorithm decides to accept or reject the solution.
+    * In particular this function is called when time step is used as the main condition to end the optimization.
+    * For this particular problem, it resets the number of variables so the optimization starts over.
+    */
     bool type;
 
+    //The conditions are checked only if the algorithm is going to change the way it initializes the population.
+    //Policy type 1 is the one with pi bias and is susceptible to loss. CThe algorithm will run until type 0 is found.
     if(*numvar == N_cut - 1) {
         try {
             type = check_policy(fitarray[1], fitarray[0]);
@@ -140,10 +163,15 @@ void Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptyp
             *numvar = N_cut - 2;
             }
         }
-
+    return 1;
     }
 
-bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goal) {
+bool Phase::error_condition(double *current_fitarray, double *memory_fitarray, int data_size, double goal) {
+    /*This function contains the function to compute error for when the algorithm is set to use error as the accept-reject condition.
+    *It allows for the information of previous optimization to be used to compute the condition as well as using the latest result.
+    *In this particular problem, we use the error that corresponds to the confidence interval of 0.98
+    * from the linear relation between logN and logV_H.
+    */
 
     double slope, intercept;
     double mean_x, SSres;
@@ -152,6 +180,8 @@ bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goa
     double x[data_size + 1];
     double y[data_size + 1];
 
+    memory_fitarray[2 * (data_size + 1)] = log10(num);
+    memory_fitarray[2 * (data_size + 1) + 1] = log10(pow(current_fitarray[0], -2) - 1);
 
     //split into x-y arrays
 
@@ -160,18 +190,19 @@ bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goa
         y[i] = memory_fitarray[2 * i + 1];
         }
 
+    //Computing the linear equation using previous data
     linear_fit(data_size + 1, x, y, &slope, &intercept, &mean_x);
-
+    //Compute the goal for error from confidence interval of 0.98
     error_goal = error_interval(x, y, mean_x, data_size + 1, &SSres, slope, intercept);
 
-    t_goal = (t_goal + 1) / 2;
-    tn2 = quantile(t_goal);
+    goal = (goal + 1) / 2;
+    tn2 = quantile(goal);
     error_goal = error_goal * tn2;
 
+    //Compute the distance between the data and the prediction from linear equation
     error = y[data_size + 1] - x[data_size + 1] * slope - intercept;
 
-    //cout<<data_size+1<<": error_goal="<<error_goal<<", error"<<error<<endl;
-
+    //Check if error is smaller than the goal
     if(error <= error_goal) {
         return 1;
         }
@@ -183,6 +214,9 @@ bool Phase::error_condition(double *memory_fitarray, int data_size, double t_goa
 
 
 void Phase::boundary(double *can1) {
+    /*This function cuts the value of the variables so they are within the boundary of the problem.
+    *This can be replaced by one or more method, such as periodic boundary or normalization.
+    */
     for(int i = 0; i < num; ++i) {
         if(can1[i] < lower_bound[i]) {
             can1[i] = lower_bound[i];
@@ -193,10 +227,19 @@ void Phase::boundary(double *can1) {
         }
     }
 
-/*private functions*/
+/*private functions: specific to the simulation and not used by the optimization algorithm*/
+
 /*########### Generating Input State ###########*/
 /*Generation function*/
 void Phase::WK_state() {
+    /* This is the main function for generating the input state.
+    * We call it here the Wiseman-Killip state, but the more general term would be the sine state.
+    * This algorithm for generating WK state is the most precise one to date (measured by how much the normalization differs from zero),
+    * but the rounding error still appears as early as N=80 and is detrimental to the shape of the state for N>100.
+    * This is a limitation caused by the use of double precision float.
+    * For N>100, either switch to quadruple precision, which will cause a large overhead
+    * (about 15 for the simulation, but even more for this function), or another method has to be used to approximate the state.
+    */
     const double beta = M_PI / 2;
     const double cosN = pow(cos(beta / 2), num);
     tan_beta = tan(beta / 2);
@@ -207,8 +250,11 @@ void Phase::WK_state() {
     double s_part;
     double temp;
 
-    sqrtfac(sqrtfac_mat); //initializing
-    one_over_fac(overfac_mat); //initializing
+    //Preparing constant arrays to save time.
+
+    //initializing array of factorial numbers
+    sqrtfac(sqrtfac_mat);
+    one_over_fac(overfac_mat);
 
     /*factors in d_matrix calculated*/
     //calculating n_parts and k_parts in
@@ -219,6 +265,7 @@ void Phase::WK_state() {
         k_part[k] = 1 / pow(-1.0, k) * sqrtfac_mat[k] * sqrtfac_mat[num - k] * pow(1 / tan_beta, k);
         }
 
+    //Compute the state
     for (n = 0; n <= num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
         temp = 0;
         input_state[n].real() = 0;
@@ -229,14 +276,15 @@ void Phase::WK_state() {
             input_state[n].real() = input_state[n].real() + temp * cos(M_PI / 2.0 * (k - n));
             input_state[n].imag() = input_state[n].imag() + temp * sin(M_PI / 2.0 * (k - n));
             }//end k
-        // FIXED:This correction corrects the probability overshoot.
         input_state[n].real() = input_state[n].real() * n_part[n] / sqrt(num / 2.0 + 1);
         input_state[n].imag() = input_state[n].imag() * n_part[n] / sqrt(num / 2.0 + 1);
         }//end n
     }
 
 inline double Phase::cal_spart(const int n, const int k, const int N) {
-    //calculating the Wigner d-matrix element
+    /*This function calculates the sum in an element of a Wigner d-matrix
+    */
+
     int s;
     int s_min;
     int s_max;
@@ -266,14 +314,16 @@ inline double Phase::cal_spart(const int n, const int k, const int N) {
     return s_part;
     }
 
-inline void Phase::one_over_fac(double *over_mat) { //calculate one over factorial matrix
+inline void Phase::one_over_fac(double *over_mat) {
+    /*This function calculates one over factorial matrix.*/
     over_mat[0] = 1;
     for (int i = 1; i <= num; ++i) {
         over_mat[i] = over_mat[i - 1] / i;
         }//end i
     }
 
-inline void Phase::sqrtfac(double *fac_mat) { //calculate sqrt of factorial matrix
+inline void Phase::sqrtfac(double *fac_mat) {
+    /*This function calculates sqrare root of factorial matrix.*/
     //check array size
     fac_mat[0] = 1;
     for (int i = 1; i <= num; ++i) {
@@ -281,57 +331,14 @@ inline void Phase::sqrtfac(double *fac_mat) { //calculate sqrt of factorial matr
         }//end i
     }
 
-/*########### Measurement Functions ###########*///Measurement function
-/*
-inline bool Phase::outcome(const double phi, const double PHI, const int N) {
-    //N is the number of photons currently available, not equal to 'num'
-    const double theta = (phi-PHI)/2;
-    const double cos_theta=cos(theta)/sqrt_cache[N];
-    const double sin_theta=sin(theta)/sqrt_cache[N];
-    int n;
-	double prob=0.0;
-    //double prob0 = 0.0, prob1 = 0.0;
-    for (n=0; n<N; ++n) {
-        //if C_0 is measured
-        update0[n] = state[n+1]*sin_theta*sqrt_cache[n+1]+state[n]*cos_theta*sqrt_cache[N-n];
-        prob += abs(update0[n]*conj(update0[n]));
-        //if C_1 is measured
-        //This is cache-optimized: we update state[n] in-place
-        //state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
-        //prob1 += abs(state[n]*conj(state[n]));
-    }
-    //FIXME: Why don't prob0+prob1 always sum to 1?
-    //The condition is set this way so that when the rounding error starts to kick in at num=82
-    //(the state is valid but the numerical value started to go off slightly)
-    //it does not effect the random selection of output path.
-    if ((double(rand())/RAND_MAX) <= prob) {
-        //measurement outcome is 0
-        state[N] = 0;
-        prob = 1.0/sqrt(prob);
-        for(n=0; n<N; ++n) {
-            state[n] = update0[n] * prob;
-        }
-        return 0;
-    } else {
-        //measurement outcome is 1
-        for(n=0; n<N; ++n) {
-            //FIXME: Why don't we multiply the RHS with (1.0-prob0) and save the
-            //second for loop here? Can't we get rid of prob1 completely?
-            //If not, rename prob0 to prob, and reuse it here. It saves a double
-            //in a critical region of the code.
-            state[n] = state[n+1]*cos_theta*sqrt_cache[n+1]-state[n]*sin_theta*sqrt_cache[N-n];
-            prob += abs(state[n]*conj(state[n]));
-        }
-        state[N] = 0;
-        prob = 1.0/sqrt(prob);
-        for(n=0; n<N; ++n) {
-            state[n] *= prob;
-        }
-        return 1;
-    }
-}*/
+/*########### Measurement Functions ###########*/
+/*The following functions are involved in the simulation of the noisy interferometer.*/
 
 inline bool Phase::noise_outcome(const double phi, const double PHI, const int N) {
+    /*This function computes the output path of a photon from a noisy interferometer
+    by computing the probablity of photon coming out of either path.
+    This simulation allows for noise in the unitary operation, but we only consider the noise in the phase shift.
+    */
     //N is the number of photons currently available, not equal to 'num'
     const double theta = (phi - PHI) / 2.0;
     const double cos_theta = cos(theta) / sqrt_cache[N];
@@ -378,7 +385,7 @@ inline bool Phase::noise_outcome(const double phi, const double PHI, const int N
     }
 
 inline void Phase::state_loss(const int N) {
-    //state update if the photon is loss
+    /*This function updates the state when one of the photon is loss.*/
     double total = 0;
     double factor = 1 / sqrt(2 * N);
     for(int n = 0; n < N; ++n) {
@@ -393,6 +400,8 @@ inline void Phase::state_loss(const int N) {
     }
 
 inline double Phase::mod_2PI(double PHI) {
+    /*This function compute the modulo of the phase.
+    */
     while(PHI >= 2 * M_PI) {
         PHI = PHI - 2 * M_PI;
         }
@@ -403,6 +412,12 @@ inline double Phase::mod_2PI(double PHI) {
     }
 
 inline bool Phase::check_policy(double error, double sharp) {
+    /*This function takes the bias and output the policy type.
+    *A policy is considered to be type zero if its error falls within the uncertainty of the scheme.
+    *This is the desirable type as its estimate no bias and the policy can be used when loss is presence.
+    *In the error falls outside the uncertainty,
+    *it is very likely that the estimate has a pi bias and is the type of policy that fails when there is loss.
+    */
     if (sharp == 1.0) {
         throw invalid_argument("sharpness cannot be one.");
         }

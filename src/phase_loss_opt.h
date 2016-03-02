@@ -1,13 +1,20 @@
 #ifndef PHASE_LOSS_H
 #define PHASE_LOSS_H
 
-/*NOTE on using fitness functions for phase estimation problem with loss*/
-/* Both avg_fitness() and fitness() contain the same code.
+/*! \brief This is a class for the problem of adaptive interferometric phase estimation including noise and loss.
+*
+* This class can be replaced by any optimization problem of interest written by the user.
+* The problem is initialized in the main function through the Problem class pointer.
+*/
+
+/* NOTE on using fitness functions for phase estimation problem with loss
+* Both avg_fitness() and fitness() contain the same code.
  * The policies are learned without loss (loss in avg_fitness() set to zero).
  * Then the policies are selected based on its mean fitness value for lossy
  * interferometer (loss in fitness() set to other than zero) which is called
  * through avg_Final_select() in OptAlg class.
  * */
+
 #include <complex>
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -29,39 +36,38 @@ class Phase: public Problem {
 
         void fitness(double *soln, double *fitarray);
         void avg_fitness(double *soln, const int K, double *fitarray);
-        void T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype);
-        bool error_condition(double *memory_fitarray, int data_size, double t_goal);
+        bool T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype);
+        bool error_condition(double *current_fitarray,double *memory_fitarray, int data_size, double goal);
         void boundary(double *can1);
 
     private:
-        double lower;
-        double upper;
-	double loss;
+        double lower; //The lower bound of the variables
+        double upper; //The upper bound of the variables
+        double loss; //The photon loss rate
 
-        //array to avoid calculation of expensive sqrt calls for integers
-        double *sqrt_cache;
         Rng *gaussian_rng, *uniform_rng;
 
         //variables for WK state generation
-        dcmplx *input_state;
+        dcmplx *input_state; //The array containing the WK state
         double *sqrtfac_mat; //matrix to keep values of square roots of factorials
         double *overfac_mat; //matrix to keep values of one over factorials
+        double *sqrt_cache; //array to avoid calculation of expensive sqrt calls for integers
         double tan_beta;
-        //state for use with measurement
-        dcmplx *state;
-        //variables for noise_output function
-        dcmplx *update0;
+
+        dcmplx *state; //state for use with measurement
+        dcmplx *update0; //variables for noise_output function
         dcmplx *update1;
 
         //functions to generate WK_state
-        inline void sqrtfac(double *fac_mat);
-        inline void one_over_fac(double *over_mat);
-        inline double cal_spart(const int n, const int k, const int N);//N is is the same as total number of photon 'num', but I'll leave it like this.
-        void WK_state();
-        //Measurement function
-        inline bool noise_outcome(const double phi, const double PHI, const int N);
-        inline void state_loss(const int N);
-        inline double mod_2PI(double PHI);
-        bool check_policy(double error, double sharp);
+        inline void sqrtfac(double *fac_mat); //A function for calculating square root of factorials for state generation.
+        inline void one_over_fac(double *over_mat); //A function for calculating one over square root of factorials for state generation.
+        inline double cal_spart(const int n, const int k, const int N);//N is the same as total number of photon 'num'.
+        void WK_state(); //A funtion generating the WK state
+        //Measurement functions
+        inline bool noise_outcome(const double phi, const double PHI, const int N); //A function for simulating a photon going through a noisy Mach-Zehnder interferometer.
+        inline void state_loss(const int N); //A function for simulating state change under loss of a photon.
+        inline double mod_2PI(double PHI); //A function to perform modulo 2PI on phase.
+
+        bool check_policy(double error, double sharp); //A function for checking whether the policy is resilient to loss. This is called by the T_condition().
     };
 #endif // PHASE_H

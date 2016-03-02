@@ -288,18 +288,14 @@ bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitar
     if(goal == 0) {
 
         if(t >= T) {
-            prob->T_condition(current_fitarray, numvar, N_cut, mem_ptype); //This is wrong
-            return 1;
+            return prob->T_condition(current_fitarray, numvar, N_cut, mem_ptype); //This is wrong
             }
         else {
             return 0;
             }
         }
     else {
-        memory_fitarray[2 * (data_size + 1)] = log10(num);
-        memory_fitarray[2 * (data_size + 1) + 1] = log10(pow(current_fitarray[0], -2) - 1);
-
-        return prob->error_condition(memory_fitarray, data_size, t_goal);
+        return prob->error_condition(current_fitarray,memory_fitarray, data_size, t_goal);
         }
 
     }
