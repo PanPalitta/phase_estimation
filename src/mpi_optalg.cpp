@@ -281,7 +281,7 @@ void OptAlg::set_success(int iter, bool goal_in) {
     goal = goal_in;
     }
 
-bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitarray, int data_size, double t_goal, bool *mem_ptype, int *numvar, int N_cut) {
+bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitarray, int data_size, double goal, bool *mem_ptype, int *numvar, int N_cut) {
 
     bool type;
 
@@ -295,7 +295,7 @@ bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitar
             }
         }
     else {
-        return prob->error_condition(current_fitarray,memory_fitarray, data_size, t_goal);
+        return prob->error_condition(current_fitarray,memory_fitarray, data_size, goal);
         }
 
     }
