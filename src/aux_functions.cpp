@@ -5,6 +5,9 @@ using namespace std;
 
 /*############################Linear Regression############################*/
 void linear_fit(int data_size, double *x, double *y, double *slope, double *intercept, double *mean_x) {
+    /** This function calculates the coefficients of a linear equation.
+    * The function takes two arrays of x and y of size data_size, and output the slope, intercept, and the mean_x.
+    */
     if(data_size <= 0) {
         throw invalid_argument("data_size must be positive.");
         }
@@ -13,6 +16,7 @@ void linear_fit(int data_size, double *x, double *y, double *slope, double *inte
     double sum_y = 0;
     double sum_xy = 0;
 
+    //Preparing the data for calculating mean_x, slope, and intercept.
     for(int v = 0; v < data_size; ++v) {
         sum_x = sum_x + x[v];
         sum_xx = sum_xx + x[v] * x[v];
@@ -27,6 +31,10 @@ void linear_fit(int data_size, double *x, double *y, double *slope, double *inte
     }
 
 double error_interval(double *x, double *y, double mean_x, int data_size, double *SSres, double slope, double intercept) {
+    /** This function calculates the error of the latest data y in the array.
+    * This requires all data x and y of size data_size, slope, mean_x, and intercept from linear_fit function.
+    * SSres is a variable used to store the value of (x-mean_x)^2, which can be used to reduce the time for calculating error_update.
+    */
     if(data_size <= 0) {
         throw invalid_argument("data_size must be positive.");
         }
@@ -39,6 +47,9 @@ double error_interval(double *x, double *y, double mean_x, int data_size, double
     }
 
 double error_update(int old_size, double *SSres, double *mean_x, double slope, double intercept, double *y, double *x) {
+    /** This function update the error_interval when a new value of y.
+    * The function requires the coefficients of the linear equations and the data array x and y.
+    */
     if(old_size <= 0) {
         throw invalid_argument("data_size must be positive.");
         }
@@ -77,6 +88,8 @@ inline double inv_erf(double x) {
     }
 
 inline int sgn(double x) {
+    /** Sign function of x: https://en.wikipedia.org/wiki/Sign_function
+    */
     if(x < 0) {
         return -1;
         }
