@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
     double final_fit; //the optimum fitness value
     double *soln_fit; //array for containing the fitness values for all candidate solutions
     bool mem_ptype[2] = {false, false}; //array for storing the type of policy -- specific to adaptive phase estimation
+    double memory_forT[2]; //array for storing the fitness values for T_condition
 
     /*parameter settings*/
     int pop_size, iter, iter_begin, repeat, seed, data_end;
@@ -190,7 +191,7 @@ int main(int argc, char **argv) {
             final_fit = opt->Final_select(soln_fit, solution, fitarray); //communicate to find the best solution that exist so far
 
             //check if optimization is successful. This function includes accept-reject criteria.
-            opt->success = opt->check_success(t, fitarray, &memory_fitarray[0][0], data_size, t_goal, mem_ptype, &numvar, N_cut);
+            opt->success = opt->check_success(t, fitarray, &memory_fitarray[0][0], data_size, t_goal, mem_ptype, &numvar, N_cut, memory_forT);
             }
         while (opt->success == 0);
 

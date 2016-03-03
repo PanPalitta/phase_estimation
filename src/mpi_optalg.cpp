@@ -281,14 +281,14 @@ void OptAlg::set_success(int iter, bool goal_in) {
     goal = goal_in;
     }
 
-bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitarray, int data_size, double t_goal, bool *mem_ptype, int *numvar, int N_cut) {
+bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitarray, int data_size, double t_goal, bool *mem_ptype, int *numvar, int N_cut, double *memory_forT) {
 
     bool type;
 
     if(goal == 0) {
 
         if(t >= T) {
-            return prob->T_condition(current_fitarray, numvar, N_cut, mem_ptype); //This is wrong
+            return prob->T_condition(current_fitarray, numvar, N_cut, mem_ptype, memory_forT); //This is wrong
             }
         else {
             return 0;

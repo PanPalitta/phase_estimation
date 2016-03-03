@@ -125,7 +125,7 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
 
     }
 
-bool Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype) {
+bool Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype, double *memory_forT) {
     /*This function contains the conditions that has to be checked after a step T elapses
     * before the algorithm decides to accept or reject the solution.
     * In particular this function is called when time step is used as the main condition to end the optimization.
@@ -144,9 +144,14 @@ bool Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptyp
             type = check_policy(fitarray[1], fitarray[0]);
             }
         mem_ptype[0] = type;
-        if(mem_ptype[0] == 1) {
+        if(type == 1) {
             *numvar = *numvar - 1;
             }
+	else if(type == 0){
+	    memory_forT[0]=fitarray[0];
+	    memory_forT[1]=fitarray[1];
+	}
+	else{}
         }
     else if(*numvar == N_cut) {
         try {
@@ -157,7 +162,8 @@ bool Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptyp
             type = check_policy(fitarray[1], fitarray[0]);
             }
         mem_ptype[1] = type;
-        if(mem_ptype[0] | mem_ptype[1]) {
+//        if(mem_ptype[0] | type) {
+        if(check_policy(memory_forT[1],memory_forT[0]) | type) {
             //the policy is bad
             //reset the policy found in numvar=N_cut-1
             *numvar = N_cut - 2;
