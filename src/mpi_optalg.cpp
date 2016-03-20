@@ -3,6 +3,9 @@
 /*##############################Function for initializing population##############################*/
 
 void OptAlg::Init_population(int psize) {
+    /*! This function first initialize a group of candidates for a processor uniformly over the search space.
+    * The function then compute the fitness values for each.
+    */
     if(psize <= 0) {
         throw invalid_argument("Population size must be positive.");
         }
@@ -13,19 +16,22 @@ void OptAlg::Init_population(int psize) {
     pop = new Candidate[pop_size];
 
     for(int p = 0; p < pop_size; ++p) {
-        //generate candidate
+        //generate candidate uniformly
         for(int i = 0; i < num; ++i) {
             input[i] = double(rand()) / RAND_MAX * (prob->upper_bound[i] - prob->lower_bound[i]) + prob->lower_bound[i];
             }
 
         //store it in candidate object
-        pop[p].init_can(num, num_fit);
-        pop[p].update_cont(input);
-        Cont_fitness(p);
+        pop[p].init_can(num, num_fit); //First the memories in the object are initialized.
+        pop[p].update_cont(input); //The candidates are stored in the contender array.
+        Cont_fitness(p); //The fitness values are computed.
         }
     }
 
 void OptAlg::Init_previous(double prev_dev, double new_dev, int psize, double *prev_soln) {
+    /*! This function first initialize a group of candidates for a processor from a previous solution.
+    * The function then compute the fitness values for each.
+    */
     if(psize <= 0) {
         throw invalid_argument("Population size must be positive");
         }
@@ -36,8 +42,8 @@ void OptAlg::Init_previous(double prev_dev, double new_dev, int psize, double *p
     pop_size = psize;
     pop = new Candidate[pop_size];
 
-    prev_soln[num - 1] = prev_soln[num - 2];
-    dev_gen(dev, prev_dev, new_dev, dev_cut_off);
+    prev_soln[num - 1] = prev_soln[num - 2]; //Generate the input array from previous solution.
+    dev_gen(dev, prev_dev, new_dev, dev_cut_off); //Generate an array of the width of the Gaussian distribution.
 
     for(int p = 0; p < pop_size; ++p) {
         //generate candidate
@@ -46,9 +52,9 @@ void OptAlg::Init_previous(double prev_dev, double new_dev, int psize, double *p
             }
         prob->boundary(input);
         //store it in candidate object
-        pop[p].init_can(num, num_fit);
-        pop[p].update_cont(input);
-        Cont_fitness(p);
+        pop[p].init_can(num, num_fit); //First the memories in the object are initialized.
+        pop[p].update_cont(input); //The candidates are stored in the contender array.
+        Cont_fitness(p); //The fitness values are computed.
         }
 
     }
@@ -56,6 +62,9 @@ void OptAlg::Init_previous(double prev_dev, double new_dev, int psize, double *p
 /*##############################Function for calculating fitnesses##############################*/
 
 void OptAlg::Cont_fitness(int p) {
+    /*! The mean fitness value of a contender are computed for 2 samples.
+    The number of samples is currently fixed.
+    */
     double fit1[num_fit];
     double fit2[num_fit];
 
@@ -69,6 +78,8 @@ void OptAlg::Cont_fitness(int p) {
     }
 
 void OptAlg::Best_fitness(int p) {
+    /*! A fitness value of the best array is computed, and the mean fitness value is update.
+    */
     double fit[num_fit];
 
     prob->avg_fitness(pop[p].can_best, prob->num_repeat, fit);
@@ -76,6 +87,8 @@ void OptAlg::Best_fitness(int p) {
     }
 
 void OptAlg::update_popfit() {
+    /*! The mean fitness values of the population on a processor are updated.
+    */
     for(int p = 0; p < pop_size; ++p) {
         Best_fitness(p);
         }
@@ -83,6 +96,9 @@ void OptAlg::update_popfit() {
 
 /*##############################Final Selections#################################*/
 double OptAlg::Final_select(double *fit, double *solution, double *fitarray) {
+    /*! The fitness values are sent to the zeroth processor, where the candidate with the highest fitness value.
+    * A copy of that candidate to other processors.
+    */
     int indx;
     MPI_Status status;
     int tag = 1;
@@ -172,6 +188,9 @@ double OptAlg::Final_select(double *fit, double *solution, double *fitarray) {
     }
 
 double OptAlg::avg_Final_select(double* solution, int repeat, double *soln_fit) {
+    /*! Similar to Final_select(), the function finds the solution with the highest fitness in the population.
+    * But before doing so, the fitness values were computed for 10 times (the variable is repeat).
+    */
     MPI_Status status;
     int tag = 1;
     double final_fit;
@@ -282,7 +301,12 @@ void OptAlg::set_success(int iter, bool goal_in) {
     }
 
 bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitarray, int data_size, double t_goal, bool *mem_ptype, int *numvar, int N_cut, double *memory_forT) {
-
+    /*! The condition for stopping the optimization is checked. If the condition is based on the number of iterations,
+    * T_condition() is checked. This condition doesn't change t if the condition is not met, but it reverses numvar
+    * so that the optimization process restarts from the initialization. This function can take the memory from several numvar.
+    * If the condition is based on whether the fitness value met the error condition, error_condition() is called.
+    * This function takes the data from several numvar to generate the error condition according to t_goal.
+    */
     bool type;
 
     if(goal == 0) {
@@ -295,7 +319,7 @@ bool OptAlg::check_success(int t, double *current_fitarray, double *memory_fitar
             }
         }
     else {
-        return prob->error_condition(current_fitarray,memory_fitarray, data_size, t_goal);
+        return prob->error_condition(current_fitarray, memory_fitarray, data_size, t_goal);
         }
 
     }
