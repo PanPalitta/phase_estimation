@@ -15,6 +15,11 @@ void PSO::write_param(double *param_array) {
     }
 
 void PSO::find_global() {
+    /*! The global best position is find for a neighborhood of three. Because of the circular topology,
+    * the neighbors are on other processors and the fitness values from the best array are sent back to the candidate.
+    * The candidate then communicates with the processor containing the highest fitness values of the three
+    * and ask for the rest of the information.
+    */
     MPI_Status status;
     int tag = 1;
     int ptr, prev, forw;
@@ -105,6 +110,8 @@ void PSO::find_global() {
         }//p loop
     }
 inline void PSO::find_index(int * prev, int * forw, int p) {
+    /*! Finding the indexes of candidate in the neighborhood. We use the circular topology in order to determine the neighborhood.
+    */
     if(p == 0) {
         *prev = total_pop - 1;
         }
@@ -115,6 +122,8 @@ inline void PSO::find_index(int * prev, int * forw, int p) {
     }
 
 inline int PSO::find_fitness(int prev, double prev_fit, int forw, double forw_fit, int p, double fit) {
+    /*! Find the candidate with the best fitness value from a group of three.
+    */
     int ptr = prev;
     if(prev_fit <= fit) {
         ptr = p;
@@ -134,6 +143,9 @@ inline int PSO::find_fitness(int prev, double prev_fit, int forw, double forw_fi
     }
 
 void PSO::put_to_best() {
+    /*! This function in PSO record the first position as personal best, initialize the velocity and find global best position
+    * in preparation for the iterative steps.
+    */
     double array[this->num];
 
     for(int p = 0; p < this->pop_size; ++p) {
@@ -151,6 +163,9 @@ void PSO::put_to_best() {
     }
 
 void PSO::selection() {
+    /*!In PSO, selection chooses whether the position stored in contender is a new personal best,
+    * and, if so, store it in best array. The global best position is then searched and updated.
+    */
     for(int p = 0; p < this->pop_size; ++p) {
         if(this->pop[p].read_bestfit(0) < this->pop[p].read_contfit(0)) {
             this->pop[p].update_best();
@@ -161,6 +176,9 @@ void PSO::selection() {
     }
 
 void PSO::combination() {
+    /*! Combination() generates the position and velocity for the next time step using the rule with inertia term.
+    * The new position is stored in the contender and computed for mean fitness value.
+    */
     double global_pos[this->num];
     double personal_pos[this->num];
     double pos[this->num];
@@ -174,7 +192,7 @@ void PSO::combination() {
         this->pop[p].read_vel(vel);
         for(int i = 0; i < this->num; ++i) {
             new_pos[i] = pos[i] + vel[i];
-            vel[i] = vel[i] + phi1 * double(rand()) / RAND_MAX * (personal_pos[i] - pos[i]) + phi2 * double(rand()) / RAND_MAX * (global_pos[i] - pos[i]);
+            vel[i] = w * vel[i] + phi1 * double(rand()) / RAND_MAX * (personal_pos[i] - pos[i]) + phi2 * double(rand()) / RAND_MAX * (global_pos[i] - pos[i]);
             if(vel[i] > v_max) {
                 vel[i] = v_max;
                 }
