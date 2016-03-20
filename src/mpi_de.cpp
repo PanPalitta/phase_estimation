@@ -23,6 +23,9 @@ void DE::fit_to_global() {
     }
 
 void DE::selection() {
+    /*! Selection() reads the mean fitness value of best array and contender and decides which one is to be the member of the population.
+    In this version, we simple select the one with the higher fitness value.
+    */
     for(int p = 0; p < this->pop_size; ++p) {
         if(this->pop[p].read_bestfit(0) < this->pop[p].read_contfit(0)) {
             this->pop[p].update_best();
@@ -31,6 +34,10 @@ void DE::selection() {
     }
 
 void DE::combination() {
+    /*! Combination() generates the next generation of candidates. First, all the candidate give their best array to the zeroth processor
+    * who then generates the new candidate and send it back to the parent candidate. The parent store the new array into the contender
+    * and compute the mean fitness value.
+    */
     MPI_Status status;
     int tag = 1;
     double coin;
@@ -114,6 +121,9 @@ void DE::combination() {
     }
 
 void DE::family_gen(int* fam, int p, int fam_size) {
+    /*! Three candidates are chosen at random from the population are selected to generate the next generation.
+    * The candidates selected for the family are not allow to be the parent or the same individual more than once.
+    */
     if(total_pop <= fam_size + 1) {
         for(int f = 0; f < fam_size; ++f) {
             fam[f] = rand() % total_pop;
