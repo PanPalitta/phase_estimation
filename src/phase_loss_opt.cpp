@@ -147,11 +147,11 @@ bool Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptyp
         if(type == 1) {
             *numvar = *numvar - 1;
             }
-	else if(type == 0){
-	    memory_forT[0]=fitarray[0];
-	    memory_forT[1]=fitarray[1];
-	}
-	else{}
+        else if(type == 0) {
+            memory_forT[0] = fitarray[0];
+            memory_forT[1] = fitarray[1];
+            }
+        else {}
         }
     else if(*numvar == N_cut) {
         try {
@@ -163,7 +163,7 @@ bool Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptyp
             }
         mem_ptype[1] = type;
 //        if(mem_ptype[0] | type) {
-        if(check_policy(memory_forT[1],memory_forT[0]) | type) {
+        if(check_policy(memory_forT[1], memory_forT[0]) | type) {
             //the policy is bad
             //reset the policy found in numvar=N_cut-1
             *numvar = N_cut - 2;

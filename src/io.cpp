@@ -7,7 +7,9 @@
 
 using namespace std;
 
-void output_header(char const *output_filename, char const *time_filename) {
+void output_header( char const *output_filename, /*!<Pointer to output file where the sharpness will be printed.*/
+                    char const *time_filename /*!<Pointer to output file where the clock time for optimizing a policy.*/
+                  ) {
     ofstream output_file;
     ofstream time_file;
 
@@ -19,10 +21,13 @@ void output_header(char const *output_filename, char const *time_filename) {
     time_file.close();
     }
 
-template<typename typeT>
-void output_result(int num, double final_fit, typeT *solution,
-                   time_t start_time, char const *output_filename,
-                   char const *time_filename) {
+void output_result( int num, /*!< Number of variables in a policy.*/
+                    double final_fit, /*!< The primary fitness value.*/
+                    double *solution, /*!< Policy*/
+                    time_t start_time, /*!< Clock time for finding the policy.*/
+                    char const *output_filename, /*!< Pointer to file that store the fitness value and the policy.*/
+                    char const *time_filename /*!< Pointer to file that store time.s*/
+                  ) {
     int i;
     ofstream output_file;
     ofstream time_file;
@@ -41,10 +46,10 @@ void output_result(int num, double final_fit, typeT *solution,
 
     }
 
-template void output_result<double>(int num, double final_fit, double *solution,
-                                    time_t start_time,
-                                    char const *output_filename,
-                                    char const *time_filename);
+void output_result(int num, double final_fit, double *solution,
+                   time_t start_time,
+                   char const *output_filename,
+                   char const *time_filename);
 
 map<string, string> parse(ifstream & cfgfile) {
     map<string, string> options;
@@ -60,11 +65,30 @@ map<string, string> parse(ifstream & cfgfile) {
     return options;
     }
 
-void read_config_file(char const *filename, int *pop_size, int *N_begin,
-                      int *N_cut, int *N_end, int *iter, int *iter_begin,
-                      int *repeat, int *seed, string *output_filename,
-                      string *time_filename, string *optimization,
-                      double *prev_dev, double *new_dev, double *t_goal, int *data_end) {
+void read_config_file(  char const *filename, /*!< File that contains program parameters.*/
+                        int *pop_size, int *N_begin,
+                        int *N_cut, int *N_end, int *iter, int *iter_begin,
+                        int *repeat, int *seed, string *output_filename,
+                        string *time_filename, string *optimization,
+                        double *prev_dev, double *new_dev, double *t_goal, int *data_end) {
+    /*! This fucntion reads the user specified configuration file or set the parameters to defaults.
+    Parameters that can be set by users are
+    population size: *pop_size
+    smallest number of variables to be searched: *N_begin
+    number of variables to switch from uniform initialization: *N_cut
+    largest number of variables: *N_end
+    number of iteration when initialization is uniformed: *iter_begin
+    number of iteration before accepting/checking a policy: *iter
+    number of times the fitness value is compute in the final selection process: *repeat
+    seed for rng: *seed
+    the name of the file that the fitness value and policy will be stored: *output_filename
+    the name of the file that the clock time will be stored: *time_filename = "time.dat"
+    name of the optimization algorithm: *optimization = "de"
+    parameter for initialization using previous result -- for variables with previous data: *prev_dev = 0.01;
+    parameter for initialization using previous result -- for new variables: *new_dev = 0.25;
+    goal to be used in accept/reject criterion *t_goal
+    the number of variable to begin using accept/reject criterion: *data_end
+    */
     // Setting defaults
     *pop_size = 12;
     *N_begin = 4;
