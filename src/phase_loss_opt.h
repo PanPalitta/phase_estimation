@@ -1,20 +1,6 @@
 #ifndef PHASE_LOSS_H
 #define PHASE_LOSS_H
 
-/*! \brief This is a class for the problem of adaptive interferometric phase estimation including noise and loss.
-*
-* This class can be replaced by any optimization problem of interest written by the user.
-* The problem is initialized in the main function through the Problem class pointer.
-*/
-
-/* NOTE on using fitness functions for phase estimation problem with loss
-* Both avg_fitness() and fitness() contain the same code.
- * The policies are learned without loss (loss in avg_fitness() set to zero).
- * Then the policies are selected based on its mean fitness value for lossy
- * interferometer (loss in fitness() set to other than zero) which is called
- * through avg_Final_select() in OptAlg class.
- * */
-
 #include <complex>
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -29,6 +15,12 @@
 
 typedef complex<double> dcmplx;
 
+/*! \brief Phase class for the problem of adaptive interferometric phase estimation including noise and loss.
+*
+* This class can be replaced by any optimization problem of interest written by the user.
+* The problem is initialized in the main function through the Problem class pointer.
+*/
+
 class Phase: public Problem {
     public:
         Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng);
@@ -37,7 +29,7 @@ class Phase: public Problem {
         void fitness(double *soln, double *fitarray);
         void avg_fitness(double *soln, const int K, double *fitarray);
         bool T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype, double *memory_forT);
-        bool error_condition(double *current_fitarray,double *memory_fitarray, int data_size, double goal);
+        bool error_condition(double *current_fitarray, double *memory_fitarray, int data_size, double goal);
         void boundary(double *can1);
 
     private:
