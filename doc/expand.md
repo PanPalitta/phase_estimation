@@ -6,7 +6,7 @@ Readers are assumed to be familiar with population-based optimization algorithm,
 
 ## Program structure
 
-![Diagram of program](..\Phase_Est_diagram2.png)
+![Diagram of program](Phase_Est_diagram2.png)
 
 ### User-specified components
 
