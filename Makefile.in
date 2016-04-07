@@ -21,7 +21,7 @@ all install uninstall lib phase_estimation:
 clean:
 	$(MAKE) -C src $@
 	$(MAKE) -C tests $@
-		
+
 test:
 	$(MAKE) -C tests $@
 
@@ -32,13 +32,23 @@ $(distdir).tar.gz: FORCE $(distdir)
 	rm -rf $(distdir)
 
 $(distdir):
+	mkdir -p $(distdir)/doc
 	mkdir -p $(distdir)/src
+	mkdir -p $(distdir)/tests
+	cp $(srcdir)/CHANGES $(distdir)
+	cp $(srcdir)/LICENSE $(distdir)
+	cp $(srcdir)/README.md $(distdir)
 	cp $(srcdir)/configure $(distdir)
 	cp $(srcdir)/config.h.in $(distdir)
 	cp $(srcdir)/install-sh $(distdir)
 	cp $(srcdir)/Makefile.in $(distdir)
+	cp -R $(srcdir)/doc/html $(distdir)/doc/
+	cp $(srcdir)/doc/latex/refman.pdf $(distdir)/doc/
 	cp $(srcdir)/src/Makefile.in $(distdir)/src
 	cp $(srcdir)/src/*.c* $(srcdir)/src/*.h $(distdir)/src
+	cp $(srcdir)/tests/Makefile.in $(distdir)/tests
+	cp $(srcdir)/tests/*.c* $(distdir)/tests
+
 
 distcheck: $(distdir).tar.gz
 	gzip -cd $+ | tar xvf -
@@ -56,6 +66,6 @@ config.status: configure
 
 FORCE:
 	-rm -rf $(distdir) &>/dev/null
-	-rm $(distdir).tar.gz &>/dev/null
+	-rm -rf $(distdir).tar.gz &>/dev/null
 
 .PHONY: FORCE all clean check dist distcheck install uninstall
