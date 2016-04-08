@@ -15,8 +15,8 @@ Features:
 
 ### Links
 
- * Latest release: 1.0 [download]()
- * Feedback and issue: [link]()
+ * Latest release: 1.0 [download](https://github.com/PanPalitta/phase_estimation/releases)
+ * Feedback and issue: [link](https://github.com/PanPalitta/phase_estimation/issues)
 
 ## Copyright and license
 This is a free software made available under the [GNU GENERAL PUBLIC LICENSE](http://www.gnu.org/licenses/gpl-3.0.html), which means you can share, modify, and redistribute this software. While we endeavor to make this software as useful and as error-free as possible, we cannot make any such guarantee, and the software is hence released **without any warranty**.

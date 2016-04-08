@@ -2,9 +2,9 @@
 
 ## Download
 
-* Latest release: [download]()
-* Development version: [Github]()
-* Feedback and issues: [issue]()
+* Latest release: [download](https://github.com/PanPalitta/phase_estimation/releases)
+* Development version: [Github](https://github.com/PanPalitta/phase_estimation)
+* Feedback and issues: [issue](https://github.com/PanPalitta/phase_estimation/issues)
 
 ## Compilation and installation
 
