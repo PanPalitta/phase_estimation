@@ -17,8 +17,8 @@ Candidate::~Candidate() {
     }
 
 void Candidate::init_can(int numvar, /*!<number of variables*/
-			 int fit_size /*!< the number of objective functions*/
-			) {
+                         int fit_size /*!< the number of objective functions*/
+                        ) {
     if(numvar <= 0) {
         throw out_of_range("numvar must be positive.");
         }
