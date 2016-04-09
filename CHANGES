@@ -1,5 +1,12 @@
+Version 1.0: 2016-04-13
+
+  -First official release.
+
 Since 0.1:
 
+  - New: Generated documents added.
+  - New: Code documented.
+  - Changed: Accept/reject criteria generalized and moved to phase_loss_opt.
   - New: Implemented basic logic of vectorized random number generation.
   - New: Test case added.
   - New: Parser of configuration file.
