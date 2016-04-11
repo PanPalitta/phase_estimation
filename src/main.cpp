@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
 
         if (my_rank == 0) {
             //if the policy is of the correct type output the solution
-            if ((numvar == 4) || (!mem_ptype[0] && !mem_ptype[1])) {
+            if ((numvar >= N_begin) && (!mem_ptype[0] && !mem_ptype[1])) {
                 output_result(numvar, final_fit, solution, start_time,
                               output_filename.c_str(), time_filename.c_str());
                 }
@@ -220,9 +220,7 @@ int main(int argc, char **argv) {
         if (my_rank == 0) {
             problem->fitness(solution, fitarray);
             final_fit = fitarray[0];
-            if (my_rank == 0) {
-                cout << numvar << "\t" << final_fit << endl;
-                }
+            cout << numvar << "\t" << final_fit << endl;
             }
 
         /*delete the objects for algorithm and problem to free memory*/
@@ -237,7 +235,6 @@ int main(int argc, char **argv) {
     delete uniform_rng;
     delete [] solution;
     delete [] soln_fit;
-    delete [] memory_fitarray;
     delete [] can_per_proc;
 
     MPI_Finalize();

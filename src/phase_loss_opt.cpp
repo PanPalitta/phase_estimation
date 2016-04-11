@@ -185,6 +185,7 @@ bool Phase::error_condition(double *current_fitarray, double *memory_fitarray, i
     double error, error_goal;
     double x[data_size + 1];
     double y[data_size + 1];
+    bool out;
 
     memory_fitarray[2 * (data_size + 1)] = log10(num);
     memory_fitarray[2 * (data_size + 1) + 1] = log10(pow(current_fitarray[0], -2) - 1);
@@ -210,11 +211,12 @@ bool Phase::error_condition(double *current_fitarray, double *memory_fitarray, i
 
     //Check if error is smaller than the goal
     if(error <= error_goal) {
-        return 1;
+        out = 1;
         }
     else {
-        return 0;
+        out = 0;
         }
+    return out;
     }
 
 
