@@ -2,7 +2,8 @@
             In this particular example, the main function contains the code for optimizing feedback policy of an adaptive phase estimation scheme.
 */
 
-#include "phase_loss_opt.h" //The header file for the specific problem
+//#include "phase_loss_opt.h" //The header file for the specific problem
+#include "phase_loss_rand.h" //The header file for the specific problem
 #include "mpi_optalg.h" //The header file for the optimization algorithms.'mpi.h' is included in this header.
 #include "io.h" //The header file for user-specified parameters
 
