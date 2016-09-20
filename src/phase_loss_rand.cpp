@@ -80,7 +80,7 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
     double PHI, phi, coin, PHI_in;
     int m, k, d;
 
-    Random_state(); //Generate the WK state.
+    Gaussian_state(); //Generate the WK state.
 
     for(k = 0; k < K; ++k) {
         phi = uniform_rng->next_rand(0.0, 1.0) * (upper - lower) + lower;
@@ -245,6 +245,23 @@ void Phase::Random_state(){
        for (int n = 0; n <= num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
         input_state[n].real() = double(rand())/double(RAND_MAX);
         input_state[n].imag() = double(rand())/double(RAND_MAX);
+        temp=temp+input_state[n].real()*input_state[n].real()+input_state[n].imag()*input_state[n].imag();
+        }//end n
+        //Normalize the state
+        temp=sqrt(temp);
+        for (int n = 0; n <= num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
+        input_state[n].real() = input_state[n].real()/temp;
+        input_state[n].imag() = input_state[n].imag()/temp;
+        }//end n
+    }
+
+void Phase::Gaussian_state(){
+    /* This is a function for generating random input state in permutationally symmetric subspace.*/
+    srand(time(NULL));
+    double temp=0;
+       for (int n = 0; n <= num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
+        input_state[n].real() = rand_Gaussian(0,1);
+        input_state[n].imag() = rand_Gaussian(0,1);
         temp=temp+input_state[n].real()*input_state[n].real()+input_state[n].imag()*input_state[n].imag();
         }//end n
         //Normalize the state
@@ -455,3 +472,23 @@ inline bool Phase::check_policy(double error, double sharp) {
         return 0;
         }
     }
+
+double Phase::rand_Gaussian(double mean, /*the average theta*/
+				double dev /*deviation for distribution*/
+				){
+	/*creating random number using Box-Muller Method/Transformation*/
+	double Z0;//,Z1;
+	double U1,U2; /*uniformly distributed random number input*/
+	double r;
+	
+	/*create input between [-1,1]*/
+	do{
+	U1=2.0*double(rand())/RAND_MAX-1.0;
+	U2=2.0*double(rand())/RAND_MAX-1.0;
+	r=U1*U1+U2*U2;
+	}while(r==0.0||r>=1.0);
+	/*using Box-Muller Transformation*/
+	Z0=U1*sqrt(-2*log(r)/r);
+	
+	return Z0*dev+mean;
+	}/*end of rand_Gaussian*/

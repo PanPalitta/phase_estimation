@@ -56,10 +56,13 @@ class Phase: public Problem {
         inline double cal_spart(const int n, const int k, const int N);//N is the same as total number of photon 'num'.
         void WK_state(); //A funtion generating the WK state
         void Random_state(); //A function generating a random, symmetric state.
+	void Gaussian_state();
         //Measurement functions
         inline bool noise_outcome(const double phi, const double PHI, const int N); //A function for simulating a photon going through a noisy Mach-Zehnder interferometer.
         inline void state_loss(const int N); //A function for simulating state change under loss of a photon.
         inline double mod_2PI(double PHI); //A function to perform modulo 2PI on phase.
+
+	double rand_Gaussian(double mean, double dev);
 
         bool check_policy(double error, double sharp); //A function for checking whether the policy is resilient to loss. This is called by the T_condition().
     };
