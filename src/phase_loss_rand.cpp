@@ -46,6 +46,8 @@ Phase::Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng):
     state = new dcmplx[num + 1];
     update0 = new dcmplx[num + 1];
     update1 = new dcmplx[num + 1];
+
+    Gaussian_state();	
     }
 
 Phase::~Phase() {
@@ -80,14 +82,20 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
     double PHI, phi, coin, PHI_in;
     int m, k, d;
 
-    Gaussian_state(); //Generate the WK state.
-
     for(k = 0; k < K; ++k) {
         phi = uniform_rng->next_rand(0.0, 1.0) * (upper - lower) + lower;
         PHI = 0;
         //copy input state: the optimal solution across all compilers is memcpy:
         //nadeausoftware.com/articles/2012/05/c_c_tip_how_copy_memory_quickly
         memcpy(state, input_state, (num + 1)*sizeof(dcmplx));
+
+	cout<<"state"<<endl;
+	    for(int i=0;i<num+1;i++){
+		cout<<input_state[i]<<",";
+	}
+	cout<<endl;
+
+
         //Begining the measurement of one sample
         d = 0;
         for (m = 0; m < num; ++m) {
