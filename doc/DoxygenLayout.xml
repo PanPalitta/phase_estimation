@@ -5,7 +5,7 @@
     <tab type="mainpage" visible="yes" title=""/>
     <tab type="user" url="md_download.html" title="Download and Installation"/>
 <tab type="user" url="md_usage.html" title="Usage"/>
-<tab type="user" url="md_expand.html" title="Expanding Library"/>
+<tab type="user" url="md_expand.html" title="Expanding the Library"/>
     <tab type="pages" visible="no" title="" intro=""/>
     <tab type="modules" visible="yes" title="" intro=""/>
     <tab type="namespaces" visible="yes" title="">
