@@ -20,7 +20,7 @@ Phase::Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng):
 
     //Initializing the conditions the simulation uses.
     lower = 0;
-    upper = 2 * M_PI;
+    upper = M_PI/8;
     loss = 0.0;
 
     //Initializing the numbers used by the optimization algorithm.
@@ -48,6 +48,11 @@ Phase::Phase(const int numvar, Rng *gaussian_rng, Rng *uniform_rng):
     update1 = new dcmplx[num + 1];
 
     Gaussian_state();	
+	cout<<"input state is"<<endl;
+	for(int i=0;i<=num;i++){
+	cout<<input_state[i]<<endl;
+	}
+
     }
 
 Phase::~Phase() {
@@ -82,19 +87,14 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
     double PHI, phi, coin, PHI_in;
     int m, k, d;
 
+
+
     for(k = 0; k < K; ++k) {
         phi = uniform_rng->next_rand(0.0, 1.0) * (upper - lower) + lower;
         PHI = 0;
         //copy input state: the optimal solution across all compilers is memcpy:
         //nadeausoftware.com/articles/2012/05/c_c_tip_how_copy_memory_quickly
         memcpy(state, input_state, (num + 1)*sizeof(dcmplx));
-
-	cout<<"state"<<endl;
-	    for(int i=0;i<num+1;i++){
-		cout<<input_state[i]<<",";
-	}
-	cout<<endl;
-
 
         //Begining the measurement of one sample
         d = 0;
@@ -248,7 +248,7 @@ void Phase::boundary(double *can1) {
 /*########### Generating Input State ###########*/
 void Phase::Random_state(){
     /* This is a function for generating random input state in permutationally symmetric subspace.*/
-    srand(time(NULL));
+    srand(0);
     double temp=0;
        for (int n = 0; n <= num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
         input_state[n].real() = double(rand())/double(RAND_MAX);
@@ -265,7 +265,7 @@ void Phase::Random_state(){
 
 void Phase::Gaussian_state(){
     /* This is a function for generating random input state in permutationally symmetric subspace.*/
-    srand(time(NULL));
+    srand(0);
     double temp=0;
        for (int n = 0; n <= num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
         input_state[n].real() = rand_Gaussian(0,1);
@@ -452,11 +452,11 @@ inline void Phase::state_loss(const int N) {
 inline double Phase::mod_2PI(double PHI) {
     /*This function compute the modulo of the phase.
     */
-    while(PHI >= 2 * M_PI) {
-        PHI = PHI - 2 * M_PI;
+    while(PHI >= M_PI/8) {
+        PHI = PHI - M_PI/8;
         }
     while (PHI < 0) {
-        PHI = PHI + 2 * M_PI;
+        PHI = PHI + M_PI/8;
         }
     return PHI;
     }
