@@ -210,7 +210,6 @@ bool Phase::error_condition(double *current_fitarray, double *memory_fitarray, i
     error = y[data_size + 1] - x[data_size + 1] * slope - intercept;
 
     //Check if error is smaller than the goal
-	cout<<"error-error_goal="<<error-error_goal<<endl;
     if(error <= error_goal) {
         out = 1;
         }
