@@ -65,7 +65,7 @@ void Phase::fitness(double *soln, double *fitarray) {
     /*In this particular problem, this function serves as a wrapper to change the loss rate,
     * so that we can test the policy we found in lossless interferometry with a chosen level of loss.
     */
-    loss = 0.6; //This loss rate can be changed by user.
+    loss = 0.2; //This loss rate can be changed by user.
     avg_fitness(soln, num_repeat, fitarray);
     loss = 0.0; //Change back in case the optimization process has to be redone.
     }
@@ -115,8 +115,8 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
                 }
             }
         //store fitness values
-        sharp.real(sharp.real() + cos(phi - PHI));
-        sharp.imag(sharp.imag() + sin(phi - PHI));
+        sharp.real() = sharp.real() + cos(phi - PHI);
+        sharp.imag() = sharp.imag() + sin(phi - PHI);
         error += abs(phi - PHI);
         }
     //find the averages and return
@@ -183,8 +183,8 @@ bool Phase::error_condition(double *current_fitarray, double *memory_fitarray, i
     double mean_x, SSres;
     double tn2;
     double error, error_goal;
-    double x[data_size + 2];
-    double y[data_size + 2];
+    double x[data_size + 1];
+    double y[data_size + 1];
     bool out;
 
     memory_fitarray[2 * (data_size + 1)] = log10(num);
@@ -192,7 +192,7 @@ bool Phase::error_condition(double *current_fitarray, double *memory_fitarray, i
 
     //split into x-y arrays
 
-    for(int i = 0; i <= (data_size + 1); ++i) {
+    for(int i = 0; i < data_size + 1; ++i) {
         x[i] = memory_fitarray[2 * i];
         y[i] = memory_fitarray[2 * i + 1];
         }
@@ -276,16 +276,16 @@ void Phase::WK_state() {
     //Compute the state
     for (n = 0; n <= num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
         temp = 0;
-        input_state[n].real(0);
-        input_state[n].imag(0);
+        input_state[n].real() = 0;
+        input_state[n].imag() = 0;
         for (k = 0; k <= num; ++k) {
             s_part = cal_spart(n, k, num);
             temp = s_part * k_part[k] * sin((k + 1) * M_PI / (num + 2));
-            input_state[n].real(input_state[n].real() + temp * cos(M_PI / 2.0 * (k - n)));
-            input_state[n].imag(input_state[n].imag() + temp * sin(M_PI / 2.0 * (k - n)));
+            input_state[n].real() = input_state[n].real() + temp * cos(M_PI / 2.0 * (k - n));
+            input_state[n].imag() = input_state[n].imag() + temp * sin(M_PI / 2.0 * (k - n));
             }//end k
-        input_state[n].real(input_state[n].real() * n_part[n] / sqrt(num / 2.0 + 1));
-        input_state[n].imag(input_state[n].imag() * n_part[n] / sqrt(num / 2.0 + 1));
+        input_state[n].real() = input_state[n].real() * n_part[n] / sqrt(num / 2.0 + 1);
+        input_state[n].imag() = input_state[n].imag() * n_part[n] / sqrt(num / 2.0 + 1);
         }//end n
     }
 
