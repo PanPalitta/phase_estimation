@@ -183,8 +183,8 @@ bool Phase::error_condition(double *current_fitarray, double *memory_fitarray, i
     double mean_x, SSres;
     double tn2;
     double error, error_goal;
-    double x[data_size + 1];
-    double y[data_size + 1];
+    double x[data_size + 2];
+    double y[data_size + 2];
     bool out;
 
     memory_fitarray[2 * (data_size + 1)] = log10(num);
@@ -192,7 +192,7 @@ bool Phase::error_condition(double *current_fitarray, double *memory_fitarray, i
 
     //split into x-y arrays
 
-    for(int i = 0; i < data_size + 1; ++i) {
+    for(int i = 0; i <= data_size + 1; ++i) {
         x[i] = memory_fitarray[2 * i];
         y[i] = memory_fitarray[2 * i + 1];
         }
