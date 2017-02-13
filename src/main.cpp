@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     int num_repeat = 10 * N_end * N_end; //The size of the samples used in the the learning algorithm
     soln_fit = new double[pop_size]; //an array to store global fitness from each candidate.
     solution = new double[N_end]; //an array to store solution
-    double memory_fitarray[2][N_end - data_start + 1]; //memory for storing data from many numvar's to be used in accept/reject criteria
+    double memory_fitarray[N_end - data_start + 1][2]; //memory for storing data from many numvar's to be used in accept/reject criteria
 
     /*Initializing the RNG*/
     //Maximum number of uniform random numbers we will use in one go
@@ -88,9 +88,9 @@ int main(int argc, char **argv) {
     numvar = N_begin;
     /*beginning the optimization algorithm*/
     do {
-        if (my_rank == 0) {
+        /*if (my_rank == 0) {
             cout << numvar << endl;
-            }
+            }*/
         t = 0;
 
         //instantiate the particular problem using pointer from Problem class
@@ -167,6 +167,7 @@ int main(int argc, char **argv) {
             }
         else if (numvar >= data_end) {
             //The optimization terminate after the set level of error is reached
+		//cout<<"set_success goal=1"<<endl;
             opt->set_success(1000, 1);  //stop after perform 1000 iteration or exceeding the goal.
             }
         else {
@@ -192,6 +193,7 @@ int main(int argc, char **argv) {
 
             //check if optimization is successful. This function includes accept-reject criteria.
             opt->success = opt->check_success(t, fitarray, &memory_fitarray[0][0], data_size, t_goal, mem_ptype, &numvar, N_cut, memory_forT);
+
             }
         while (opt->success == 0);
 
@@ -208,8 +210,8 @@ int main(int argc, char **argv) {
 
         //collect data to use in error calculation
         if(numvar >= data_start && numvar < data_end) {
-            memory_fitarray[0][numvar - data_start] = log10(numvar);
-            memory_fitarray[1][numvar - data_start] = log10(pow(final_fit, -2) - 1);
+            memory_fitarray[numvar - data_start][0] = log10(numvar);
+            memory_fitarray[numvar - data_start][1] = log10(pow(final_fit, -2) - 1);
             }
         else if(numvar >= data_end) {
             ++data_size;

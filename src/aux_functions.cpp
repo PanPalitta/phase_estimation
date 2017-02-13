@@ -22,15 +22,14 @@ void linear_fit(int data_size, double *x, double *y, double *slope, double *inte
         sum_xx = sum_xx + x[v] * x[v];
         sum_y = sum_y + y[v];
         sum_xy = sum_xy + x[v] * y[v];
-        *mean_x = *mean_x + x[v];
         }
 
-    *mean_x = *mean_x / double(data_size);
+    *mean_x = sum_x / double(data_size);
     *slope = (sum_xy - sum_y * sum_x / double(data_size)) / (sum_xx - sum_x * sum_x / double(data_size));
-    *intercept = sum_y / double(data_size) - *slope * sum_x / double(data_size);
+    *intercept = sum_y / double(data_size) - *slope * (*mean_x);
     }
 
-double error_interval(double *x, double *y, double mean_x, int data_size, double *SSres, double slope, double intercept) {
+double error_interval(double *x, double *y, double mean_x, int data_size, double slope, double intercept) {
     /** This function calculates the error of the latest data y in the array.
     * This requires all data x and y of size data_size, slope, mean_x, and intercept from linear_fit function.
     * SSres is a variable used to store the value of (x-mean_x)^2, which can be used to reduce the time for calculating error_update.
@@ -39,11 +38,13 @@ double error_interval(double *x, double *y, double mean_x, int data_size, double
         throw invalid_argument("data_size must be positive.");
         }
     double SSx = 0;
+    double SSres = 0;   
+ 
     for(int i = 0; i < data_size; ++i) {
-        *SSres = *SSres + pow(y[i] - slope * x[i] - intercept, 2);
+        SSres = SSres + pow(y[i] - slope * x[i] - intercept, 2);
         SSx = SSx + (x[i] - mean_x) * (x[i] - mean_x);
         }
-    return sqrt(*SSres / double(data_size - 2) * (1 / data_size + (pow(x[data_size - 1] - mean_x, 2) / SSx)));
+    return sqrt(SSres / double(data_size - 1) * (1 / data_size + (pow(x[data_size] - mean_x, 2) / SSx)));
     }
 
 double error_update(int old_size, double *SSres, double *mean_x, double slope, double intercept, double *y, double *x) {
@@ -55,7 +56,7 @@ double error_update(int old_size, double *SSres, double *mean_x, double slope, d
         }
     double SSx = 0;
 
-    *mean_x = (*mean_x * old_size + x[old_size]) / double(old_size + 1);
+    *mean_x = (*mean_x * old_size + x[old_size]) / double(old_size + 1); //updating mean_x
     *SSres = *SSres + pow(y[old_size] - slope * x[old_size] - intercept, 2);
 
     for(int i = 0; i < old_size + 1; ++i) {
