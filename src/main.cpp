@@ -88,9 +88,6 @@ int main(int argc, char **argv) {
     numvar = N_begin;
     /*beginning the optimization algorithm*/
     do {
-        /*if (my_rank == 0) {
-            cout << numvar << endl;
-            }*/
         t = 0;
 
         //instantiate the particular problem using pointer from Problem class
@@ -167,7 +164,6 @@ int main(int argc, char **argv) {
             }
         else if (numvar >= data_end) {
             //The optimization terminate after the set level of error is reached
-		//cout<<"set_success goal=1"<<endl;
             opt->set_success(1000, 1);  //stop after perform 1000 iteration or exceeding the goal.
             }
         else {
