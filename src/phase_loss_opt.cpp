@@ -115,8 +115,8 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
                 }
             }
         //store fitness values
-        sharp.real() = sharp.real() + cos(phi - PHI);
-        sharp.imag() = sharp.imag() + sin(phi - PHI);
+        sharp.real(sharp.real() + cos(phi - PHI));
+        sharp.imag(sharp.imag() + sin(phi - PHI));
         error += abs(phi - PHI);
         }
     //find the averages and return
@@ -207,9 +207,7 @@ bool Phase::error_condition(double *current_fitarray, double *memory_fitarray, i
     error_goal = error_goal * tn2;
 
     //Compute the distance between the data and the prediction from linear equation
-    error = abs(x[data_size] * slope + intercept - y[data_size]);
-
-	//cout<<"error_goal="<<error_goal<<", error="<<error<<endl;
+    error = y[data_size]-x[data_size] * slope - intercept;
 
     //Check if error is smaller than the goal
     if(error <= error_goal) {
@@ -278,16 +276,16 @@ void Phase::WK_state() {
     //Compute the state
     for (n = 0; n <= num; ++n) { //we have N+1 state b/c we include n=0 and n=N.
         temp = 0;
-        input_state[n].real() = 0;
-        input_state[n].imag() = 0;
+        input_state[n].real(0);
+        input_state[n].imag(0);
         for (k = 0; k <= num; ++k) {
             s_part = cal_spart(n, k, num);
             temp = s_part * k_part[k] * sin((k + 1) * M_PI / (num + 2));
-            input_state[n].real() = input_state[n].real() + temp * cos(M_PI / 2.0 * (k - n));
-            input_state[n].imag() = input_state[n].imag() + temp * sin(M_PI / 2.0 * (k - n));
+            input_state[n].real(input_state[n].real() + temp * cos(M_PI / 2.0 * (k - n)));
+            input_state[n].imag(input_state[n].imag() + temp * sin(M_PI / 2.0 * (k - n)));
             }//end k
-        input_state[n].real() = input_state[n].real() * n_part[n] / sqrt(num / 2.0 + 1);
-        input_state[n].imag() = input_state[n].imag() * n_part[n] / sqrt(num / 2.0 + 1);
+        input_state[n].real(input_state[n].real() * n_part[n] / sqrt(num / 2.0 + 1));
+        input_state[n].imag(input_state[n].imag() * n_part[n] / sqrt(num / 2.0 + 1));
         }//end n
     }
 
