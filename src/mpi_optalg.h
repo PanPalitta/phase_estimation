@@ -57,7 +57,7 @@ class OptAlg {
 
         //Selecting solution
         double Final_select(double *fit, double *solution, double *fitarray); /*!< A function to find the candidate with the highest fitness value in the population.*/
-        double avg_Final_select(double* solution, int repeat, double *soln_fit); /*!< A function to compute the fitness function for 10 times and find the candidate with the highest fitness value in the population*/
+        double avg_Final_select(double* solution, int repeat, double *soln_fit, double *fitarray); /*!< A function to compute the fitness function for 10 times and find the candidate with the highest fitness value in the population*/
 
         void dev_gen(double *dev_array, double prev_dev, double new_dev, int cut_off); /*!< A function for generating the array that indicates the width of the Gaussian distribution for each of the variable.
                                                                                         * This array is used by Init_previous(). */

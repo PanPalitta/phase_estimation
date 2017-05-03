@@ -194,12 +194,13 @@ int main(int argc, char **argv) {
         while (opt->success == 0);
 
         //repeat calculation of fitness value to find the best one in the population
-        final_fit = opt->avg_Final_select(solution, repeat, soln_fit);
+        final_fit = opt->avg_Final_select(solution, repeat, soln_fit, fitarray);
 
         if (my_rank == 0) {
+	    //cout<<"fitarray="<<fitarray[0]<<","<<fitarray[1]<<endl;
             //if the policy is of the correct type output the solution
             if ((numvar >= N_begin) && (!mem_ptype[0] && !mem_ptype[1])) {
-                output_result(numvar, final_fit, solution, start_time,
+                output_result(numvar, problem->num_fit, fitarray, solution, start_time,
                               output_filename.c_str(), time_filename.c_str());
                 }
             }
@@ -217,8 +218,8 @@ int main(int argc, char **argv) {
         //testing how the solution perform under lossy condition
         if (my_rank == 0) {
             problem->fitness(solution, fitarray);
-            final_fit = fitarray[0];
-            cout << numvar << "\t" << final_fit << endl;
+            //final_fit = fitarray[0];
+            cout << numvar << "\t" << fitarray[0] << "\t" <<fitarray[1] << endl;
             }
 
         /*delete the objects for algorithm and problem to free memory*/

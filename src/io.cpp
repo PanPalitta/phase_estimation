@@ -14,7 +14,7 @@ void output_header( char const *output_filename, /*!<Pointer to output file wher
     ofstream time_file;
 
     output_file.open(output_filename, ios::app);
-    output_file << "#N \t Sharpness \t Policy" << endl;
+    output_file << "#N \t Sharpness \t Bias \t Policy" << endl;
     output_file.close();
     time_file.open(time_filename, ios::app);
     time_file << "#N \t Time" << endl;
@@ -22,7 +22,8 @@ void output_header( char const *output_filename, /*!<Pointer to output file wher
     }
 
 void output_result( int num, /*!< Number of variables in a policy.*/
-                    double final_fit, /*!< The primary fitness value.*/
+		    int num_fit, /*!<number of fitness values*/
+                    double *final_fit, /*!<fitness values.*/
                     double *solution, /*!< Policy*/
                     time_t start_time, /*!< Clock time for finding the policy.*/
                     char const *output_filename, /*!< Pointer to file that store the fitness value and the policy.*/
@@ -33,7 +34,10 @@ void output_result( int num, /*!< Number of variables in a policy.*/
     ofstream time_file;
 
     output_file.open(output_filename, ios::app);
-    output_file << num << "\t" << final_fit << "\t";
+    output_file << num << "\t"; 
+    for(i = 0; i< num_fit; i++){
+	output_file << final_fit[i] << "\t";
+    }
     for(i = 0; i < num; ++i) {
         output_file << solution[i] << "\t";
         }

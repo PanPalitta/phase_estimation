@@ -7,7 +7,7 @@
 
 void output_header(char const *output_filename, char const *time_filename); /*!<This function print the headers to output files.*/
 
-void output_result(int num, double final_fit, double *solution,
+void output_result(int num, int num_fit, double *final_fit, double *solution,
                    time_t start_time, char const *output_filename,
                    char const *time_filename); /*!<This function print the sharpness, policy, and time for N.*/
 

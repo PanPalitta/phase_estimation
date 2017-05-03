@@ -187,7 +187,7 @@ double OptAlg::Final_select(double *fit, double *solution, double *fitarray) {
     return fitarray[0];
     }
 
-double OptAlg::avg_Final_select(double* solution, int repeat, double *soln_fit) {
+double OptAlg::avg_Final_select(double* solution, int repeat, double *soln_fit, double *fitarray) {
     /*! Similar to Final_select(), the function finds the solution with the highest fitness in the population.
     * But before doing so, the fitness values were computed for 10 times (the variable is repeat).
     */
@@ -196,30 +196,33 @@ double OptAlg::avg_Final_select(double* solution, int repeat, double *soln_fit) 
     double final_fit;
     int indx;
     double array[num];
-    double fit[pop_size];
-    double fitarray[num_fit];
+    double fit[pop_size][num_fit];
+    //double fitarray[num_fit];
 
     fit_to_global();//move solution to global_best array in case we're using DE.
 
     //Need to calculate fitness again for 'repeat' times, independently on each
     for(int p = 0; p < pop_size; ++p) {
         //pop[p].read_global(array);
-        fit[p] = 0;
+        fit[p][0] = 0;
+        fit[p][1] = 0;
         for(int i = 0; i < repeat; ++i) {
             prob->avg_fitness(pop[p].global_best, prob->num_repeat, fitarray);
-            fit[p] += fitarray[0];
+            fit[p][0] += fitarray[0];
+	    fit[p][1] += fitarray[1];
             }
-        fit[p] = fit[p] / repeat;
+        fit[p][0] = fit[p][0] / repeat;
+        fit[p][1] = fit[p][1] / repeat;
         }
 
     //filling the fitness table in root
     for(int p = 0; p < total_pop; ++p) {
         if(p % nb_proc == 0) {
-            soln_fit[p] = fit[p / nb_proc]; //no need for transmitting data
+            soln_fit[p] = fit[p / nb_proc][0]; //no need for transmitting data
             }
         else {
             if(my_rank == p % nb_proc) {
-                MPI_Send(&fit[p / nb_proc], 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
+                MPI_Send(&fit[p / nb_proc][0], 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
                 }
             else if(my_rank == 0) {
                 MPI_Recv(&soln_fit[p], 1, MPI_DOUBLE, p % nb_proc, tag, MPI_COMM_WORLD, &status);
@@ -267,6 +270,16 @@ double OptAlg::avg_Final_select(double* solution, int repeat, double *soln_fit) 
     else {}
 
     MPI_Barrier(MPI_COMM_WORLD);
+
+   //get fitarray from the processor
+    if(my_rank == indx % nb_proc) {
+        MPI_Send(&fit[indx / nb_proc][1], 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
+        }
+    else if(my_rank == 0) {
+	fitarray[0]=final_fit;
+        MPI_Recv(&fitarray[1], 1, MPI_DOUBLE, indx % nb_proc, tag, MPI_COMM_WORLD, &status);
+        }
+    else {}
 
     return final_fit;
     }
