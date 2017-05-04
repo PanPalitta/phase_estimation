@@ -41,7 +41,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="md_download.html"><span>Download&#160;and&#160;Installation</span></a></li>
       <li><a href="md_usage.html"><span>Usage</span></a></li>
-      <li><a href="md_expand.html"><span>Expanding&#160;Library</span></a></li>
+      <li><a href="md_expand.html"><span>Expanding&#160;the&#160;Library</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -147,8 +147,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>put_to_best</
 <tr class="separator:a46ab488aab5a16c5355c34e5a2f5010c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87cc15028c9fd9c48a2704688e130df4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classOptAlg.html#a87cc15028c9fd9c48a2704688e130df4">Final_select</a> (double *fit, double *solution, double *fitarray)</td></tr>
 <tr class="separator:a87cc15028c9fd9c48a2704688e130df4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a93f5a6d878a952ace1e59c9535f169f3"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classOptAlg.html#a93f5a6d878a952ace1e59c9535f169f3">avg_Final_select</a> (double *solution, int repeat, double *soln_fit)</td></tr>
-<tr class="separator:a93f5a6d878a952ace1e59c9535f169f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00eb4ffc7e7ce8fe072ef90cd9e8dc52"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classOptAlg.html#a00eb4ffc7e7ce8fe072ef90cd9e8dc52">avg_Final_select</a> (double *solution, int repeat, double *soln_fit, double *fitarray)</td></tr>
+<tr class="separator:a00eb4ffc7e7ce8fe072ef90cd9e8dc52"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a066626a5ae556db202925836792d86af"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classOptAlg.html#a066626a5ae556db202925836792d86af">dev_gen</a> (double *dev_array, double prev_dev, double new_dev, int cut_off)</td></tr>
 <tr class="separator:a066626a5ae556db202925836792d86af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3902ca969077ccb650b7080bfe8b5e5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classOptAlg.html#af3902ca969077ccb650b7080bfe8b5e5">find_max</a> (double *fit)</td></tr>
@@ -191,7 +191,7 @@ Protected Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classOptAlg.html" title="OptAlg class contains the functions that can be used to contruct an optimization algorithm in the mai...">OptAlg</a> class contains the functions that can be used to contruct an optimization algorithm in the main function. The object needs the pointer to the problem object and the RNG object in order to instantiate. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a93f5a6d878a952ace1e59c9535f169f3"></a>
+<a class="anchor" id="a00eb4ffc7e7ce8fe072ef90cd9e8dc52"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -211,7 +211,13 @@ Protected Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double *&#160;</td>
-          <td class="paramname"><em>soln_fit</em>&#160;</td>
+          <td class="paramname"><em>soln_fit</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>fitarray</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -953,8 +959,8 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>D:/GitHub/phase_estimation/src/<a class="el" href="mpi__optalg_8h_source.html">mpi_optalg.h</a></li>
-<li>D:/GitHub/phase_estimation/src/mpi_optalg.cpp</li>
+<li>D:/Program/GitHub/phase_estimation/src/<a class="el" href="mpi__optalg_8h_source.html">mpi_optalg.h</a></li>
+<li>D:/Program/GitHub/phase_estimation/src/mpi_optalg.cpp</li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

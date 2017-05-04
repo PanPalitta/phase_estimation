@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>Quantum Phase Estimation with Reinforcement Learning: D:/GitHub/phase_estimation/src/io.h Source File</title>
+<title>Quantum Phase Estimation with Reinforcement Learning: D:/Program/GitHub/phase_estimation/src/io.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -41,7 +41,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="md_download.html"><span>Download&#160;and&#160;Installation</span></a></li>
       <li><a href="md_usage.html"><span>Usage</span></a></li>
-      <li><a href="md_expand.html"><span>Expanding&#160;Library</span></a></li>
+      <li><a href="md_expand.html"><span>Expanding&#160;the&#160;Library</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -95,7 +95,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define IO_H</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keywordtype">void</span> output_header(<span class="keywordtype">char</span> <span class="keyword">const</span> *output_filename, <span class="keywordtype">char</span> <span class="keyword">const</span> *time_filename); </div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keywordtype">void</span> output_result(<span class="keywordtype">int</span> <a class="code" href="classOptAlg.html#a90c8e3ad1c547ae5a8ee572b8f5aec98">num</a>, <span class="keywordtype">double</span> final_fit, <span class="keywordtype">double</span> *solution,</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keywordtype">void</span> output_result(<span class="keywordtype">int</span> <a class="code" href="classOptAlg.html#a90c8e3ad1c547ae5a8ee572b8f5aec98">num</a>, <span class="keywordtype">int</span> <a class="code" href="classOptAlg.html#aad208e0441922169d0333c2277f1b7aa">num_fit</a>, <span class="keywordtype">double</span> *final_fit, <span class="keywordtype">double</span> *solution,</div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;                   time_t start_time, <span class="keywordtype">char</span> <span class="keyword">const</span> *output_filename,</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;                   <span class="keywordtype">char</span> <span class="keyword">const</span> *time_filename); </div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keywordtype">void</span> read_config_file(<span class="keywordtype">char</span> <span class="keyword">const</span> *filename, <span class="keywordtype">int</span> *<a class="code" href="classOptAlg.html#a3e8052f94b8cbecfe087377cc5c9a530">pop_size</a>, <span class="keywordtype">int</span> *N_begin,</div>
@@ -105,6 +105,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;                      <span class="keywordtype">double</span> *prev_dev, <span class="keywordtype">double</span> *new_dev, <span class="keywordtype">double</span> *t_goal, <span class="keywordtype">int</span> *data_end);</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#endif // IO_H</span></div>
 <div class="ttc" id="classOptAlg_html_a3e8052f94b8cbecfe087377cc5c9a530"><div class="ttname"><a href="classOptAlg.html#a3e8052f94b8cbecfe087377cc5c9a530">OptAlg::pop_size</a></div><div class="ttdeci">int pop_size</div><div class="ttdef"><b>Definition:</b> mpi_optalg.h:74</div></div>
+<div class="ttc" id="classOptAlg_html_aad208e0441922169d0333c2277f1b7aa"><div class="ttname"><a href="classOptAlg.html#aad208e0441922169d0333c2277f1b7aa">OptAlg::num_fit</a></div><div class="ttdeci">int num_fit</div><div class="ttdef"><b>Definition:</b> mpi_optalg.h:72</div></div>
 <div class="ttc" id="classOptAlg_html_a90c8e3ad1c547ae5a8ee572b8f5aec98"><div class="ttname"><a href="classOptAlg.html#a90c8e3ad1c547ae5a8ee572b8f5aec98">OptAlg::num</a></div><div class="ttdeci">int num</div><div class="ttdef"><b>Definition:</b> mpi_optalg.h:71</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
