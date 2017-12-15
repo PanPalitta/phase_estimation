@@ -7,7 +7,7 @@
 #endif
 
 #define DEV_N 0.0 //level of noise in operator
-#define THETA_DEV 0.2 //M_PI;//phase noise level
+#define THETA_DEV 0.0//M_PI;//phase noise level
 
 #include "problem.h"
 #include "rng.h"

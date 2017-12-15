@@ -117,11 +117,11 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
         //store fitness values
         sharp.real(sharp.real() + cos(phi - PHI));
         sharp.imag(sharp.imag() + sin(phi - PHI));
-        error += abs(phi - PHI);
+        error += (phi - PHI)*(phi - PHI);
         }
     //find the averages and return
     fitarray[0] = abs(sharp) / double(K);
-    fitarray[1] = error / double(K);
+    fitarray[1] = error/ double(K);
 
     }
 
@@ -131,6 +131,7 @@ bool Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptyp
     * In particular this function is called when time step is used as the main condition to end the optimization.
     * For this particular problem, it resets the number of variables so the optimization starts over.
     */
+	//Let's start this condition from scratch.
     bool type;
 
     //The conditions are checked only if the algorithm is going to change the way it initializes the population.
@@ -430,7 +431,9 @@ inline bool Phase::check_policy(double error, double sharp) {
         throw invalid_argument("sharpness cannot be one.");
         }
     double sd = sqrt(1 / (sharp * sharp) - 1);
-    if(error >= M_PI - sd) {
+//    double var = (1 / (sharp * sharp) - 1);
+//    if(sqrt(error)>=M_PI-sd) {
+	if(sqrt(error-sd*sd)>=M_PI-sd){
         return 1;
         }
     else {
