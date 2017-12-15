@@ -5,6 +5,7 @@
 #include "phase_loss_opt.h" //The header file for the specific problem
 #include "mpi_optalg.h" //The header file for the optimization algorithms.'mpi.h' is included in this header.
 #include "io.h" //The header file for user-specified parameters
+#include "iostream"
 
 using namespace std;
 
@@ -123,7 +124,7 @@ int main(int argc, char **argv) {
                 opt->Init_population(can_per_proc[my_rank]);
                 }
             catch(invalid_argument) {
-                cout << "Population size at processor" << my_rank << "is <=0." << endl;
+                //cout << "Population size at processor" << my_rank << "is <=0." << endl;
                 terminate();
                 }
             }
@@ -197,9 +198,9 @@ int main(int argc, char **argv) {
         final_fit = opt->avg_Final_select(solution, repeat, soln_fit, fitarray);
 
         if (my_rank == 0) {
-	    //cout<<"fitarray="<<fitarray[0]<<","<<fitarray[1]<<endl;
             //if the policy is of the correct type output the solution
             if ((numvar >= N_begin) && (!mem_ptype[0] && !mem_ptype[1])) {
+//		if ((numvar >= N_begin)) {
                 output_result(numvar, problem->num_fit, fitarray, solution, start_time,
                               output_filename.c_str(), time_filename.c_str());
                 }
