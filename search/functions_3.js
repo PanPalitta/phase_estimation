@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['de',['DE',['../class_d_e.html#a37d9ef0ccffda10dda67b29538416d0c',1,'DE::DE()'],['../class_d_e.html#a05422a96555b912d74ce1ac753fd073c',1,'DE::DE(Problem *problem_ptr, Rng *gaussian_rng, int pop_size)']]],
-  ['dev_5fgen',['dev_gen',['../class_opt_alg.html#a066626a5ae556db202925836792d86af',1,'OptAlg']]]
+  ['dev_5fgen',['dev_gen',['../classOptAlg.html#a066626a5ae556db202925836792d86af',1,'OptAlg']]]
 ];

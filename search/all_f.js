@@ -1,8 +1,6 @@
 var searchData=
 [
-  ['selection',['selection',['../class_opt_alg.html#a5d05b462e89f24b1bd5c3fe3f72a3cbc',1,'OptAlg::selection()'],['../class_d_e.html#a7737dbccc88c44d1a88c211259959942',1,'DE::selection()'],['../class_p_s_o.html#a45cb9b859ebd3a1893a7ec557ca81c31',1,'PSO::selection()']]],
-  ['set_5fsuccess',['set_success',['../class_opt_alg.html#aede105b27f0777435108e3c8d79b0e91',1,'OptAlg']]],
-  ['sgn',['sgn',['../aux__functions_8cpp.html#a2f12a64b87e6cf1be8360bbb056f8680',1,'sgn(double x):&#160;aux_functions.cpp'],['../aux__functions_8h.html#a2f12a64b87e6cf1be8360bbb056f8680',1,'sgn(double x):&#160;aux_functions.cpp']]],
-  ['stream',['stream',['../rng__vsl_8cpp.html#adb4296845fcc831ca51341e3d09d77cb',1,'rng_vsl.cpp']]],
-  ['success',['success',['../class_opt_alg.html#a2150acef11d441cb786afe578051e56f',1,'OptAlg']]]
+  ['t',['t',['../classOptAlg.html#a716972bd2e408aa4b77be28fa2f0cbb1',1,'OptAlg::t()'],['../classOptAlg.html#a9cbac99eb4f69fb2a3860ecec0dd3dc3',1,'OptAlg::T()']]],
+  ['t_5fcondition',['T_condition',['../classProblem.html#a255e5389c219874e664e30c9c668c304',1,'Problem']]],
+  ['total_5fpop',['total_pop',['../classOptAlg.html#a00d7aba3351e761fdb86aa3d40af5079',1,'OptAlg']]]
 ];

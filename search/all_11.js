@@ -1,9 +1,7 @@
 var searchData=
 [
-  ['update_5fbest',['update_best',['../class_candidate.html#ad1a0cf0584397e7ccb0727202f15bb57',1,'Candidate']]],
-  ['update_5fcont',['update_cont',['../class_candidate.html#a187a80dd9f06918ec9698a7f1a5c1485',1,'Candidate']]],
-  ['update_5fglobal',['update_global',['../class_candidate.html#a92b69fdeef06e2660a1c54a9eca6646b',1,'Candidate']]],
-  ['update_5fpopfit',['update_popfit',['../class_opt_alg.html#a7db6fbc363c4d98858d7c10a60c26e96',1,'OptAlg']]],
-  ['update_5fvel',['update_vel',['../class_candidate.html#a8835c6f8f7932e052771cca05594491a',1,'Candidate']]],
-  ['upper_5fbound',['upper_bound',['../class_problem.html#a02bd6d1e098e211cc3bf0f5e02f20133',1,'Problem']]]
+  ['write_5fbestfit',['write_bestfit',['../classCandidate.html#a491eb3fc3331b64f4536f1ed47a23c7b',1,'Candidate']]],
+  ['write_5fcontfit',['write_contfit',['../classCandidate.html#a66db5a3f7d39af1d6b0737c39ebe941a',1,'Candidate']]],
+  ['write_5fglobalfit',['write_globalfit',['../classCandidate.html#a3103669bea40f27fba4a415f6b384a3d',1,'Candidate']]],
+  ['write_5fparam',['write_param',['../classOptAlg.html#a30d9983af0d0eb8125e888e87fd37a99',1,'OptAlg::write_param()'],['../classDE.html#a07523caeeac589fc632a8aa87c8305dd',1,'DE::write_param()'],['../classPSO.html#aa0b785a7ccee6b8b6e5d40d0c8100696',1,'PSO::write_param()']]]
 ];
