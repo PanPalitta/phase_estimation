@@ -39,4 +39,4 @@ The computational work was enabled by support from [WestGrid](https://www.westgr
 
 4. Pantita Palittapongarnpim, Peter Wittek and Barry C. Sanders. Robustness of learning-assisted adaptive quantum-enhanced metrology in the presence of noise. In *Proc. 2017 IEEE International Conference on Systems, Man and Cybernetics* (2017 SMC): 294--299, Dec 2017. [DOI](https://doi.org/10.1109/SMC.2017.8122618)
  
-5. Pantita Palittapongranpim and Barry C. Sanders, Robustness of Adaptive Quantum-Enhanced Phase Estimation. 2018. [arXiv:1809.05525](https://arxiv.org/abs/1809.05525)
+5. Pantita Palittapongranpim and Barry C. Sanders. Robustness of Adaptive Quantum-Enhanced Phase Estimation. 2018. [arXiv:1809.05525](https://arxiv.org/abs/1809.05525)
