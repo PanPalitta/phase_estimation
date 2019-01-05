@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['optalg',['OptAlg',['../classOptAlg.html',1,'']]]
+  ['optalg',['OptAlg',['../class_opt_alg.html',1,'']]]
 ];

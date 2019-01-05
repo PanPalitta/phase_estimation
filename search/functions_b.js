@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['update_5fbest',['update_best',['../classCandidate.html#ad1a0cf0584397e7ccb0727202f15bb57',1,'Candidate']]],
-  ['update_5fcont',['update_cont',['../classCandidate.html#a187a80dd9f06918ec9698a7f1a5c1485',1,'Candidate']]],
-  ['update_5fglobal',['update_global',['../classCandidate.html#a92b69fdeef06e2660a1c54a9eca6646b',1,'Candidate']]],
-  ['update_5fpopfit',['update_popfit',['../classOptAlg.html#a7db6fbc363c4d98858d7c10a60c26e96',1,'OptAlg']]],
-  ['update_5fvel',['update_vel',['../classCandidate.html#a8835c6f8f7932e052771cca05594491a',1,'Candidate']]]
+  ['parse',['parse',['../io_8cpp.html#a2d60a187e46ba5641d20f16faae0e823',1,'io.cpp']]],
+  ['phase',['Phase',['../class_phase.html#a3400d37e26b0f5f785db31d7887a6d76',1,'Phase']]],
+  ['problem',['Problem',['../class_problem.html#ad9d44f0ef936fb62f0ce41dd200494ac',1,'Problem']]],
+  ['pso',['PSO',['../class_p_s_o.html#a7c23dd85e82ab8c9fd69ea9dc2528b0e',1,'PSO::PSO()'],['../class_p_s_o.html#aec248206b605394d0574daebe124cac6',1,'PSO::PSO(Problem *problem_ptr, Rng *gaussian_rng, int pop_size)']]],
+  ['put_5fto_5fbest',['put_to_best',['../class_opt_alg.html#a19442f0034cc1d44391461cd4177100f',1,'OptAlg::put_to_best()'],['../class_d_e.html#a30ceae5053347a26c77e3114a9bfe212',1,'DE::put_to_best()'],['../class_p_s_o.html#a69226e2a2fc83054c2610777fb792993',1,'PSO::put_to_best()']]],
+  ['put_5fto_5fglobal',['put_to_global',['../class_candidate.html#a3cad9a8d3aa7775affab581776734a64',1,'Candidate']]]
 ];

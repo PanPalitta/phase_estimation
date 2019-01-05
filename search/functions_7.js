@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['phase',['Phase',['../classPhase.html#a3400d37e26b0f5f785db31d7887a6d76',1,'Phase']]],
-  ['put_5fto_5fbest',['put_to_best',['../classPSO.html#a69226e2a2fc83054c2610777fb792993',1,'PSO']]],
-  ['put_5fto_5fglobal',['put_to_global',['../classCandidate.html#a3cad9a8d3aa7775affab581776734a64',1,'Candidate']]]
+  ['linear_5ffit',['linear_fit',['../aux__functions_8cpp.html#afdf7b535d92d641088f02e2f40d660d4',1,'linear_fit(int data_size, double *x, double *y, double *slope, double *intercept, double *mean_x):&#160;aux_functions.cpp'],['../aux__functions_8h.html#afdf7b535d92d641088f02e2f40d660d4',1,'linear_fit(int data_size, double *x, double *y, double *slope, double *intercept, double *mean_x):&#160;aux_functions.cpp']]]
 ];

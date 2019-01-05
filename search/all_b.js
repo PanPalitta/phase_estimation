@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['optalg',['OptAlg',['../classOptAlg.html',1,'']]]
+  ['optalg',['OptAlg',['../class_opt_alg.html',1,'OptAlg'],['../class_candidate.html#a82c309100a515a23c6e9581cf1ea00aa',1,'Candidate::OptAlg()'],['../class_opt_alg.html#a43c2ab2d0561c3de89d1ecc65a81be23',1,'OptAlg::OptAlg()'],['../class_opt_alg.html#a48b7b238c6b308ed1c4ce3694cb5f285',1,'OptAlg::OptAlg(Problem *problem_ptr, Rng *gaussian_rng, int pop_size)']]],
+  ['output_5fheader',['output_header',['../io_8cpp.html#a10583a8642f4535af8c6592fc6a8dc96',1,'output_header(char const *output_filename, char const *time_filename):&#160;io.cpp'],['../io_8h.html#a10583a8642f4535af8c6592fc6a8dc96',1,'output_header(char const *output_filename, char const *time_filename):&#160;io.cpp']]],
+  ['output_5fresult',['output_result',['../io_8cpp.html#a3e8256b0a2d6c6efb5019c05e4720176',1,'output_result(int num, int num_fit, double *final_fit, double *solution, time_t start_time, char const *output_filename, char const *time_filename):&#160;io.cpp'],['../io_8cpp.html#aa84d0589ed58ddb39b96d980513f7019',1,'output_result(int num, double final_fit, double *solution, time_t start_time, char const *output_filename, char const *time_filename):&#160;io.cpp'],['../io_8h.html#a3e8256b0a2d6c6efb5019c05e4720176',1,'output_result(int num, int num_fit, double *final_fit, double *solution, time_t start_time, char const *output_filename, char const *time_filename):&#160;io.cpp']]]
 ];
