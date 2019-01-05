@@ -15,7 +15,7 @@ Features:
 
 ### Links
 
- * Latest release: 1.0.1 [download](https://github.com/PanPalitta/phase_estimation/releases)
+ * Latest release: 1.0.2 [download](https://github.com/PanPalitta/phase_estimation/releases)
  * Feedback and issue: [link](https://github.com/PanPalitta/phase_estimation/issues)
 
 ## Copyright and license
