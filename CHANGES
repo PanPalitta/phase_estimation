@@ -1,7 +1,13 @@
+Version 1.0.2: 2018-01-04
+
+  - Changed: The bias calculated using mean direction according to directional statistics.
+  - Changed: The accept-reject criterion is modified to use the mean direction.
+  - New: Noise models included choices of Gaussian noise, hat-distribution noise, random telegraph noise, lognormal noise, skewed normal noise.
+
 Version 1.0.1: 2017-05-04
 
-  -Changed: Bug fixed for accept-reject criterion
-  -Changed: Include mulitple fitness values in the output file.
+  - Changed: Bug fixed for accept-reject criterion
+  - Changed: Include mulitple fitness values in the output file.
 
 Version 1.0: 2016-04-13
 
