@@ -102,7 +102,11 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
                 state_loss(num - m); //update only the state using loss function
                 }
             else {
-                PHI_in = gaussian_rng->next_rand(PHI, THETA_DEV);
+                //PHI_in = rand_Gaussian(PHI, THETA_DEV); //select if the noise is normally distributed.
+		//PHI_in = rand_Hat(PHI, THETA_DEV); //select if the noise is distributed as a Hat function.
+		//PHI_in = Lognormal(MU,THETA,PHI); //select if the noise is distributed as a lognormal function.
+		//PHI_in = rand_RTN(PHI,Ps,THETA_DEV);//select if the noise is random telegraph.
+		PHI_in = rand_skewed(PHI, THETA_DEV, RATIO); //select if the noise is skewed normal.
                 PHI_in = mod_2PI(PHI_in);//noisy PHI
                 dect_result = noise_outcome(phi, PHI_in, num - m);
                 if (dect_result == 0) {
@@ -117,12 +121,10 @@ void Phase::avg_fitness(double *soln, const int K, double *fitarray) {
         //store fitness values
         sharp.real(sharp.real() + cos(phi - PHI));
         sharp.imag(sharp.imag() + sin(phi - PHI));
-        error += (phi - PHI)*(phi - PHI);
         }
     //find the averages and return
-    fitarray[0] = abs(sharp) / double(K);
-    fitarray[1] = error/ double(K);
-
+    fitarray[0] = abs(sharp) / double(K); //Calculate the dispersion
+    fitarray[1] = atan2(sharp.imag(),sharp.real()); //Calculate the mean direction
     }
 
 bool Phase::T_condition(double *fitarray, int *numvar, int N_cut, bool *mem_ptype, double *memory_forT) {
@@ -431,12 +433,112 @@ inline bool Phase::check_policy(double error, double sharp) {
         throw invalid_argument("sharpness cannot be one.");
         }
     double sd = sqrt(1 / (sharp * sharp) - 1);
-//    double var = (1 / (sharp * sharp) - 1);
-//    if(sqrt(error)>=M_PI-sd) {
-	if(sqrt(error-sd*sd)>=M_PI-sd){
+    if(fabs(error)>=fabs(M_PI-sd)){
         return 1;
         }
     else {
         return 0;
         }
+    }
+
+double Phase::rand_Gaussian(double mean, /*the average theta*/
+				double dev /*deviation for distribution*/
+				){
+	/*creating random number using Box-Muller Method/Transformation*/
+	double Z0;//,Z1;
+	double U1,U2; /*uniformly distributed random number input*/
+	double r;
+	
+	/*create input between [-1,1]*/
+	do{
+	U1=2.0*double(rand())/RAND_MAX-1.0;
+	U2=2.0*double(rand())/RAND_MAX-1.0;
+	r=U1*U1+U2*U2;
+	}while(r==0.0||r>=1.0);
+	/*using Box-Muller Transformation*/
+	Z0=U1*sqrt(-2*log(r)/r);
+	
+	return Z0*dev+mean;
+	}/*end of rand_Gaussian*/
+
+double Phase::rand_Hat(double PHI, double dev){
+	return gaussian_rng->next_rand(PHI, dev);
+}
+
+inline double Phase::inv_erf(double x) {
+    if(x == 1) {
+        throw invalid_argument("Input leads to error.");
+        }
+    double a = 0.140012;
+    double lnx = log(1 - x * x);
+    double temp = sqrt(pow(2.0 / (M_PI * a) + lnx / 2.0, 2) - lnx / a);
+
+    return sgn(x) * sqrt(temp - 2.0 / (M_PI * a) - lnx / 2.0);
+    }
+
+inline int Phase::sgn(double x) {
+    /** Sign function of x: https://en.wikipedia.org/wiki/Sign_function
+    */
+    if(x < 0) {
+        return -1;
+        }
+    else if(x == 0) {
+        return 0;
+        }
+    else {
+        return 1;
+        }
+    }
+
+double Phase::Lognormal(double mu, double sigma, double peak) {
+    double mode = exp(mu - sigma * sigma); //where the peak is, so we know how much to move the distribution later.
+    double diff = mode - peak;
+    double ans;
+
+    double u = (double)(rand()) / ((double)(RAND_MAX));
+    double p = 2 * u - 1;
+
+    try{
+	ans=exp(sqrt(2) * sigma * inv_erf(p) + mu) - diff;
+	}
+    catch(invalid_argument){
+	u = (double)(rand()) / ((double)(RAND_MAX));
+	p = 2 * u - 1;
+	ans=exp(sqrt(2) * sigma * inv_erf(p) + mu) - diff;
+	}	
+
+    return ans;
+    }
+
+double Phase::rand_RTN(double PHI,double ps,double dev){
+	double coin = double(rand())/double(RAND_MAX);
+	double ans;
+		if (coin<=ps) {
+		    coin = double(rand())/double(RAND_MAX);
+		    if (coin<0.5){
+		        ans = PHI + dev; 
+			}
+		    else{
+			ans = PHI - dev; 
+			}
+		}
+		else {
+		    ans=PHI;
+		}
+	return ans;
+}
+
+double Phase::rand_skewed(double mean, double dev, double ratio) {
+    double u1, u2;
+    double k1, k2;
+
+    double alpha = ratio*dev;
+
+    k1 = (1 + alpha) / sqrt(2 * (1 + alpha * alpha));
+    k2 = (1 - alpha) / sqrt(2 * (1 + alpha * alpha));
+
+    u1 = rand_Gaussian(0, 1);
+    u2 = rand_Gaussian(0, 1);
+
+    return (k1 * max(u1, u2) + k2 * min(u1, u2))*dev+mean;
     }

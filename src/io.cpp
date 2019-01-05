@@ -14,7 +14,7 @@ void output_header( char const *output_filename, /*!<Pointer to output file wher
     ofstream time_file;
 
     output_file.open(output_filename, ios::app);
-    output_file << "#N \t Sharpness \t MSE \t Policy" << endl;
+    output_file << "#N \t Sharpness \t Mean \t Policy" << endl;
     output_file.close();
     time_file.open(time_filename, ios::app);
     time_file << "#N \t Time" << endl;

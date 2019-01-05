@@ -7,7 +7,16 @@
 #endif
 
 #define DEV_N 0.0 //level of noise in operator
-#define THETA_DEV 0.0//M_PI;//phase noise level
+//Normal and Hat noise parameters
+#define THETA_DEV 1.41421356237//M_PI;//phase noise level
+//RTN parameter
+#define Ps 0.5 //probability of telegraph noise
+//SND parameter
+#define RATIO 1.176959769 //ratio between alpha and sigma
+//Lognormal parameters
+#define MU 2.2214//variance
+#define THETA 0.2715 //skewness, variance
+
 
 #include "problem.h"
 #include "rng.h"
@@ -61,5 +70,17 @@ class Phase: public Problem {
         inline double mod_2PI(double PHI); //A function to perform modulo 2PI on phase.
 
         bool check_policy(double error, double sharp); //A function for checking whether the policy is resilient to loss. This is called by the T_condition().
+
+	double rand_Gaussian(double mean, double dev);
+	double rand_Hat(double PHI, double dev);
+	//lognormal-distribution noise
+	inline double inv_erf(double x); /*!< Function for calculating the inverse of an error function.*/
+	inline int sgn(double x); /*!< Sign function.*/
+	double Lognormal(double mu, double sigma, double peak);
+	//Random telegraph noise
+	double rand_RTN(double PHI,double ps,double dev);
+	//Skewed normal noise
+	double rand_skewed(double mean, double dev, double ratio);
+
     };
 #endif // PHASE_H
